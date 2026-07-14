@@ -1,0 +1,2581 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0f2027">
+<title>Smart Home Hub</title>
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --green: #34c759;
+    --green-dim: #2ecc71;
+    --blue: #0a84ff;
+    --orange: #ff9f0a;
+    --red: #ff3b30;
+    --purple: #bf5af2;
+    --text: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.65);
+    --text-faint: rgba(255, 255, 255, 0.45);
+    --glass-bg: rgba(255, 255, 255, 0.10);
+    --glass-bg-strong: rgba(255, 255, 255, 0.16);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glass-border-strong: rgba(255, 255, 255, 0.30);
+    --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.18);
+    --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.28);
+    --ease-ios: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  html, body {
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(ellipse at top left, #2d6a4f 0%, transparent 55%),
+      radial-gradient(ellipse at bottom right, #1d4ed8 0%, transparent 55%),
+      radial-gradient(ellipse at center, #134e4a 0%, transparent 70%),
+      linear-gradient(160deg, #0f2027 0%, #1a3a2e 50%, #0a1e3a 100%);
+    background-size: 200% 200%, 200% 200%, 200% 200%, 100% 100%;
+    background-attachment: fixed;
+    animation: bgShift 22s ease-in-out infinite;
+  }
+
+  @keyframes bgShift {
+    0%, 100% { background-position: 0% 50%, 100% 50%, 50% 0%, 0 0; }
+    50% { background-position: 100% 50%, 0% 50%, 50% 100%, 0 0; }
+  }
+
+  body::before, body::after {
+    content: "";
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.4;
+    z-index: -1;
+    pointer-events: none;
+  }
+  body::before {
+    width: 380px; height: 380px;
+    background: var(--green);
+    top: -120px; left: -100px;
+    animation: float1 18s ease-in-out infinite;
+  }
+  body::after {
+    width: 320px; height: 320px;
+    background: #5e60ce;
+    bottom: -100px; right: -80px;
+    animation: float2 22s ease-in-out infinite;
+  }
+  @keyframes float1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(60px, 80px) scale(1.1); }
+  }
+  @keyframes float2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-50px, -60px) scale(1.15); }
+  }
+
+  /* ============================================================
+     SCREEN SYSTEM
+     ============================================================ */
+  .screen {
+    position: fixed;
+    inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    transition: opacity 0.45s var(--ease-ios), transform 0.45s var(--ease-ios), filter 0.45s var(--ease-ios);
+  }
+  .screen[hidden] { display: none !important; }
+  .screen.entering-fade { opacity: 0; }
+  .screen.entering-fade.active { opacity: 1; }
+  .screen.entering-right { transform: translateX(100%); }
+  .screen.entering-right.active { transform: translateX(0); }
+
+  /* When modal is open, blur the screen behind */
+  .screen.modal-open {
+    filter: blur(8px) brightness(0.7);
+    transform: scale(0.98);
+    pointer-events: none;
+  }
+
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 28px 18px 60px;
+  }
+
+  /* ============================================================
+     LOGIN SCREEN
+     ============================================================ */
+  #loginScreen .container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px;
+  }
+  .login-card {
+    width: 100%;
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 36px 28px 28px;
+    box-shadow: var(--shadow-strong);
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+    animation: cardIn 0.7s var(--ease-ios) forwards;
+  }
+  @keyframes cardIn { to { opacity: 1; transform: translateY(0) scale(1); } }
+
+  .login-logo {
+    width: 64px; height: 64px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--green), var(--green-dim));
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 18px;
+    box-shadow: 0 12px 30px rgba(52, 199, 89, 0.4);
+    animation: logoFloat 3.5s ease-in-out infinite;
+  }
+  .login-logo svg { width: 32px; height: 32px; fill: white; }
+  @keyframes logoFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+  .login-title { text-align: center; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .login-sub { text-align: center; color: var(--text-muted); font-size: 14px; margin-bottom: 28px; }
+
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 7px;
+    margin-left: 4px;
+    letter-spacing: 0.02em;
+  }
+
+  .input-wrap { position: relative; }
+  .input-wrap input {
+    width: 100%;
+    padding: 14px 44px 14px 16px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    outline: none;
+    transition: all 0.25s ease;
+  }
+  .input-wrap input::placeholder { color: var(--text-faint); }
+  .input-wrap input:focus {
+    border-color: var(--green);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.18);
+  }
+  .input-wrap .input-icon {
+    position: absolute;
+    right: 14px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-faint);
+    pointer-events: none;
+  }
+  .input-wrap .input-icon svg { width: 18px; height: 18px; }
+  .input-wrap .toggle-pwd {
+    position: absolute;
+    right: 8px; top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    color: var(--text-muted);
+    display: flex; align-items: center;
+    border-radius: 8px;
+  }
+  .input-wrap .toggle-pwd:hover { color: var(--text); }
+  .input-wrap .toggle-pwd svg { width: 18px; height: 18px; }
+
+  .login-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px; font-weight: 600;
+    font-family: inherit;
+    color: white;
+    background: linear-gradient(135deg, var(--green), var(--green-dim));
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: transform 0.15s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+    box-shadow: 0 6px 20px rgba(52, 199, 89, 0.4);
+    position: relative;
+    overflow: hidden;
+  }
+  .login-btn:hover { box-shadow: 0 8px 26px rgba(52, 199, 89, 0.5); }
+  .login-btn:active { transform: scale(0.98); }
+  .login-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+  .btn-label { transition: opacity 0.2s ease; }
+  .login-btn.loading .btn-label { opacity: 0; }
+  .spinner {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 20px; height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2.5px solid rgba(255, 255, 255, 0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    opacity: 0;
+    animation: spin 0.8s linear infinite;
+  }
+  .login-btn.loading .spinner { opacity: 1; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .login-error {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: rgba(255, 59, 48, 0.15);
+    border: 1px solid rgba(255, 59, 48, 0.35);
+    border-radius: 10px;
+    font-size: 13px;
+    color: #ffb3ae;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+    max-height: 0;
+    overflow: hidden;
+  }
+  .login-error.show {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 200px;
+    pointer-events: auto;
+  }
+  .login-error svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+  .login-footer { text-align: center; margin-top: 22px; font-size: 11px; color: var(--text-faint); }
+
+  /* ============================================================
+     COMMON HEADER
+     ============================================================ */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .top-bar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+  .back-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--glass-border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.2s ease;
+    flex-shrink: 0;
+  }
+  .back-btn:active { transform: scale(0.92); }
+  .back-btn:hover { background: var(--glass-bg-strong); }
+  .back-btn svg { width: 18px; height: 18px; fill: white; }
+
+  .greeting h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+  .greeting p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  .conn-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 100px;
+    font-size: 12px; font-weight: 500;
+    box-shadow: var(--shadow-soft);
+    flex-shrink: 0;
+  }
+  .conn-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--red);
+    transition: background 0.3s ease;
+  }
+  .conn-pill.connected .conn-dot {
+    background: var(--green);
+    animation: pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.55); }
+    50% { box-shadow: 0 0 0 6px rgba(52, 199, 89, 0); }
+  }
+
+  /* ============================================================
+     HUB SCREEN
+     ============================================================ */
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: var(--shadow-soft);
+  }
+  .stat-card-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+  .stat-card-value { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+  .stat-card-value .unit { font-size: 13px; font-weight: 500; color: var(--text-muted); margin-left: 2px; }
+
+  .section-title {
+    font-size: 13px; font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 8px 4px 14px;
+  }
+
+  .device-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .device-card {
+    position: relative;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 22px;
+    padding: 18px 16px;
+    box-shadow: var(--shadow-soft);
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.2s ease, border-color 0.3s ease, background 0.3s ease;
+    user-select: none;
+    min-height: 145px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .device-card:active { transform: scale(0.97); }
+  .device-card:hover { background: var(--glass-bg-strong); }
+  .device-card.coming-soon { opacity: 0.55; cursor: not-allowed; }
+  .device-card.coming-soon:active { transform: none; }
+
+  .device-icon-wrap {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+  }
+  .device-icon-wrap svg { width: 24px; height: 24px; }
+  .device-icon-wrap.green { background: rgba(52, 199, 89, 0.2); border: 1px solid rgba(52, 199, 89, 0.35); }
+  .device-icon-wrap.green svg { fill: var(--green); }
+  .device-icon-wrap.blue { background: rgba(10, 132, 255, 0.2); border: 1px solid rgba(10, 132, 255, 0.35); }
+  .device-icon-wrap.blue svg { fill: var(--blue); }
+  .device-icon-wrap.orange { background: rgba(255, 159, 10, 0.2); border: 1px solid rgba(255, 159, 10, 0.35); }
+  .device-icon-wrap.orange svg { fill: var(--orange); }
+  .device-icon-wrap.purple { background: rgba(191, 90, 242, 0.2); border: 1px solid rgba(191, 90, 242, 0.35); }
+  .device-icon-wrap.purple svg { fill: var(--purple); }
+
+  .device-name { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 3px; }
+  .device-status { font-size: 12px; color: var(--text-muted); }
+  .device-status.active { color: var(--green); }
+
+  .device-badge {
+    position: absolute;
+    top: 12px; right: 12px;
+    font-size: 10px; font-weight: 600;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
+    border-radius: 100px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .device-arrow {
+    position: absolute;
+    bottom: 16px; right: 16px;
+    color: var(--text-faint);
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  .device-card:hover .device-arrow { transform: translateX(2px); color: var(--text-muted); }
+  .device-arrow svg { width: 16px; height: 16px; }
+
+  .logout-row { margin-top: 18px; display: flex; justify-content: center; }
+  .logout-btn {
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    font-family: inherit; font-size: 13px; font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .logout-btn:hover { color: white; background: var(--glass-bg-strong); }
+
+  /* ============================================================
+     GARDEN BOSS DETAIL SCREEN
+     ============================================================ */
+  .summary {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 18px 20px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-soft);
+  }
+  .summary-label { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
+  .summary-value { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+  .summary-value span { color: var(--green); }
+  .summary-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: rgba(52, 199, 89, 0.18);
+    border: 1px solid rgba(52, 199, 89, 0.3);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .summary-icon svg { width: 22px; height: 22px; fill: var(--green); }
+
+  .valve-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .valve {
+    position: relative;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+  }
+  .valve.on {
+    background: linear-gradient(150deg, rgba(52, 199, 89, 0.22), rgba(52, 199, 89, 0.08));
+    border-color: rgba(52, 199, 89, 0.5);
+    box-shadow: 0 8px 32px rgba(52, 199, 89, 0.2);
+  }
+  .valve.on::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 20px;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(52, 199, 89, 0.6), transparent 60%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  .valve.on::after {
+    content: "";
+    position: absolute;
+    bottom: -50px; right: -50px;
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(52, 199, 89, 0.3), transparent 70%);
+    animation: ripple 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes ripple {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.3); opacity: 0.2; }
+  }
+
+  .valve-main {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .valve-icon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+  }
+  .valve-icon svg {
+    width: 22px; height: 22px;
+    fill: var(--text-muted);
+    transition: fill 0.3s ease, transform 0.4s ease;
+  }
+  .valve.on .valve-icon {
+    background: rgba(52, 199, 89, 0.25);
+    border-color: rgba(52, 199, 89, 0.4);
+  }
+  .valve.on .valve-icon svg {
+    fill: var(--green);
+    animation: drop 1.6s ease-in-out infinite;
+  }
+  @keyframes drop {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+
+  .valve-info { flex: 1; min-width: 0; }
+  .valve-name-row {
+    display: flex; align-items: baseline; gap: 8px;
+  }
+  .valve-name { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+  .valve-num { font-size: 11px; font-weight: 600; color: var(--text-faint); letter-spacing: 0.1em; text-transform: uppercase; }
+  .valve-zone { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  .switch {
+    position: relative;
+    width: 52px; height: 30px;
+    border-radius: 100px;
+    background: rgba(120, 120, 128, 0.45);
+    transition: background 0.35s var(--ease-ios);
+    flex-shrink: 0;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  .switch::after {
+    content: "";
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 26px; height: 26px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    transition: transform 0.35s var(--ease-ios);
+  }
+  .valve.on .switch {
+    background: var(--green);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 16px rgba(52, 199, 89, 0.4);
+  }
+  .valve.on .switch::after { transform: translateX(22px); }
+
+  .valve.pending { opacity: 0.85; }
+  .valve.pending .switch::after {
+    animation: knobPulse 1.2s ease-in-out infinite;
+  }
+  @keyframes knobPulse {
+    0%, 100% { box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
+    50% { box-shadow: 0 2px 6px rgba(0,0,0,0.25), 0 0 0 4px rgba(255,255,255,0.15); }
+  }
+
+  /* Dispositivo offline (LWT): i comandi non arriverebbero mai -> controlli spenti */
+  #valveList.device-offline .switch { opacity: 0.35; }
+  #valveList.device-offline .valve-main { cursor: not-allowed; }
+
+  /* Schedule chips row inside valve */
+  .schedules-row {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .schedules-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-right: 4px;
+  }
+  .schedule-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--glass-border);
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    color: var(--text);
+  }
+  .schedule-chip:hover { background: rgba(255, 255, 255, 0.14); }
+  .schedule-chip:active { transform: scale(0.95); }
+  .schedule-chip.active {
+    background: rgba(52, 199, 89, 0.2);
+    border-color: rgba(52, 199, 89, 0.5);
+    color: var(--green);
+  }
+  .schedule-chip.disabled {
+    opacity: 0.5;
+  }
+  .schedule-chip svg { width: 12px; height: 12px; }
+  .schedule-chip-empty {
+    color: var(--text-faint);
+    border-style: dashed;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  .schedule-chip-empty svg { fill: var(--text-faint); }
+
+  /* ============================================================
+     MODAL (Schedule Editor)
+     ============================================================ */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 10, 20, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s var(--ease-ios);
+    z-index: 500;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+  }
+  .modal-backdrop.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @media (min-width: 600px) {
+    .modal-backdrop { align-items: center; padding: 24px; }
+  }
+
+  .modal {
+    width: 100%;
+    max-width: 480px;
+    background: rgba(28, 32, 40, 0.92);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid var(--glass-border-strong);
+    border-radius: 24px 24px 0 0;
+    padding: 24px 22px 28px;
+    box-shadow: var(--shadow-strong);
+    transform: translateY(100%);
+    transition: transform 0.4s var(--ease-ios);
+    max-height: 92vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .modal-backdrop.show .modal { transform: translateY(0); }
+
+  @media (min-width: 600px) {
+    .modal {
+      border-radius: 24px;
+      transform: translateY(20px) scale(0.96);
+    }
+    .modal-backdrop.show .modal {
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .modal-grabber {
+    width: 36px; height: 5px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 100px;
+    margin: 0 auto 18px;
+  }
+  @media (min-width: 600px) {
+    .modal-grabber { display: none; }
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+  }
+  .modal-title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+  .modal-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .modal-close {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s ease;
+  }
+  .modal-close:hover { background: rgba(255, 255, 255, 0.18); color: white; }
+  .modal-close svg { width: 16px; height: 16px; }
+
+  .modal-section {
+    margin-bottom: 22px;
+  }
+  .modal-section-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Enable toggle row */
+  .modal-enable-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    margin-bottom: 18px;
+  }
+  .modal-enable-text { font-size: 14px; font-weight: 500; }
+  .modal-enable-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* Days picker */
+  .days-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+  .day-pill {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1.5px solid transparent;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s var(--ease-ios);
+    user-select: none;
+  }
+  .day-pill:active { transform: scale(0.92); }
+  .day-pill.selected {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+    box-shadow: 0 4px 12px rgba(52, 199, 89, 0.35);
+  }
+
+  .days-shortcuts {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .day-shortcut {
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--glass-border);
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+  }
+  .day-shortcut:hover { background: rgba(255, 255, 255, 0.12); color: white; }
+  .day-shortcut:active { transform: scale(0.95); }
+
+  /* Time picker */
+  .time-picker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 18px;
+  }
+  .time-wheel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .time-display {
+    font-size: 44px;
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    color: white;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    min-width: 70px;
+    text-align: center;
+  }
+  .time-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .time-controls { display: flex; gap: 6px; }
+  .time-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+  .time-btn:hover { background: rgba(255, 255, 255, 0.2); }
+  .time-btn:active { transform: scale(0.9); }
+  .time-btn svg { width: 14px; height: 14px; }
+  .time-sep {
+    font-size: 38px;
+    font-weight: 300;
+    color: var(--text-muted);
+    align-self: flex-start;
+    margin-top: 12px;
+  }
+
+  /* Duration picker */
+  .duration-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 14px 18px;
+  }
+  .duration-display {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .duration-display .unit {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-left: 4px;
+  }
+  .duration-controls { display: flex; gap: 8px; align-items: center; }
+  .duration-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s ease;
+  }
+  .duration-btn:hover { background: rgba(255, 255, 255, 0.2); }
+  .duration-btn:active { transform: scale(0.9); }
+  .duration-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .duration-btn svg { width: 14px; height: 14px; }
+
+  .duration-presets {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .duration-preset {
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--glass-border);
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+  }
+  .duration-preset:hover { background: rgba(255, 255, 255, 0.12); color: white; }
+  .duration-preset.active {
+    background: rgba(52, 199, 89, 0.2);
+    border-color: rgba(52, 199, 89, 0.5);
+    color: var(--green);
+  }
+
+  /* Schedule slot tabs (1, 2, 3) */
+  .slot-tabs {
+    display: flex;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 18px;
+  }
+  .slot-tab {
+    flex: 1;
+    padding: 10px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 9px;
+    transition: all 0.2s var(--ease-ios);
+    position: relative;
+  }
+  .slot-tab.active {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+  }
+  .slot-tab .slot-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text-faint);
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .slot-tab .slot-dot.has-data { background: var(--green); }
+
+  /* Modal action row */
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .modal-btn {
+    flex: 1;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.25s ease, opacity 0.25s ease, background 0.2s ease;
+  }
+  .modal-btn:active { transform: scale(0.98); }
+  .modal-btn-primary {
+    color: white;
+    background: linear-gradient(135deg, var(--green), var(--green-dim));
+    box-shadow: 0 4px 14px rgba(52, 199, 89, 0.35);
+  }
+  .modal-btn-primary:hover { box-shadow: 0 6px 20px rgba(52, 199, 89, 0.5); }
+  .modal-btn-secondary {
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--glass-border);
+  }
+  .modal-btn-secondary:hover { background: rgba(255, 255, 255, 0.14); color: white; }
+  .modal-btn-danger {
+    color: #ffb3ae;
+    background: rgba(255, 59, 48, 0.15);
+    border: 1px solid rgba(255, 59, 48, 0.3);
+    flex: 0 0 auto;
+    padding: 14px 16px;
+  }
+  .modal-btn-danger:hover { background: rgba(255, 59, 48, 0.25); color: white; }
+  .modal-btn-danger svg { width: 16px; height: 16px; }
+
+  .modal-disabled-overlay {
+    opacity: 0.4;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  /* ============================================================
+     SYNC BANNER
+     ============================================================ */
+  .sync-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+    transition: all 0.3s ease;
+  }
+  .sync-banner.synced {
+    background: rgba(52, 199, 89, 0.10);
+    border-color: rgba(52, 199, 89, 0.25);
+    color: var(--green);
+  }
+  .sync-banner.stale {
+    background: rgba(255, 159, 10, 0.10);
+    border-color: rgba(255, 159, 10, 0.25);
+    color: var(--orange);
+  }
+  .sync-banner svg {
+    width: 14px; height: 14px;
+    flex-shrink: 0;
+  }
+  .sync-banner.loading svg {
+    animation: spin 1.4s linear infinite;
+  }
+  .sync-banner-text { flex: 1; }
+  .sync-banner-time {
+    font-size: 11px;
+    color: var(--text-faint);
+    font-weight: 500;
+  }
+
+  /* Flash on external update */
+  @keyframes flashUpdate {
+    0%   { box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.5); }
+    50%  { box-shadow: 0 0 0 6px rgba(10, 132, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(10, 132, 255, 0); }
+  }
+  .schedule-chip.flash-update {
+    animation: flashUpdate 1.2s ease-out 1;
+  }
+
+  /* Modal conflict banner */
+  .modal-conflict-banner {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: rgba(255, 159, 10, 0.15);
+    border: 1px solid rgba(255, 159, 10, 0.35);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: #ffd591;
+  }
+  .modal-conflict-banner.show { display: flex; }
+  .modal-conflict-banner svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .modal-conflict-banner button {
+    margin-left: auto;
+    background: rgba(255, 255, 255, 0.12);
+    border: none;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* ============================================================
+     TOAST
+     ============================================================ */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(20, 20, 25, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 100px;
+    font-size: 13px; font-weight: 500;
+    box-shadow: var(--shadow-strong);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 1000;
+    max-width: 90%;
+    text-align: center;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Stagger entrance */
+  .stagger { opacity: 0; transform: translateY(12px); }
+  .stagger.in {
+    opacity: 1; transform: translateY(0);
+    transition: opacity 0.5s var(--ease-ios), transform 0.5s var(--ease-ios);
+  }
+</style>
+</head>
+<body>
+
+<!-- =============================================================
+     LOGIN SCREEN
+     ============================================================= -->
+<section class="screen entering-fade active" id="loginScreen">
+  <div class="container">
+    <div class="login-card">
+      <div class="login-logo">
+        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+      </div>
+      <h1 class="login-title">Smart Home</h1>
+      <p class="login-sub">Accedi al tuo broker MQTT</p>
+
+      <div class="field">
+        <label for="brokerHost">Indirizzo broker</label>
+        <div class="input-wrap">
+          <input id="brokerHost" type="text" placeholder="441f1bb64b9243fc98f7a730d5312a6a.s1.eu.hivemq.cloud" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <span class="input-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/>
+              <line x1="6" y1="7" x2="6.01" y2="7"/><line x1="6" y1="17" x2="6.01" y2="17"/>
+            </svg>
+          </span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="brokerUser">Username</label>
+        <div class="input-wrap">
+          <input id="brokerUser" type="text" placeholder="Username MQTT" autocomplete="username" autocapitalize="off" spellcheck="false">
+          <span class="input-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+          </span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="brokerPass">Password</label>
+        <div class="input-wrap">
+          <input id="brokerPass" type="password" placeholder="Password MQTT" autocomplete="current-password">
+          <button type="button" class="toggle-pwd" id="togglePwd" aria-label="Mostra password">
+            <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <button class="login-btn" id="loginBtn">
+        <span class="btn-label">Accedi</span>
+        <span class="spinner"></span>
+      </button>
+
+      <div class="login-error" id="loginError">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span id="loginErrorText">Connessione fallita</span>
+      </div>
+
+      <p class="login-footer">Connessione protetta · WSS porta 8884</p>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================================
+     HUB HOME SCREEN
+     ============================================================= -->
+<section class="screen entering-fade" id="hubScreen" hidden>
+  <div class="container">
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <div class="greeting">
+          <h2 id="greetText">Casa</h2>
+          <p id="brokerLabel">—</p>
+        </div>
+      </div>
+      <div class="conn-pill" id="hubConnPill">
+        <div class="conn-dot"></div>
+        <span id="hubConnText">Connessione…</span>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card stagger">
+        <div class="stat-card-label">Dispositivi attivi</div>
+        <div class="stat-card-value"><span id="hubActiveDevices">0</span><span class="unit">/4</span></div>
+      </div>
+      <div class="stat-card stagger">
+        <div class="stat-card-label">Valvole aperte</div>
+        <div class="stat-card-value"><span id="hubOpenValves">0</span><span class="unit">/4</span></div>
+      </div>
+    </div>
+
+    <div class="section-title">Dispositivi</div>
+
+    <div class="device-grid">
+      <div class="device-card stagger" data-device="gardenboss">
+        <div>
+          <div class="device-icon-wrap green">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8 8 5 12 5 16a7 7 0 0 0 14 0c0-4-3-8-7-14zm0 17a5 5 0 0 1-5-5c0-2.5 2-5.5 5-10 3 4.5 5 7.5 5 10a5 5 0 0 1-5 5z"/></svg>
+          </div>
+          <div class="device-name">Garden Boss</div>
+          <div class="device-status active" id="gbStatus">In attesa…</div>
+        </div>
+        <div class="device-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="device-card coming-soon stagger">
+        <span class="device-badge">Soon</span>
+        <div>
+          <div class="device-icon-wrap blue">
+            <svg viewBox="0 0 24 24"><path d="M12 3a4 4 0 0 0-4 4v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-2V7a4 4 0 0 0-4-4zm-2 4a2 2 0 1 1 4 0v3h-4V7zm2 8a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></svg>
+          </div>
+          <div class="device-name">Smart Lock</div>
+          <div class="device-status">Non collegato</div>
+        </div>
+      </div>
+
+      <div class="device-card coming-soon stagger">
+        <span class="device-badge">Soon</span>
+        <div>
+          <div class="device-icon-wrap orange">
+            <svg viewBox="0 0 24 24"><path d="M9 21h6v-1H9v1zm3-19a7 7 0 0 0-4 12.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26A7 7 0 0 0 12 2zm2 14h-4v-1.41l-.59-.42A5 5 0 1 1 17 10a4.94 4.94 0 0 1-2.41 4.17l-.59.42V16z"/></svg>
+          </div>
+          <div class="device-name">Smart Lights</div>
+          <div class="device-status">Non collegato</div>
+        </div>
+      </div>
+
+      <div class="device-card coming-soon stagger">
+        <span class="device-badge">Soon</span>
+        <div>
+          <div class="device-icon-wrap purple">
+            <svg viewBox="0 0 24 24"><path d="M22 11h-1a9 9 0 0 0-18 0H2a1 1 0 0 0 0 2h1a9 9 0 0 0 18 0h1a1 1 0 0 0 0-2zm-10 7a7 7 0 1 1 7-7 7 7 0 0 1-7 7zm0-12a5 5 0 0 0-5 5 1 1 0 0 0 2 0 3 3 0 0 1 3-3 1 1 0 0 0 0-2z"/></svg>
+          </div>
+          <div class="device-name">Climate</div>
+          <div class="device-status">Non collegato</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="logout-row">
+      <button class="logout-btn" id="logoutBtn">Disconnetti</button>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================================
+     GARDEN BOSS DETAIL SCREEN
+     ============================================================= -->
+<section class="screen entering-right" id="gardenScreen" hidden>
+  <div class="container">
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <button class="back-btn" id="gbBack" aria-label="Indietro">
+          <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
+        </button>
+        <div class="greeting">
+          <h2>Garden Boss</h2>
+          <p>Sistema irrigazione</p>
+        </div>
+      </div>
+      <div class="conn-pill" id="gbConnPill">
+        <div class="conn-dot"></div>
+        <span id="gbConnText">Connessione…</span>
+      </div>
+    </div>
+
+    <div class="summary">
+      <div>
+        <div class="summary-label">Valvole attive</div>
+        <div class="summary-value"><span id="activeCount">0</span> / 4</div>
+      </div>
+      <div class="summary-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2C8 8 5 12 5 16a7 7 0 0 0 14 0c0-4-3-8-7-14zm0 17a5 5 0 0 1-5-5c0-2.5 2-5.5 5-10 3 4.5 5 7.5 5 10a5 5 0 0 1-5 5z"/></svg>
+      </div>
+    </div>
+
+    <div class="section-title">Zone</div>
+
+    <div class="sync-banner loading" id="syncBanner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"/>
+        <polyline points="1 20 1 14 7 14"/>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>
+      <div class="sync-banner-text" id="syncBannerText">Caricamento schedule…</div>
+      <div class="sync-banner-time" id="syncBannerTime"></div>
+    </div>
+
+    <div class="valve-list" id="valveList"></div>
+  </div>
+</section>
+
+<!-- =============================================================
+     SCHEDULE EDITOR MODAL
+     ============================================================= -->
+<div class="modal-backdrop" id="scheduleModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-grabber"></div>
+
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle">Schedule</div>
+        <div class="modal-subtitle" id="modalSubtitle">—</div>
+      </div>
+      <button class="modal-close" id="modalCloseBtn" aria-label="Chiudi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Slot tabs -->
+    <div class="slot-tabs" id="slotTabs">
+      <button class="slot-tab active" data-slot="0">Slot 1<span class="slot-dot"></span></button>
+      <button class="slot-tab" data-slot="1">Slot 2<span class="slot-dot"></span></button>
+      <button class="slot-tab" data-slot="2">Slot 3<span class="slot-dot"></span></button>
+    </div>
+
+    <!-- Enable -->
+    <div class="modal-enable-row">
+      <div>
+        <div class="modal-enable-text">Schedule attivo</div>
+        <div class="modal-enable-sub" id="enableSub">Esegue irrigazione automatica</div>
+      </div>
+      <div class="switch" id="enableSwitch" role="switch" aria-checked="false" tabindex="0"></div>
+    </div>
+
+    <div id="modalBody">
+      <div class="modal-conflict-banner" id="modalConflictBanner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <span>Schedule modificato da un altro dispositivo</span>
+        <button id="reloadConflictBtn">Ricarica</button>
+      </div>
+
+      <!-- Days -->
+      <div class="modal-section">
+        <div class="modal-section-label">Giorni</div>
+        <div class="days-row" id="daysRow">
+          <div class="day-pill" data-day="1">L</div>
+          <div class="day-pill" data-day="2">M</div>
+          <div class="day-pill" data-day="3">M</div>
+          <div class="day-pill" data-day="4">G</div>
+          <div class="day-pill" data-day="5">V</div>
+          <div class="day-pill" data-day="6">S</div>
+          <div class="day-pill" data-day="0">D</div>
+        </div>
+        <div class="days-shortcuts">
+          <button class="day-shortcut" data-shortcut="weekdays">Feriali</button>
+          <button class="day-shortcut" data-shortcut="weekend">Weekend</button>
+          <button class="day-shortcut" data-shortcut="all">Tutti</button>
+          <button class="day-shortcut" data-shortcut="none">Nessuno</button>
+        </div>
+      </div>
+
+      <!-- Time -->
+      <div class="modal-section">
+        <div class="modal-section-label">Orario di avvio</div>
+        <div class="time-picker">
+          <div class="time-wheel">
+            <div class="time-display" id="timeHH">06</div>
+            <div class="time-label">Ore</div>
+            <div class="time-controls">
+              <button class="time-btn" data-time="hh-down" aria-label="Ora -1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <button class="time-btn" data-time="hh-up" aria-label="Ora +1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="time-sep">:</div>
+          <div class="time-wheel">
+            <div class="time-display" id="timeMM">00</div>
+            <div class="time-label">Minuti</div>
+            <div class="time-controls">
+              <button class="time-btn" data-time="mm-down" aria-label="Minuti -5">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <button class="time-btn" data-time="mm-up" aria-label="Minuti +5">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Duration -->
+      <div class="modal-section">
+        <div class="modal-section-label">
+          <span>Durata irrigazione</span>
+          <span style="font-size:10px; font-weight:500; text-transform:none; letter-spacing:0; color:var(--text-faint);">min 5 min</span>
+        </div>
+        <div class="duration-row">
+          <div class="duration-display"><span id="durationVal">15</span><span class="unit">min</span></div>
+          <div class="duration-controls">
+            <button class="duration-btn" id="durDown" aria-label="Riduci durata">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <button class="duration-btn" id="durUp" aria-label="Aumenta durata">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="duration-presets" id="durPresets">
+          <button class="duration-preset" data-preset="5">5m</button>
+          <button class="duration-preset" data-preset="10">10m</button>
+          <button class="duration-preset active" data-preset="15">15m</button>
+          <button class="duration-preset" data-preset="20">20m</button>
+          <button class="duration-preset" data-preset="30">30m</button>
+          <button class="duration-preset" data-preset="45">45m</button>
+          <button class="duration-preset" data-preset="60">60m</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-danger" id="deleteBtn" aria-label="Elimina schedule">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>
+        </svg>
+      </button>
+      <button class="modal-btn modal-btn-secondary" id="cancelBtn">Annulla</button>
+      <button class="modal-btn modal-btn-primary" id="saveBtn">Salva</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================
+     CONFIG
+     ============================================================ */
+  const VALVES = [
+    { id: 1, name: 'Prato',  zone: 'Giardino frontale' },
+    { id: 2, name: 'Orto',   zone: 'Zona retro' },
+    { id: 3, name: 'Aiuole', zone: 'Lato est' },
+    { id: 4, name: 'Vasi',   zone: 'Terrazza' }
+  ];
+
+  const SLOTS_PER_VALVE = 3;
+  const MIN_DURATION_MIN = 5;
+  const MAX_DURATION_MIN = 240;
+  const DURATION_STEP_MIN = 5;
+  const DAY_NAMES = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
+  const DAY_NAMES_SHORT = ['D', 'L', 'M', 'M', 'G', 'V', 'S'];
+
+  // Topic helpers
+  const STATUS_VALVE_FILTER  = 'gardenboss/status/valve/+';
+  const STATUS_DEVICE_TOPIC  = 'gardenboss/status/device';
+  const SCHEDULE_GET_FILTER  = 'gardenboss/schedule/get/+/+';   // gardenboss/schedule/get/{valve}/{slot}
+  const CMD_VALVE  = id => `gardenboss/cmd/valve/${id}`;
+  const SCHEDULE_SET    = (vid, slot) => `gardenboss/schedule/set/${vid}/${slot}`;
+  const SCHEDULE_DELETE = (vid, slot) => `gardenboss/schedule/delete/${vid}/${slot}`;
+  const SCHEDULE_REQUEST_ALL = 'gardenboss/schedule/request';
+
+  /* ============================================================
+     STATE
+     ============================================================ */
+  const state = {
+    client: null,
+    connected: false,
+    brokerHost: '',
+    deviceOnline: false,
+    valves: {},
+    // schedules: { valveId: { 0: scheduleObj|null, 1: ..., 2: ... } }
+    schedules: {},
+    // Sync tracking
+    initialSyncDone: false,
+    initialSyncTimer: null,
+    schedulesEverReceived: false,
+    lastScheduleUpdate: null   // timestamp dell'ultimo messaggio schedule ricevuto
+  };
+  VALVES.forEach(v => {
+    state.valves[v.id] = { on: false, pending: false, pendingTimer: null };
+    state.schedules[v.id] = { 0: null, 1: null, 2: null };
+  });
+
+  // Modal state (working copy)
+  const modalState = {
+    valveId: null,
+    activeSlot: 0,
+    // working copy of the 3 slots: array of {enabled, days[7], hh, mm, durationMin} or null
+    slots: [null, null, null],
+    // Snapshot dei dati al momento dell'apertura, per detect conflicts
+    originalSnapshot: null,
+    // Flag: true se durante l'editing è arrivato un update dal broker per la stessa valvola
+    externalUpdate: false
+  };
+
+  /* ============================================================
+     DOM REFS
+     ============================================================ */
+  const screens = {
+    login:  document.getElementById('loginScreen'),
+    hub:    document.getElementById('hubScreen'),
+    garden: document.getElementById('gardenScreen')
+  };
+
+  // Login
+  const brokerHostEl = document.getElementById('brokerHost');
+  const brokerUserEl = document.getElementById('brokerUser');
+  const brokerPassEl = document.getElementById('brokerPass');
+  const loginBtn     = document.getElementById('loginBtn');
+  const loginError   = document.getElementById('loginError');
+  const loginErrorText = document.getElementById('loginErrorText');
+  const togglePwd    = document.getElementById('togglePwd');
+  const eyeIcon      = document.getElementById('eyeIcon');
+
+  // Hub
+  const hubConnPill  = document.getElementById('hubConnPill');
+  const hubConnText  = document.getElementById('hubConnText');
+  const brokerLabel  = document.getElementById('brokerLabel');
+  const greetText    = document.getElementById('greetText');
+  const hubActiveDevices = document.getElementById('hubActiveDevices');
+  const hubOpenValves    = document.getElementById('hubOpenValves');
+  const gbStatusEl   = document.getElementById('gbStatus');
+  const logoutBtn    = document.getElementById('logoutBtn');
+
+  // Garden Boss
+  const gbConnPill   = document.getElementById('gbConnPill');
+  const gbConnText   = document.getElementById('gbConnText');
+  const gbBack       = document.getElementById('gbBack');
+  const valveList    = document.getElementById('valveList');
+  const activeCountEl = document.getElementById('activeCount');
+  const syncBanner    = document.getElementById('syncBanner');
+  const syncBannerText = document.getElementById('syncBannerText');
+  const syncBannerTime = document.getElementById('syncBannerTime');
+
+  // Modal
+  const modalEl       = document.getElementById('scheduleModal');
+  const modalTitle    = document.getElementById('modalTitle');
+  const modalSubtitle = document.getElementById('modalSubtitle');
+  const modalCloseBtn = document.getElementById('modalCloseBtn');
+  const slotTabs      = document.getElementById('slotTabs');
+  const enableSwitch  = document.getElementById('enableSwitch');
+  const enableSub     = document.getElementById('enableSub');
+  const modalBody     = document.getElementById('modalBody');
+  const daysRow       = document.getElementById('daysRow');
+  const timeHH        = document.getElementById('timeHH');
+  const timeMM        = document.getElementById('timeMM');
+  const durationVal   = document.getElementById('durationVal');
+  const durDown       = document.getElementById('durDown');
+  const durUp         = document.getElementById('durUp');
+  const durPresets    = document.getElementById('durPresets');
+  const saveBtn       = document.getElementById('saveBtn');
+  const cancelBtn     = document.getElementById('cancelBtn');
+  const deleteBtn     = document.getElementById('deleteBtn');
+  const modalConflictBanner = document.getElementById('modalConflictBanner');
+  const reloadConflictBtn   = document.getElementById('reloadConflictBtn');
+
+  // Toast
+  const toastEl = document.getElementById('toast');
+
+  /* ============================================================
+     UTILITIES
+     ============================================================ */
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function formatDays(days) {
+    // days = [bool, bool, bool, bool, bool, bool, bool] index = day-of-week (0=Sun)
+    const count = days.filter(Boolean).length;
+    if (count === 0) return 'Nessun giorno';
+    if (count === 7) return 'Tutti i giorni';
+    if (count === 5 && !days[0] && !days[6] && days[1] && days[2] && days[3] && days[4] && days[5]) return 'Feriali';
+    if (count === 2 && days[0] && days[6] && !days[1] && !days[2] && !days[3] && !days[4] && !days[5]) return 'Weekend';
+    // List shorthand: starts with monday for natural reading
+    const order = [1, 2, 3, 4, 5, 6, 0];
+    return order.filter(i => days[i]).map(i => DAY_NAMES[i].substring(0, 3)).join(', ');
+  }
+
+  function defaultSchedule() {
+    return {
+      enabled: true,
+      days: [false, false, false, false, false, false, false],
+      hh: 6,
+      mm: 0,
+      durationMin: 15
+    };
+  }
+
+  function cloneSchedule(s) {
+    if (!s) return null;
+    return {
+      enabled: !!s.enabled,
+      days: [...s.days],
+      hh: s.hh,
+      mm: s.mm,
+      durationMin: s.durationMin
+    };
+  }
+
+  function schedulesEqual(a, b) {
+    if (a === null && b === null) return true;
+    if (a === null || b === null) return false;
+    if (a.enabled !== b.enabled) return false;
+    if (a.hh !== b.hh || a.mm !== b.mm) return false;
+    if (a.durationMin !== b.durationMin) return false;
+    for (let i = 0; i < 7; i++) {
+      if (!!a.days[i] !== !!b.days[i]) return false;
+    }
+    return true;
+  }
+
+  function formatRelativeTime(ts) {
+    if (!ts) return '';
+    const diff = Date.now() - ts;
+    const sec = Math.floor(diff / 1000);
+    if (sec < 5) return 'ora';
+    if (sec < 60) return `${sec}s fa`;
+    const min = Math.floor(sec / 60);
+    if (min < 60) return `${min}m fa`;
+    const hr = Math.floor(min / 60);
+    if (hr < 24) return `${hr}h fa`;
+    const day = Math.floor(hr / 24);
+    return `${day}g fa`;
+  }
+
+  function validateSchedule(s) {
+    if (!s || typeof s !== 'object') return false;
+    if (!Array.isArray(s.days) || s.days.length !== 7) return false;
+    if (!Number.isInteger(s.hh) || s.hh < 0 || s.hh > 23) return false;
+    if (!Number.isInteger(s.mm) || s.mm < 0 || s.mm > 59) return false;
+    if (!Number.isInteger(s.durationMin) || s.durationMin < MIN_DURATION_MIN || s.durationMin > MAX_DURATION_MIN) return false;
+    return true;
+  }
+
+  /* ============================================================
+     SCREEN ROUTER
+     ============================================================ */
+  function triggerStagger() {
+    const items = screens.hub.querySelectorAll('.stagger');
+    items.forEach((el, i) => {
+      el.classList.remove('in');
+      setTimeout(() => el.classList.add('in'), 60 + i * 60);
+    });
+  }
+
+  /* ============================================================
+     SYNC BANNER
+     ============================================================ */
+  function updateSyncBanner() {
+    if (!state.connected) {
+      syncBanner.classList.remove('synced', 'stale', 'loading');
+      syncBanner.classList.add('stale');
+      syncBannerText.textContent = 'Disconnesso dal broker';
+      syncBannerTime.textContent = '';
+      return;
+    }
+    if (!state.initialSyncDone) {
+      syncBanner.classList.remove('synced', 'stale');
+      syncBanner.classList.add('loading');
+      syncBannerText.textContent = 'Caricamento schedule…';
+      syncBannerTime.textContent = '';
+      return;
+    }
+    if (!state.schedulesEverReceived) {
+      // Sync timeout scaduto e nessun retained ricevuto: ESP non ha mai pubblicato schedule
+      syncBanner.classList.remove('loading', 'synced');
+      syncBanner.classList.add('stale');
+      syncBannerText.textContent = state.deviceOnline
+        ? 'Nessuno schedule configurato'
+        : 'Nessun dato dal dispositivo (mai online?)';
+      syncBannerTime.textContent = '';
+      return;
+    }
+    // Abbiamo schedule sincronizzati
+    syncBanner.classList.remove('loading', 'stale');
+    syncBanner.classList.add('synced');
+    if (state.deviceOnline) {
+      syncBannerText.textContent = 'Schedule sincronizzati';
+    } else {
+      syncBannerText.textContent = 'Ultima sincronizzazione (dispositivo offline)';
+    }
+    syncBannerTime.textContent = formatRelativeTime(state.lastScheduleUpdate);
+  }
+
+  // Loop che aggiorna il timestamp relativo ogni 15 secondi
+  setInterval(() => {
+    if (state.initialSyncDone && state.schedulesEverReceived) {
+      syncBannerTime.textContent = formatRelativeTime(state.lastScheduleUpdate);
+    }
+  }, 15000);
+
+  /* ============================================================
+     LOGIN
+     ============================================================ */
+  togglePwd.addEventListener('click', () => {
+    const isPwd = brokerPassEl.type === 'password';
+    brokerPassEl.type = isPwd ? 'text' : 'password';
+    eyeIcon.innerHTML = isPwd
+      ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  });
+
+  function showLoginError(msg) { loginErrorText.textContent = msg; loginError.classList.add('show'); }
+  function clearLoginError() { loginError.classList.remove('show'); }
+
+  function setLoginLoading(on) {
+    loginBtn.classList.toggle('loading', on);
+    loginBtn.disabled = on;
+    brokerHostEl.disabled = on;
+    brokerUserEl.disabled = on;
+    brokerPassEl.disabled = on;
+  }
+
+  loginBtn.addEventListener('click', attemptLogin);
+  [brokerHostEl, brokerUserEl, brokerPassEl].forEach(el => {
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+    el.addEventListener('input', clearLoginError);
+  });
+
+  const DEFAULT_BROKER = '441f1bb64b9243fc98f7a730d5312a6a.s1.eu.hivemq.cloud';
+  brokerHostEl.addEventListener('focus', function autofillOnce() {
+    if (brokerHostEl.value.trim() === '') {
+      brokerHostEl.value = DEFAULT_BROKER;
+    }
+    brokerHostEl.removeEventListener('focus', autofillOnce);
+  });
+
+  function sanitizeHost(raw) {
+    return raw.trim()
+      .replace(/^wss?:\/\//i, '')
+      .replace(/^https?:\/\//i, '')
+      .replace(/\/.*$/, '')
+      .replace(/:\d+$/, '');
+  }
+
+  function attemptLogin() {
+    const host = sanitizeHost(brokerHostEl.value);
+    const username = brokerUserEl.value;
+    const password = brokerPassEl.value;
+
+    if (!host)     { showLoginError("Inserisci l'indirizzo del broker."); brokerHostEl.focus(); return; }
+    if (!username) { showLoginError('Inserisci lo username.'); brokerUserEl.focus(); return; }
+    if (!password) { showLoginError('Inserisci la password.'); brokerPassEl.focus(); return; }
+
+    clearLoginError();
+    setLoginLoading(true);
+
+    const url = `wss://${host}:8884/mqtt`;
+    const clientId = 'iothub-web-' + Math.random().toString(16).slice(2, 10);
+
+    let resolved = false;
+    const safetyTimeout = setTimeout(() => {
+      if (resolved) return;
+      resolved = true;
+      try { client.end(true); } catch (e) {}
+      setLoginLoading(false);
+      showLoginError('Timeout: il broker non risponde.');
+    }, 9000);
+
+    const client = mqtt.connect(url, {
+      clientId, username, password,
+      clean: true, reconnectPeriod: 0,
+      connectTimeout: 8000, keepalive: 30
+    });
+
+    client.once('connect', () => {
+      if (resolved) return;
+      resolved = true;
+      clearTimeout(safetyTimeout);
+      client.end(true, () => startMainSession(host, username, password));
+    });
+
+    client.once('error', err => {
+      if (resolved) return;
+      resolved = true;
+      clearTimeout(safetyTimeout);
+      try { client.end(true); } catch (e) {}
+      setLoginLoading(false);
+      const msg = (err && err.message) ? err.message.toLowerCase() : '';
+      if (msg.includes('not authorized') || msg.includes('bad user') || msg.includes('5')) {
+        showLoginError('Credenziali non valide.');
+      } else if (msg.includes('refused') || msg.includes('closed')) {
+        showLoginError('Connessione rifiutata dal broker.');
+      } else {
+        showLoginError('Connessione fallita.');
+      }
+    });
+
+    client.once('close', () => {
+      if (resolved) return;
+      resolved = true;
+      clearTimeout(safetyTimeout);
+      setLoginLoading(false);
+      showLoginError('Impossibile raggiungere il broker.');
+    });
+  }
+
+  /* ============================================================
+     MAIN MQTT SESSION
+     ============================================================ */
+  function startMainSession(host, username, password) {
+    const url = `wss://${host}:8884/mqtt`;
+    const clientId = 'iothub-web-' + Math.random().toString(16).slice(2, 10);
+
+    state.brokerHost = host;
+    state.client = mqtt.connect(url, {
+      clientId, username, password,
+      clean: true, reconnectPeriod: 3000,
+      connectTimeout: 8000, keepalive: 30
+    });
+
+    state.client.on('connect', () => {
+      state.connected = true;
+      setConnectionUI(true);
+
+      // Reset sync state
+      state.initialSyncDone = false;
+      state.schedulesEverReceived = false;
+      state.lastScheduleUpdate = null;
+      updateSyncBanner();
+
+      const topics = [STATUS_VALVE_FILTER, STATUS_DEVICE_TOPIC, SCHEDULE_GET_FILTER];
+      state.client.subscribe(topics, { qos: 1 }, err => {
+        if (err) { console.error('Subscribe error:', err); toast('Errore sottoscrizione'); }
+      });
+
+      // Request all schedules on connect (fallback se i retained non arrivano)
+      state.client.publish(SCHEDULE_REQUEST_ALL, '1', { qos: 0, retain: false });
+
+      // Dopo 2 secondi consideriamo concluso il sync iniziale (i retained dovrebbero
+      // essere arrivati tutti). Se non è arrivato nulla, il banner mostrerà "stale".
+      if (state.initialSyncTimer) clearTimeout(state.initialSyncTimer);
+      state.initialSyncTimer = setTimeout(() => {
+        state.initialSyncDone = true;
+        updateSyncBanner();
+      }, 2000);
+    });
+
+    state.client.on('reconnect', () => {
+      hubConnText.textContent = 'Riconnessione…';
+      gbConnText.textContent  = 'Riconnessione…';
+    });
+
+    state.client.on('close',   () => { state.connected = false; setConnectionUI(false); updateSyncBanner(); });
+    state.client.on('offline', () => { state.connected = false; setConnectionUI(false); updateSyncBanner(); });
+
+    state.client.on('error', err => {
+      console.error('MQTT error:', err);
+      const msg = (err && err.message) ? err.message.toLowerCase() : '';
+      if (msg.includes('not authorized')) toast('Credenziali rifiutate');
+    });
+
+    state.client.on('message', handleMqttMessage);
+
+    brokerLabel.textContent = `Broker: ${host}`;
+    setLoginLoading(false);
+    transitionToHub();
+  }
+
+  function handleMqttMessage(topic, payload) {
+    const text = payload.toString().trim();
+
+    // Valve status: gardenboss/status/valve/{id}
+    let m = topic.match(/^gardenboss\/status\/valve\/(\d+)$/);
+    if (m) {
+      const id = parseInt(m[1], 10);
+      if (!state.valves[id]) return;
+      const isOn = text === '1';
+      const v = state.valves[id];
+      if (v.pendingTimer) { clearTimeout(v.pendingTimer); v.pendingTimer = null; }
+      v.pending = false;
+      v.on = isOn;
+      renderValve(id);
+      updateHubStats();
+      return;
+    }
+
+    // Device status (LWT): gardenboss/status/device
+    if (topic === STATUS_DEVICE_TOPIC) {
+      state.deviceOnline = (text === 'online');
+      gbStatusEl.textContent = state.deviceOnline ? 'Online' : 'Offline';
+      gbStatusEl.classList.toggle('active', state.deviceOnline);
+      valveList.classList.toggle('device-offline', !state.deviceOnline);
+      updateDeviceCount();
+      updateSyncBanner();
+      return;
+    }
+
+    // Schedule get: gardenboss/schedule/get/{valve}/{slot}
+    m = topic.match(/^gardenboss\/schedule\/get\/(\d+)\/(\d+)$/);
+    if (m) {
+      const vid = parseInt(m[1], 10);
+      const slot = parseInt(m[2], 10);
+      if (!state.schedules[vid] || slot < 0 || slot >= SLOTS_PER_VALVE) return;
+
+      // Empty payload = no schedule in this slot (cleared)
+      let newSched = null;
+      if (text) {
+        try {
+          const obj = JSON.parse(text);
+          // Convert days from [0,1,1,...] integers to bool array if needed
+          if (obj && Array.isArray(obj.days)) {
+            obj.days = obj.days.map(d => !!d);
+          }
+          if (validateSchedule(obj)) {
+            newSched = obj;
+          } else {
+            console.warn('Invalid schedule payload', topic, text);
+            return;
+          }
+        } catch (e) {
+          console.warn('Failed to parse schedule', topic, e);
+          return;
+        }
+      }
+
+      const oldSched = state.schedules[vid][slot];
+      const changed = !schedulesEqual(oldSched, newSched);
+
+      // Aggiorna lo state
+      state.schedules[vid][slot] = newSched;
+      state.schedulesEverReceived = true;
+      state.lastScheduleUpdate = Date.now();
+      updateSyncBanner();
+      renderValve(vid);
+
+      // Se l'utente ha il modal aperto su questa valvola e qualcosa è cambiato
+      // (per uno slot diverso da quello in editing, o per quello in editing ma
+      // diverso dal nostro snapshot iniziale), avvisalo.
+      if (changed && modalState.valveId === vid) {
+        // Flash visivo sul chip
+        flashValveChip(vid, slot);
+
+        // Se è cambiato lo slot che l'utente sta editando E il valore è diverso dal
+        // nostro snapshot di apertura, mostra banner di conflitto.
+        if (slot === modalState.activeSlot &&
+            modalState.originalSnapshot &&
+            !schedulesEqual(modalState.originalSnapshot, newSched)) {
+          modalState.externalUpdate = true;
+          modalConflictBanner.classList.add('show');
+        } else if (slot !== modalState.activeSlot) {
+          // L'altro slot è cambiato: aggiorna in background il working copy se non
+          // l'utente non lo sta editando attivamente
+          if (!modalState.slots[slot] || schedulesEqual(modalState.slots[slot], oldSched)) {
+            modalState.slots[slot] = cloneSchedule(newSched);
+            // Refresh tabs (puntini di stato)
+            renderModal();
+          }
+        }
+      }
+      return;
+    }
+  }
+
+  function flashValveChip(vid, slot) {
+    const el = valveList.querySelector(`.valve[data-id="${vid}"]`);
+    if (!el) return;
+    const chip = el.querySelector(`.schedule-chip[data-slot="${slot}"]`);
+    if (chip) {
+      chip.classList.remove('flash-update');
+      // forza reflow per riavviare l'animazione
+      void chip.offsetWidth;
+      chip.classList.add('flash-update');
+    }
+  }
+
+  function transitionToHub() {
+    screens.login.classList.remove('active');
+    setTimeout(() => {
+      screens.login.hidden = true;
+      screens.hub.hidden = false;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        screens.hub.classList.add('active');
+        triggerStagger();
+      }));
+    }, 320);
+  }
+
+  /* ============================================================
+     CONNECTION UI
+     ============================================================ */
+  // Il contatore riflette il dispositivo (LWT), non la connessione al broker:
+  // essere connessi a HiveMQ non significa che il Garden Boss sia acceso.
+  function updateDeviceCount() {
+    hubActiveDevices.textContent = (state.connected && state.deviceOnline) ? '1' : '0';
+  }
+
+  function setConnectionUI(connected) {
+    [hubConnPill, gbConnPill].forEach(p => p.classList.toggle('connected', connected));
+    const txt = connected ? 'Connesso' : 'Disconnesso';
+    hubConnText.textContent = txt;
+    gbConnText.textContent  = txt;
+    if (!connected) {
+      state.deviceOnline = false;
+      gbStatusEl.textContent = 'Offline';
+      gbStatusEl.classList.remove('active');
+      valveList.classList.add('device-offline');
+    }
+    updateDeviceCount();
+  }
+
+  /* ============================================================
+     VALVE LIST RENDERING
+     ============================================================ */
+  const VALVE_ICON_SVG = '<svg viewBox="0 0 24 24"><path d="M12 2C8 8 5 12 5 16a7 7 0 0 0 14 0c0-4-3-8-7-14zm0 17a5 5 0 0 1-5-5c0-2.5 2-5.5 5-10 3 4.5 5 7.5 5 10a5 5 0 0 1-5 5z"/></svg>';
+  const CLOCK_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+  const PLUS_ICON_SVG  = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
+
+  VALVES.forEach(v => {
+    const el = document.createElement('div');
+    el.className = 'valve';
+    el.dataset.id = v.id;
+    el.innerHTML = `
+      <div class="valve-main" data-toggle>
+        <div class="valve-icon">${VALVE_ICON_SVG}</div>
+        <div class="valve-info">
+          <div class="valve-name-row">
+            <div class="valve-name">${v.name}</div>
+            <div class="valve-num">V0${v.id}</div>
+          </div>
+          <div class="valve-zone">${v.zone}</div>
+        </div>
+        <div class="switch" role="switch" aria-checked="false" tabindex="0"></div>
+      </div>
+      <div class="schedules-row" data-schedules></div>
+    `;
+    el.querySelector('[data-toggle]').addEventListener('click', () => toggleValve(v.id));
+    valveList.appendChild(el);
+  });
+
+  function renderValve(id) {
+    const el = valveList.querySelector(`.valve[data-id="${id}"]`);
+    if (!el) return;
+    const s = state.valves[id];
+    el.classList.toggle('on', s.on);
+    el.classList.toggle('pending', s.pending);
+    const sw = el.querySelector('.switch');
+    sw.setAttribute('aria-checked', String(s.on));
+
+    // Schedule chips
+    const row = el.querySelector('[data-schedules]');
+    row.innerHTML = '';
+
+    const label = document.createElement('div');
+    label.className = 'schedules-label';
+    label.textContent = 'Schedule';
+    row.appendChild(label);
+
+    const schedules = state.schedules[id];
+    let hasAny = false;
+    for (let slot = 0; slot < SLOTS_PER_VALVE; slot++) {
+      const sched = schedules[slot];
+      if (sched) {
+        hasAny = true;
+        const chip = document.createElement('div');
+        chip.className = 'schedule-chip' + (sched.enabled ? ' active' : ' disabled');
+        chip.dataset.slot = slot;
+        chip.innerHTML = `
+          ${CLOCK_ICON_SVG}
+          <span>${pad2(sched.hh)}:${pad2(sched.mm)} · ${sched.durationMin}m</span>
+        `;
+        chip.title = formatDays(sched.days);
+        chip.addEventListener('click', () => openModal(id, slot));
+        row.appendChild(chip);
+      }
+    }
+
+    // Add button if there's room
+    const usedSlots = Object.values(schedules).filter(Boolean).length;
+    if (usedSlots < SLOTS_PER_VALVE) {
+      const addChip = document.createElement('div');
+      addChip.className = 'schedule-chip schedule-chip-empty';
+      addChip.innerHTML = `${PLUS_ICON_SVG}<span>${hasAny ? 'Aggiungi' : 'Crea schedule'}</span>`;
+      // Find first empty slot
+      let firstEmpty = 0;
+      for (let i = 0; i < SLOTS_PER_VALVE; i++) {
+        if (!schedules[i]) { firstEmpty = i; break; }
+      }
+      addChip.addEventListener('click', () => openModal(id, firstEmpty));
+      row.appendChild(addChip);
+    }
+
+    activeCountEl.textContent = Object.values(state.valves).filter(v => v.on).length;
+  }
+
+  function updateHubStats() {
+    const n = Object.values(state.valves).filter(v => v.on).length;
+    hubOpenValves.textContent = n;
+  }
+
+  /* ============================================================
+     VALVE COMMAND
+     ============================================================ */
+  function publishCmd(id, on) {
+    if (!state.client || !state.connected) {
+      toast('Broker non raggiungibile');
+      return false;
+    }
+    state.client.publish(CMD_VALVE(id), on ? '1' : '0', { qos: 0, retain: false }, err => {
+      if (err) { console.error('Publish error:', err); toast(`Errore comando V0${id}`); }
+    });
+    return true;
+  }
+
+  function toggleValve(id) {
+    if (!state.deviceOnline) {
+      toast('Dispositivo offline: comando non inviato');
+      return;
+    }
+    const s = state.valves[id];
+    const target = !s.on;
+    s.pending = true;
+    renderValve(id);
+
+    const sent = publishCmd(id, target);
+    if (!sent) {
+      s.pending = false;
+      renderValve(id);
+      return;
+    }
+
+    if (s.pendingTimer) clearTimeout(s.pendingTimer);
+    s.pendingTimer = setTimeout(() => {
+      if (s.pending) {
+        // Nessuna conferma dal device: NON fingere il cambio di stato.
+        // Lo switch torna a mostrare lo stato reale confermato via MQTT.
+        s.pending = false;
+        renderValve(id);
+        updateHubStats();
+        toast(`V0${id}: nessuna conferma — stato non modificato`);
+      }
+    }, 4000);
+
+    toast(`Valvola ${id} → ${target ? 'ON' : 'OFF'}`);
+  }
+
+  /* ============================================================
+     SCHEDULE MODAL
+     ============================================================ */
+  function openModal(valveId, slot) {
+    const valve = VALVES.find(v => v.id === valveId);
+    if (!valve) return;
+
+    modalState.valveId = valveId;
+    modalState.activeSlot = slot;
+    modalState.externalUpdate = false;
+
+    // Clone the existing schedules (working copy — won't touch state until save)
+    for (let i = 0; i < SLOTS_PER_VALVE; i++) {
+      modalState.slots[i] = cloneSchedule(state.schedules[valveId][i]);
+    }
+    // Snapshot dello slot attivo, per detection di conflitti
+    modalState.originalSnapshot = cloneSchedule(state.schedules[valveId][slot]);
+
+    // If the requested slot is empty, prepare a default
+    if (!modalState.slots[slot]) {
+      modalState.slots[slot] = defaultSchedule();
+    }
+
+    modalTitle.textContent = `${valve.name}`;
+    modalSubtitle.textContent = `${valve.zone} · V0${valveId}`;
+
+    modalConflictBanner.classList.remove('show');
+    renderModal();
+
+    // Show
+    screens.garden.classList.add('modal-open');
+    modalEl.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    modalEl.classList.remove('show');
+    screens.garden.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    modalState.valveId = null;
+    modalState.originalSnapshot = null;
+    modalState.externalUpdate = false;
+    modalConflictBanner.classList.remove('show');
+  }
+
+  function renderModal() {
+    const slot = modalState.activeSlot;
+    const sched = modalState.slots[slot] || defaultSchedule();
+
+    // Tabs
+    slotTabs.querySelectorAll('.slot-tab').forEach((tab, i) => {
+      tab.classList.toggle('active', i === slot);
+      const dot = tab.querySelector('.slot-dot');
+      // Il pallino indica uno schedule CONFERMATO (salvato), non il working
+      // copy: visitare un tab vuoto non deve farlo sembrare occupato.
+      const has = !!state.schedules[modalState.valveId]?.[i];
+      dot.classList.toggle('has-data', has);
+    });
+
+    // Enable
+    enableSwitch.classList.toggle('active', sched.enabled);
+    // Reuse .switch.on visual
+    enableSwitch.classList.toggle('on', sched.enabled);
+    enableSwitch.setAttribute('aria-checked', sched.enabled ? 'true' : 'false');
+    enableSub.textContent = sched.enabled ? 'Esegue irrigazione automatica' : 'Schedule disattivato';
+    modalBody.classList.toggle('modal-disabled-overlay', !sched.enabled);
+
+    // Days
+    daysRow.querySelectorAll('.day-pill').forEach(pill => {
+      const d = parseInt(pill.dataset.day, 10);
+      pill.classList.toggle('selected', !!sched.days[d]);
+    });
+
+    // Time
+    timeHH.textContent = pad2(sched.hh);
+    timeMM.textContent = pad2(sched.mm);
+
+    // Duration
+    durationVal.textContent = sched.durationMin;
+    durDown.disabled = sched.durationMin <= MIN_DURATION_MIN;
+    durUp.disabled   = sched.durationMin >= MAX_DURATION_MIN;
+    durPresets.querySelectorAll('.duration-preset').forEach(p => {
+      p.classList.toggle('active', parseInt(p.dataset.preset, 10) === sched.durationMin);
+    });
+
+    // Delete button visibility: only enabled if the slot already exists in committed state
+    const exists = !!state.schedules[modalState.valveId]?.[slot];
+    deleteBtn.style.display = exists ? '' : 'none';
+  }
+
+  // The enable switch styled like .switch — toggle .on visually
+  enableSwitch.addEventListener('click', () => {
+    const slot = modalState.activeSlot;
+    if (!modalState.slots[slot]) modalState.slots[slot] = defaultSchedule();
+    modalState.slots[slot].enabled = !modalState.slots[slot].enabled;
+    renderModal();
+  });
+  // Style fix: enable switch uses .on like .valve.on .switch — apply directly
+  // (we already set classes above)
+
+  // Slot tabs
+  slotTabs.querySelectorAll('.slot-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const i = parseInt(tab.dataset.slot, 10);
+      modalState.activeSlot = i;
+      // Aggiorna snapshot per il nuovo slot attivo
+      modalState.originalSnapshot = cloneSchedule(state.schedules[modalState.valveId][i]);
+      modalState.externalUpdate = false;
+      modalConflictBanner.classList.remove('show');
+      if (!modalState.slots[i]) modalState.slots[i] = defaultSchedule();
+      renderModal();
+    });
+  });
+
+  // Days
+  daysRow.querySelectorAll('.day-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const slot = modalState.activeSlot;
+      if (!modalState.slots[slot]) modalState.slots[slot] = defaultSchedule();
+      const d = parseInt(pill.dataset.day, 10);
+      modalState.slots[slot].days[d] = !modalState.slots[slot].days[d];
+      renderModal();
+    });
+  });
+
+  document.querySelectorAll('.day-shortcut').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const slot = modalState.activeSlot;
+      if (!modalState.slots[slot]) modalState.slots[slot] = defaultSchedule();
+      const cur = modalState.slots[slot];
+      const k = btn.dataset.shortcut;
+      switch (k) {
+        case 'weekdays': cur.days = [false, true, true, true, true, true, false]; break;
+        case 'weekend':  cur.days = [true, false, false, false, false, false, true]; break;
+        case 'all':      cur.days = [true, true, true, true, true, true, true]; break;
+        case 'none':     cur.days = [false, false, false, false, false, false, false]; break;
+      }
+      renderModal();
+    });
+  });
+
+  // Time controls
+  document.querySelectorAll('[data-time]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const slot = modalState.activeSlot;
+      if (!modalState.slots[slot]) modalState.slots[slot] = defaultSchedule();
+      const s = modalState.slots[slot];
+      switch (btn.dataset.time) {
+        case 'hh-up':   s.hh = (s.hh + 1) % 24; break;
+        case 'hh-down': s.hh = (s.hh - 1 + 24) % 24; break;
+        case 'mm-up':   s.mm = (s.mm + 5) % 60; break;
+        case 'mm-down': s.mm = (s.mm - 5 + 60) % 60; break;
+      }
+      renderModal();
+    });
+  });
+
+  // Duration
+  durDown.addEventListener('click', () => {
+    const slot = modalState.activeSlot;
+    if (!modalState.slots[slot]) modalState.slots[slot] = defaultSchedule();
+    const s = modalState.slots[slot];
+    s.durationMin = Math.max(MIN_DURATION_MIN, s.durationMin - DURATION_STEP_MIN);
+    renderModal();
+  });
+  durUp.addEventListener('click', () => {
+    const slot = modalState.activeSlot;
+    if (!modalState.slots[slot]) modalState.slots[slot] = defaultSchedule();
+    const s = modalState.slots[slot];
+    s.durationMin = Math.min(MAX_DURATION_MIN, s.durationMin + DURATION_STEP_MIN);
+    renderModal();
+  });
+  durPresets.querySelectorAll('.duration-preset').forEach(p => {
+    p.addEventListener('click', () => {
+      const slot = modalState.activeSlot;
+      if (!modalState.slots[slot]) modalState.slots[slot] = defaultSchedule();
+      modalState.slots[slot].durationMin = parseInt(p.dataset.preset, 10);
+      renderModal();
+    });
+  });
+
+  // Save / Cancel / Delete / Close
+  cancelBtn.addEventListener('click', closeModal);
+  modalCloseBtn.addEventListener('click', closeModal);
+  modalEl.addEventListener('click', e => { if (e.target === modalEl) closeModal(); });
+
+  // "Ricarica" del banner di conflitto: rimpiazza il working copy con la versione
+  // attuale dal broker e nasconde il banner.
+  reloadConflictBtn.addEventListener('click', () => {
+    if (modalState.valveId === null) return;
+    const slot = modalState.activeSlot;
+    modalState.slots[slot] = cloneSchedule(state.schedules[modalState.valveId][slot])
+                              || defaultSchedule();
+    modalState.originalSnapshot = cloneSchedule(state.schedules[modalState.valveId][slot]);
+    modalState.externalUpdate = false;
+    modalConflictBanner.classList.remove('show');
+    renderModal();
+    toast('Schedule ricaricato');
+  });
+
+  saveBtn.addEventListener('click', () => {
+    const vid = modalState.valveId;
+
+    if (!state.client || !state.connected) {
+      toast('Broker non raggiungibile');
+      return;
+    }
+    if (!state.deviceOnline) {
+      // I set non sono retained e l'ESP usa clean session: pubblicare ora
+      // significherebbe perdere il messaggio fingendo di aver salvato.
+      toast('Dispositivo offline: impossibile salvare');
+      return;
+    }
+
+    // Salva TUTTI gli slot modificati rispetto allo stato confermato, non solo
+    // quello attivo: l'utente può aver editato più tab prima di premere Salva.
+    const toSave = [];
+    for (let i = 0; i < SLOTS_PER_VALVE; i++) {
+      const sched = modalState.slots[i];
+      const committed = state.schedules[vid][i];
+      if (!sched) continue;
+      if (schedulesEqual(sched, committed)) continue;
+      if (!committed && !sched.days.some(Boolean)) continue; // tab visitato ma senza giorni: non è uno schedule
+      if (!sched.days.some(Boolean)) {
+        modalState.activeSlot = i;
+        renderModal();
+        toast(`Slot ${i + 1}: seleziona almeno un giorno`);
+        return;
+      }
+      if (!validateSchedule(sched)) {
+        modalState.activeSlot = i;
+        renderModal();
+        toast(`Slot ${i + 1}: schedule non valido`);
+        return;
+      }
+      toSave.push(i);
+    }
+
+    if (toSave.length === 0) { toast('Nessuna modifica'); closeModal(); return; }
+
+    toSave.forEach(i => {
+      const sched = modalState.slots[i];
+      const payload = JSON.stringify({
+        enabled: sched.enabled,
+        days: sched.days.map(b => b ? 1 : 0),
+        hh: sched.hh,
+        mm: sched.mm,
+        durationMin: sched.durationMin
+      });
+
+      state.client.publish(SCHEDULE_SET(vid, i), payload, { qos: 1, retain: false }, err => {
+        if (err) {
+          console.error('Schedule publish error:', err);
+          toast(`Errore salvataggio slot ${i + 1}`);
+          return;
+        }
+        // Update ottimistico — la verità definitiva arriverà dall'ESP via topic
+        // 'get' (con retain=true) appena lo riceve e salva.
+        state.schedules[vid][i] = cloneSchedule(sched);
+        state.lastScheduleUpdate = Date.now();
+        state.schedulesEverReceived = true;
+        renderValve(vid);
+        updateSyncBanner();
+      });
+    });
+
+    toast(toSave.length > 1 ? `${toSave.length} schedule salvati` : 'Schedule salvato');
+    closeModal();
+  });
+
+  deleteBtn.addEventListener('click', () => {
+    const vid = modalState.valveId;
+    const slot = modalState.activeSlot;
+    if (!state.client || !state.connected) {
+      toast('Broker non raggiungibile');
+      return;
+    }
+    if (!state.deviceOnline) {
+      toast('Dispositivo offline: impossibile eliminare');
+      return;
+    }
+    state.client.publish(SCHEDULE_DELETE(vid, slot), '1', { qos: 1, retain: false }, err => {
+      if (err) {
+        console.error('Schedule delete error:', err);
+        toast('Errore eliminazione');
+        return;
+      }
+      state.schedules[vid][slot] = null;
+      state.lastScheduleUpdate = Date.now();
+      renderValve(vid);
+      updateSyncBanner();
+      toast(state.deviceOnline ? 'Schedule eliminato' : 'Eliminato (in attesa di sync con dispositivo)');
+      closeModal();
+    });
+  });
+
+  /* ============================================================
+     NAVIGATION
+     ============================================================ */
+  document.querySelector('[data-device="gardenboss"]').addEventListener('click', () => {
+    screens.hub.classList.remove('active');
+    setTimeout(() => {
+      screens.hub.hidden = true;
+      screens.garden.hidden = false;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        screens.garden.classList.add('active');
+      }));
+    }, 320);
+  });
+
+  gbBack.addEventListener('click', () => {
+    screens.garden.classList.remove('active');
+    setTimeout(() => {
+      screens.garden.hidden = true;
+      screens.hub.hidden = false;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        screens.hub.classList.add('active');
+        triggerStagger();
+      }));
+    }, 320);
+  });
+
+  /* ============================================================
+     LOGOUT
+     ============================================================ */
+  logoutBtn.addEventListener('click', () => {
+    if (state.client) {
+      try { state.client.end(true); } catch (e) {}
+      state.client = null;
+    }
+    state.connected = false;
+    setConnectionUI(false);
+
+    VALVES.forEach(v => {
+      state.valves[v.id].on = false;
+      state.valves[v.id].pending = false;
+      if (state.valves[v.id].pendingTimer) clearTimeout(state.valves[v.id].pendingTimer);
+      state.schedules[v.id] = { 0: null, 1: null, 2: null };
+      renderValve(v.id);
+    });
+    updateHubStats();
+
+    state.initialSyncDone = false;
+    state.schedulesEverReceived = false;
+    state.lastScheduleUpdate = null;
+    if (state.initialSyncTimer) clearTimeout(state.initialSyncTimer);
+    updateSyncBanner();
+
+    brokerPassEl.value = '';
+    clearLoginError();
+
+    screens.hub.classList.remove('active');
+    screens.garden.classList.remove('active');
+    setTimeout(() => {
+      screens.hub.hidden = true;
+      screens.garden.hidden = true;
+      screens.login.hidden = false;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        screens.login.classList.add('active');
+      }));
+    }, 320);
+  });
+
+  /* ============================================================
+     TOAST
+     ============================================================ */
+  let toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2400);
+  }
+
+  /* ============================================================
+     INIT
+     ============================================================ */
+  VALVES.forEach(v => renderValve(v.id));
+  valveList.classList.add('device-offline'); // finché il LWT non conferma 'online'
+
+  const h = new Date().getHours();
+  if      (h < 6)  greetText.textContent = 'Buonanotte';
+  else if (h < 12) greetText.textContent = 'Buongiorno';
+  else if (h < 18) greetText.textContent = 'Buon pomeriggio';
+  else             greetText.textContent = 'Buonasera';
+
+  // Debug
+  window.__hub = { state, screens, toggleValve, openModal };
+})();
+</script>
+
+</body>
+</html>
