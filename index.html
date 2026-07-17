@@ -1268,6 +1268,172 @@
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
   }
+
+  /* ============================================================
+     ACCOUNT SCREEN & PROFILE MANAGEMENT
+     ============================================================ */
+  .account-header { text-align: center; margin-bottom: 8px; }
+  .account-header .login-logo { margin-left: auto; margin-right: auto; }
+  .account-header .login-title { margin-top: 4px; }
+
+  .account-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 24px;
+  }
+  .account-tile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    font-family: inherit;
+    color: var(--text);
+  }
+  .account-tile:hover { background: var(--glass-bg-strong); }
+  .account-tile:active { transform: scale(0.98); }
+
+  .account-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700;
+    background: rgba(57, 255, 122, 0.18);
+    color: var(--green);
+    border: 1px solid rgba(57, 255, 122, 0.35);
+    flex-shrink: 0;
+  }
+  .account-tile.role-guest .account-avatar {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-muted);
+    border-color: var(--glass-border);
+  }
+
+  .account-tile-info { flex: 1; min-width: 0; }
+  .account-tile-name { font-size: 15px; font-weight: 600; }
+  .account-tile-role { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+  .account-tile-role.admin { color: var(--green); }
+
+  .account-tile-pin-icon { color: var(--text-faint); flex-shrink: 0; }
+  .account-tile-pin-icon svg { width: 16px; height: 16px; }
+
+  .account-tile-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .account-tile-action-btn {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    color: var(--text-muted);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .account-tile-action-btn:hover { background: rgba(255, 255, 255, 0.16); color: white; }
+  .account-tile-action-btn svg { width: 14px; height: 14px; }
+  .account-tile-action-btn.danger:hover { background: rgba(255, 59, 48, 0.25); color: #ffb3ae; }
+
+  .account-add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 14px;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1.5px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .account-add-btn:hover { background: rgba(255, 255, 255, 0.09); color: white; }
+  .account-add-btn svg { width: 16px; height: 16px; }
+
+  .pin-modal .field { margin-bottom: 4px; }
+  .pin-input {
+    width: 100%;
+    padding: 16px;
+    font-size: 28px;
+    letter-spacing: 0.3em;
+    text-align: center;
+    font-family: inherit;
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    outline: none;
+  }
+  .pin-input:focus { border-color: var(--green); box-shadow: 0 0 0 4px rgba(57, 255, 122, 0.18); }
+
+  .role-picker { display: flex; gap: 8px; }
+  .role-pill {
+    flex: 1;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1.5px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .role-pill.selected {
+    background: rgba(57, 255, 122, 0.18);
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  /* Account bar (hub top) */
+  .account-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text);
+    transition: background 0.2s ease;
+  }
+  .account-bar:hover { background: var(--glass-bg-strong); }
+  .account-bar:active { transform: scale(0.99); }
+  .account-bar-text { flex: 1; display: flex; flex-direction: column; text-align: left; min-width: 0; }
+  .account-bar-text strong { font-size: 14px; font-weight: 600; }
+  .account-bar-text span { font-size: 12px; color: var(--text-muted); }
+  .account-bar-chevron { width: 16px; height: 16px; color: var(--text-faint); flex-shrink: 0; }
+
+  /* Read-only lockout for guest accounts */
+  #valveList.role-readonly .valve-main { cursor: not-allowed; }
+  #valveList.role-readonly .switch { opacity: 0.4; }
+  #scheduleModal.readonly #modalBody,
+  #scheduleModal.readonly .modal-enable-row,
+  #scheduleModal.readonly .slot-tabs {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  #scheduleModal.readonly .modal-actions .modal-btn-primary,
+  #scheduleModal.readonly .modal-actions .modal-btn-danger { display: none; }
 </style>
 </head>
 <body>
@@ -1282,37 +1448,12 @@
         <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
       </div>
       <h1 class="login-title">Smart Home</h1>
-      <p class="login-sub">Accedi al tuo broker MQTT</p>
-
-      <div class="field">
-        <label for="brokerHost">Indirizzo broker</label>
-        <div class="input-wrap">
-          <input id="brokerHost" type="text" placeholder="441f1bb64b9243fc98f7a730d5312a6a.s1.eu.hivemq.cloud" autocomplete="off" autocapitalize="off" spellcheck="false">
-          <span class="input-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/>
-              <line x1="6" y1="7" x2="6.01" y2="7"/><line x1="6" y1="17" x2="6.01" y2="17"/>
-            </svg>
-          </span>
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="brokerUser">Username</label>
-        <div class="input-wrap">
-          <input id="brokerUser" type="text" placeholder="Username MQTT" autocomplete="username" autocapitalize="off" spellcheck="false">
-          <span class="input-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-            </svg>
-          </span>
-        </div>
-      </div>
+      <p class="login-sub">Inserisci la password per accedere all'hub</p>
 
       <div class="field">
         <label for="brokerPass">Password</label>
         <div class="input-wrap">
-          <input id="brokerPass" type="password" placeholder="Password MQTT" autocomplete="current-password">
+          <input id="brokerPass" type="password" placeholder="Password di accesso" autocomplete="current-password" autofocus>
           <button type="button" class="toggle-pwd" id="togglePwd" aria-label="Mostra password">
             <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
@@ -1345,6 +1486,120 @@
 </section>
 
 <!-- =============================================================
+     ACCOUNT SCREEN (scelta/creazione profilo personale)
+     ============================================================= -->
+<section class="screen entering-fade" id="accountScreen" hidden>
+  <div class="container">
+    <div class="account-header">
+      <div class="login-logo">
+        <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.5c-3.3 0-9.8 1.6-9.8 4.9v2.4h19.6v-2.4c0-3.3-6.5-4.9-9.8-4.9z"/></svg>
+      </div>
+      <h1 class="login-title">Chi sei?</h1>
+      <p class="login-sub">Scegli il tuo profilo per continuare</p>
+    </div>
+
+    <div class="account-list" id="accountList"></div>
+
+    <button class="account-add-btn" id="addAccountBtn">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+      <span>Nuovo profilo</span>
+    </button>
+  </div>
+</section>
+
+<!-- PIN entry sheet (condiviso: primo accesso e cambio profilo da hub) -->
+<div class="modal-backdrop" id="pinModal">
+  <div class="modal pin-modal" role="dialog" aria-modal="true" aria-labelledby="pinModalName">
+    <div class="modal-grabber"></div>
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="pinModalName">—</div>
+        <div class="modal-subtitle">Inserisci il PIN</div>
+      </div>
+      <button class="modal-close" id="pinModalCloseBtn" aria-label="Chiudi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="field">
+      <input type="password" inputmode="numeric" maxlength="8" class="pin-input" id="pinInput" placeholder="••••" autocomplete="off">
+    </div>
+    <div class="login-error" id="pinError">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span>PIN errato</span>
+    </div>
+    <button class="modal-btn modal-btn-primary" id="pinConfirmBtn" style="width:100%; margin-top:6px;">Conferma</button>
+  </div>
+</div>
+
+<!-- Nuovo profilo sheet (condiviso: auto-iscrizione e creazione da admin) -->
+<div class="modal-backdrop" id="newAccountModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-grabber"></div>
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Nuovo profilo</div>
+        <div class="modal-subtitle" id="newAccountSubtitle">—</div>
+      </div>
+      <button class="modal-close" id="newAccountCloseBtn" aria-label="Chiudi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="field">
+      <label for="newAccountName">Nome</label>
+      <div class="input-wrap">
+        <input id="newAccountName" type="text" placeholder="Es. Marco" autocomplete="off" maxlength="20">
+      </div>
+    </div>
+    <div class="field">
+      <label for="newAccountPin">PIN (opzionale, 4 cifre)</label>
+      <div class="input-wrap">
+        <input id="newAccountPin" type="password" inputmode="numeric" maxlength="8" placeholder="Lascia vuoto per nessun PIN" autocomplete="off">
+      </div>
+    </div>
+    <div class="field" id="newAccountRoleField" hidden>
+      <label>Permessi</label>
+      <div class="role-picker" id="newAccountRolePicker">
+        <button type="button" class="role-pill" data-role="guest">Ospite</button>
+        <button type="button" class="role-pill" data-role="admin">Amministratore</button>
+      </div>
+    </div>
+    <div class="login-error" id="newAccountError">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span id="newAccountErrorText">Errore</span>
+    </div>
+    <button class="modal-btn modal-btn-primary" id="createAccountBtn" style="width:100%; margin-top:6px;">Crea profilo</button>
+  </div>
+</div>
+
+<!-- Profili: cambio/gestione da hub -->
+<div class="modal-backdrop" id="accountsModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-grabber"></div>
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Profili</div>
+        <div class="modal-subtitle" id="accountsModalSubtitle">Cambia profilo</div>
+      </div>
+      <button class="modal-close" id="accountsModalCloseBtn" aria-label="Chiudi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="account-list" id="accountsModalList"></div>
+    <button class="modal-btn modal-btn-secondary" id="openNewAccountFromModalBtn" style="width:100%; margin-top:14px;" hidden>+ Aggiungi profilo</button>
+  </div>
+</div>
+
+<!-- =============================================================
      HUB HOME SCREEN
      ============================================================= -->
 <section class="screen entering-fade" id="hubScreen" hidden>
@@ -1361,6 +1616,15 @@
         <span id="hubConnText">Connessione…</span>
       </div>
     </div>
+
+    <button class="account-bar stagger" id="accountBarBtn">
+      <span class="account-avatar" id="accountAvatar">?</span>
+      <span class="account-bar-text">
+        <strong id="accountBarName">—</strong>
+        <span id="accountBarRole">—</span>
+      </span>
+      <svg class="account-bar-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+    </button>
 
     <div class="stats-row">
       <div class="stat-card stagger">
@@ -1664,6 +1928,7 @@
     connected: false,
     brokerHost: '',
     deviceOnline: false,
+    currentAccount: null,  // { id, name, pin, role: 'admin'|'guest' } — profilo attivo nella sessione
     valves: {},
     // schedules: { valveId: { 0: scheduleObj|null, 1: ..., 2: ... } }
     schedules: {},
@@ -1694,14 +1959,13 @@
      DOM REFS
      ============================================================ */
   const screens = {
-    login:  document.getElementById('loginScreen'),
-    hub:    document.getElementById('hubScreen'),
-    garden: document.getElementById('gardenScreen')
+    login:   document.getElementById('loginScreen'),
+    account: document.getElementById('accountScreen'),
+    hub:     document.getElementById('hubScreen'),
+    garden:  document.getElementById('gardenScreen')
   };
 
   // Login
-  const brokerHostEl = document.getElementById('brokerHost');
-  const brokerUserEl = document.getElementById('brokerUser');
   const brokerPassEl = document.getElementById('brokerPass');
   const rememberMeEl = document.getElementById('rememberMe');
   const loginBtn     = document.getElementById('loginBtn');
@@ -1709,6 +1973,35 @@
   const loginErrorText = document.getElementById('loginErrorText');
   const togglePwd    = document.getElementById('togglePwd');
   const eyeIcon      = document.getElementById('eyeIcon');
+
+  // Account (profili con permessi)
+  const accountList          = document.getElementById('accountList');
+  const addAccountBtn        = document.getElementById('addAccountBtn');
+  const pinModal              = document.getElementById('pinModal');
+  const pinModalName          = document.getElementById('pinModalName');
+  const pinInput               = document.getElementById('pinInput');
+  const pinError               = document.getElementById('pinError');
+  const pinConfirmBtn          = document.getElementById('pinConfirmBtn');
+  const pinModalCloseBtn       = document.getElementById('pinModalCloseBtn');
+  const newAccountModal        = document.getElementById('newAccountModal');
+  const newAccountSubtitle     = document.getElementById('newAccountSubtitle');
+  const newAccountNameEl       = document.getElementById('newAccountName');
+  const newAccountPinEl        = document.getElementById('newAccountPin');
+  const newAccountRoleField    = document.getElementById('newAccountRoleField');
+  const newAccountRolePicker   = document.getElementById('newAccountRolePicker');
+  const newAccountError        = document.getElementById('newAccountError');
+  const newAccountErrorText    = document.getElementById('newAccountErrorText');
+  const createAccountBtn       = document.getElementById('createAccountBtn');
+  const newAccountCloseBtn     = document.getElementById('newAccountCloseBtn');
+  const accountsModal          = document.getElementById('accountsModal');
+  const accountsModalSubtitle  = document.getElementById('accountsModalSubtitle');
+  const accountsModalList      = document.getElementById('accountsModalList');
+  const accountsModalCloseBtn  = document.getElementById('accountsModalCloseBtn');
+  const openNewAccountFromModalBtn = document.getElementById('openNewAccountFromModalBtn');
+  const accountBarBtn   = document.getElementById('accountBarBtn');
+  const accountAvatar   = document.getElementById('accountAvatar');
+  const accountBarName  = document.getElementById('accountBarName');
+  const accountBarRole  = document.getElementById('accountBarRole');
 
   // Hub
   const hubConnPill  = document.getElementById('hubConnPill');
@@ -1895,8 +2188,8 @@
       return raw ? JSON.parse(raw) : null;
     } catch (e) { return null; }
   }
-  function saveRememberedLogin(host, username, password) {
-    try { localStorage.setItem(REMEMBER_KEY, JSON.stringify({ host, username, password })); }
+  function saveRememberedLogin(password) {
+    try { localStorage.setItem(REMEMBER_KEY, JSON.stringify({ password })); }
     catch (e) { /* storage disabilitato/quota piena: non bloccante */ }
   }
   function clearRememberedLogin() {
@@ -1924,51 +2217,32 @@
   function setLoginLoading(on) {
     loginBtn.classList.toggle('loading', on);
     loginBtn.disabled = on;
-    brokerHostEl.disabled = on;
-    brokerUserEl.disabled = on;
     brokerPassEl.disabled = on;
   }
 
   loginBtn.addEventListener('click', attemptLogin);
-  [brokerHostEl, brokerUserEl, brokerPassEl].forEach(el => {
-    el.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
-    el.addEventListener('input', clearLoginError);
-  });
+  brokerPassEl.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+  brokerPassEl.addEventListener('input', clearLoginError);
 
-  const DEFAULT_BROKER = '441f1bb64b9243fc98f7a730d5312a6a.s1.eu.hivemq.cloud';
+  // Host e username del broker non sono più parametri visibili/modificabili
+  // dall'utente: sono fissi per questo hub. Solo la password resta un
+  // segreto personale da digitare (o da ricordare via "Ricordami").
+  const HUB_BROKER_HOST = '441f1bb64b9243fc98f7a730d5312a6a.s1.eu.hivemq.cloud';
+  const HUB_BROKER_USER = 'Riccis_IoT';
 
-  // Precompila con l'ultimo login salvato (se l'utente aveva spuntato "Ricordami").
+  // Precompila con l'ultima password salvata (se l'utente aveva spuntato "Ricordami").
   // Solo autofill: la connessione parte comunque da un tap esplicito su "Accedi".
   const remembered = loadRememberedLogin();
   if (remembered) {
-    brokerHostEl.value = remembered.host || '';
-    brokerUserEl.value = remembered.username || '';
     brokerPassEl.value = remembered.password || '';
     rememberMeEl.checked = true;
   }
 
-  brokerHostEl.addEventListener('focus', function autofillOnce() {
-    if (brokerHostEl.value.trim() === '') {
-      brokerHostEl.value = DEFAULT_BROKER;
-    }
-    brokerHostEl.removeEventListener('focus', autofillOnce);
-  });
-
-  function sanitizeHost(raw) {
-    return raw.trim()
-      .replace(/^wss?:\/\//i, '')
-      .replace(/^https?:\/\//i, '')
-      .replace(/\/.*$/, '')
-      .replace(/:\d+$/, '');
-  }
-
   function attemptLogin() {
-    const host = sanitizeHost(brokerHostEl.value);
-    const username = brokerUserEl.value;
+    const host = HUB_BROKER_HOST;
+    const username = HUB_BROKER_USER;
     const password = brokerPassEl.value;
 
-    if (!host)     { showLoginError("Inserisci l'indirizzo del broker."); brokerHostEl.focus(); return; }
-    if (!username) { showLoginError('Inserisci lo username.'); brokerUserEl.focus(); return; }
     if (!password) { showLoginError('Inserisci la password.'); brokerPassEl.focus(); return; }
 
     clearLoginError();
@@ -1996,8 +2270,8 @@
       if (resolved) return;
       resolved = true;
       clearTimeout(safetyTimeout);
-      // Persisti le credenziali solo ora che sono state validate da una connessione riuscita
-      if (rememberMeEl.checked) saveRememberedLogin(host, username, password);
+      // Persisti la password solo ora che è stata validata da una connessione riuscita
+      if (rememberMeEl.checked) saveRememberedLogin(password);
       else clearRememberedLogin();
       client.end(true, () => startMainSession(host, username, password));
     });
@@ -2085,7 +2359,23 @@
     state.client.on('message', handleMqttMessage);
 
     setLoginLoading(false);
-    transitionToHub();
+    afterBrokerConnected();
+  }
+
+  // Dopo la connessione al broker (il "cancello" condiviso), serve ancora
+  // sapere CHI sta usando l'hub: se un profilo era già stato scelto su questo
+  // dispositivo lo riattiviamo subito, altrimenti si passa dalla schermata profili.
+  function afterBrokerConnected() {
+    const accounts = loadAccounts();
+    const rememberedId = loadCurrentAccountId();
+    const rememberedAcc = rememberedId ? accounts.find(a => a.id === rememberedId) : null;
+    if (rememberedAcc) {
+      state.currentAccount = rememberedAcc;
+      applyAccountToSession();
+      transitionToHub();
+    } else {
+      transitionToAccountPicker();
+    }
   }
 
   function handleMqttMessage(topic, payload) {
@@ -2196,9 +2486,12 @@
   }
 
   function transitionToHub() {
-    screens.login.classList.remove('active');
+    // Puo' arrivare sia da loginScreen (profilo già ricordato) sia da accountScreen
+    // (dopo la scelta/creazione del profilo).
+    const from = screens.account.hidden ? screens.login : screens.account;
+    from.classList.remove('active');
     setTimeout(() => {
-      screens.login.hidden = true;
+      from.hidden = true;
       screens.hub.hidden = false;
       requestAnimationFrame(() => requestAnimationFrame(() => {
         screens.hub.classList.add('active');
@@ -2206,6 +2499,280 @@
       }));
     }, 320);
   }
+
+  function transitionToAccountPicker() {
+    renderAccountList();
+    screens.login.classList.remove('active');
+    setTimeout(() => {
+      screens.login.hidden = true;
+      screens.account.hidden = false;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        screens.account.classList.add('active');
+      }));
+    }, 320);
+  }
+
+  /* ============================================================
+     ACCOUNT MANAGEMENT (profili con permessi diversi)
+     ------------------------------------------------------------
+     Nota: questa è una separazione di UI/permessi lato client, non una
+     vera ACL di rete — la password del broker resta l'unica barriera di
+     sicurezza reale. I profili servono a personalizzare chi vede/può fare
+     cosa una volta dentro (es. un "Ospite" non deve poter aprire le valvole).
+     ============================================================ */
+  const ACCOUNTS_KEY = 'gbHub.accounts';
+  const CURRENT_ACCOUNT_KEY = 'gbHub.currentAccountId';
+
+  const LOCK_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+  const SWAP_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>';
+  const TRASH_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
+  function loadAccounts() {
+    try {
+      const raw = localStorage.getItem(ACCOUNTS_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) { return []; }
+  }
+  function saveAccounts(accounts) {
+    try { localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts)); } catch (e) {}
+  }
+  function loadCurrentAccountId() {
+    try { return localStorage.getItem(CURRENT_ACCOUNT_KEY); } catch (e) { return null; }
+  }
+  function saveCurrentAccountId(id) {
+    try { localStorage.setItem(CURRENT_ACCOUNT_KEY, id); } catch (e) {}
+  }
+  function clearCurrentAccountId() {
+    try { localStorage.removeItem(CURRENT_ACCOUNT_KEY); } catch (e) {}
+  }
+  function countAdmins(accounts) {
+    return (accounts || loadAccounts()).filter(a => a.role === 'admin').length;
+  }
+
+  function buildAccountTile(acc, opts) {
+    opts = opts || {};
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'account-tile role-' + acc.role;
+    tile.dataset.id = acc.id;
+
+    const initial = (acc.name || '?').trim().charAt(0).toUpperCase() || '?';
+    const roleLabel = acc.role === 'admin' ? 'Amministratore' : 'Ospite';
+
+    tile.innerHTML = `
+      <span class="account-avatar">${initial}</span>
+      <span class="account-tile-info">
+        <span class="account-tile-name">${escapeHtml(acc.name)}</span>
+        <span class="account-tile-role ${acc.role}">${roleLabel}</span>
+      </span>
+      ${acc.pin ? `<span class="account-tile-pin-icon">${LOCK_ICON_SVG}</span>` : ''}
+    `;
+
+    if (opts.manage) {
+      const accounts = loadAccounts();
+      const actions = document.createElement('span');
+      actions.className = 'account-tile-actions';
+
+      const roleBtn = document.createElement('button');
+      roleBtn.type = 'button';
+      roleBtn.className = 'account-tile-action-btn';
+      roleBtn.title = acc.role === 'admin' ? 'Rendi Ospite' : 'Rendi Amministratore';
+      roleBtn.innerHTML = SWAP_ICON_SVG;
+      const wouldLeaveNoAdmin = acc.role === 'admin' && countAdmins(accounts) <= 1;
+      roleBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        if (wouldLeaveNoAdmin) { toast('Deve rimanere almeno un amministratore'); return; }
+        const list = loadAccounts();
+        const target = list.find(a => a.id === acc.id);
+        if (!target) return;
+        target.role = target.role === 'admin' ? 'guest' : 'admin';
+        saveAccounts(list);
+        if (state.currentAccount && state.currentAccount.id === target.id) {
+          state.currentAccount = target;
+          saveCurrentAccountId(target.id);
+          applyAccountToSession();
+        }
+        renderAccountsModalList();
+      });
+
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'account-tile-action-btn danger';
+      delBtn.title = 'Elimina profilo';
+      delBtn.innerHTML = TRASH_ICON_SVG;
+      const isActive = state.currentAccount && state.currentAccount.id === acc.id;
+      const isLastAdmin = acc.role === 'admin' && countAdmins(accounts) <= 1;
+      delBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        if (isActive) { toast('Non puoi eliminare il profilo attivo'); return; }
+        if (isLastAdmin) { toast('Deve rimanere almeno un amministratore'); return; }
+        const list = loadAccounts().filter(a => a.id !== acc.id);
+        saveAccounts(list);
+        renderAccountsModalList();
+      });
+
+      actions.appendChild(roleBtn);
+      actions.appendChild(delBtn);
+      tile.appendChild(actions);
+    }
+
+    tile.addEventListener('click', () => selectAccount(acc));
+    return tile;
+  }
+
+  function renderAccountList() {
+    accountList.innerHTML = '';
+    loadAccounts().forEach(acc => accountList.appendChild(buildAccountTile(acc, { manage: false })));
+  }
+
+  function renderAccountsModalList() {
+    const isAdmin = !!(state.currentAccount && state.currentAccount.role === 'admin');
+    accountsModalSubtitle.textContent = isAdmin ? 'Gestisci profili e permessi' : 'Cambia profilo';
+    openNewAccountFromModalBtn.hidden = !isAdmin;
+    accountsModalList.innerHTML = '';
+    loadAccounts().forEach(acc => accountsModalList.appendChild(buildAccountTile(acc, { manage: isAdmin })));
+  }
+
+  function applyAccountToSession() {
+    const acc = state.currentAccount;
+    if (!acc) return;
+    const initial = (acc.name || '?').trim().charAt(0).toUpperCase() || '?';
+    accountAvatar.textContent = initial;
+    accountBarName.textContent = acc.name;
+    accountBarRole.textContent = acc.role === 'admin' ? 'Amministratore' : 'Ospite';
+    valveList.classList.toggle('role-readonly', acc.role !== 'admin');
+  }
+
+  function activateAccount(acc) {
+    state.currentAccount = acc;
+    saveCurrentAccountId(acc.id);
+    pinModal.classList.remove('show');
+    accountsModal.classList.remove('show');
+    applyAccountToSession();
+    if (!screens.account.hidden) transitionToHub();
+  }
+
+  function selectAccount(acc) {
+    if (acc.pin) {
+      pendingPinAccount = acc;
+      pinModalName.textContent = acc.name;
+      pinInput.value = '';
+      pinError.classList.remove('show');
+      pinModal.classList.add('show');
+      setTimeout(() => pinInput.focus(), 200);
+    } else {
+      activateAccount(acc);
+    }
+  }
+
+  let pendingPinAccount = null;
+
+  pinConfirmBtn.addEventListener('click', () => {
+    if (!pendingPinAccount) return;
+    if (pinInput.value === pendingPinAccount.pin) {
+      activateAccount(pendingPinAccount);
+      pendingPinAccount = null;
+    } else {
+      pinError.classList.add('show');
+    }
+  });
+  pinInput.addEventListener('keydown', e => { if (e.key === 'Enter') pinConfirmBtn.click(); });
+  pinInput.addEventListener('input', () => pinError.classList.remove('show'));
+  pinModalCloseBtn.addEventListener('click', () => { pinModal.classList.remove('show'); pendingPinAccount = null; });
+
+  // Nuovo profilo: contesto diverso a seconda di dove è stato aperto
+  // (auto-iscrizione dalla schermata profili vs creazione admin dalla hub).
+  const newAccountContext = { source: 'picker', selectedRole: 'guest' };
+
+  function openNewAccountModal(source) {
+    newAccountContext.source = source;
+    newAccountNameEl.value = '';
+    newAccountPinEl.value = '';
+    newAccountError.classList.remove('show');
+
+    const accounts = loadAccounts();
+    if (source === 'manage') {
+      // Le due sheet sono entrambe modal-backdrop a schermo intero: si
+      // sostituisce quella "Profili" con quella "Nuovo profilo" invece di
+      // impilarle, e si ripristina la prima alla chiusura.
+      accountsModal.classList.remove('show');
+      newAccountRoleField.hidden = false;
+      newAccountContext.selectedRole = 'guest';
+      newAccountRolePicker.querySelectorAll('.role-pill').forEach(p => p.classList.toggle('selected', p.dataset.role === 'guest'));
+      newAccountSubtitle.textContent = 'Scegli nome, PIN e permessi';
+    } else {
+      newAccountRoleField.hidden = true;
+      newAccountSubtitle.textContent = accounts.length === 0
+        ? 'Il primo profilo diventa amministratore'
+        : 'Verrà creato come profilo Ospite';
+    }
+    newAccountModal.classList.add('show');
+    setTimeout(() => newAccountNameEl.focus(), 200);
+  }
+
+  function closeNewAccountModal() {
+    newAccountModal.classList.remove('show');
+    if (newAccountContext.source === 'manage') {
+      renderAccountsModalList();
+      accountsModal.classList.add('show');
+    }
+  }
+
+  addAccountBtn.addEventListener('click', () => openNewAccountModal('picker'));
+  openNewAccountFromModalBtn.addEventListener('click', () => openNewAccountModal('manage'));
+  newAccountCloseBtn.addEventListener('click', closeNewAccountModal);
+
+  newAccountRolePicker.querySelectorAll('.role-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      newAccountContext.selectedRole = pill.dataset.role;
+      newAccountRolePicker.querySelectorAll('.role-pill').forEach(p => p.classList.toggle('selected', p === pill));
+    });
+  });
+
+  function showNewAccountError(msg) {
+    newAccountErrorText.textContent = msg;
+    newAccountError.classList.add('show');
+  }
+
+  createAccountBtn.addEventListener('click', () => {
+    const name = newAccountNameEl.value.trim();
+    const pin = newAccountPinEl.value.trim();
+    if (!name) { showNewAccountError('Inserisci un nome.'); return; }
+    if (pin && !/^\d{4,8}$/.test(pin)) { showNewAccountError('Il PIN deve avere 4-8 cifre (o lascialo vuoto).'); return; }
+
+    const accounts = loadAccounts();
+    const wasEmpty = accounts.length === 0;
+    const role = newAccountContext.source === 'manage'
+      ? newAccountContext.selectedRole
+      : (wasEmpty ? 'admin' : 'guest');
+
+    const acc = {
+      id: 'acc_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      name, pin: pin || null, role
+    };
+    accounts.push(acc);
+    saveAccounts(accounts);
+
+    if (newAccountContext.source === 'manage') {
+      closeNewAccountModal();
+      toast(`Profilo "${name}" creato`);
+    } else {
+      newAccountModal.classList.remove('show');
+      renderAccountList();
+      if (wasEmpty) activateAccount(acc); // primo profilo del dispositivo: entra subito
+    }
+  });
+
+  accountBarBtn.addEventListener('click', () => {
+    renderAccountsModalList();
+    accountsModal.classList.add('show');
+  });
+  accountsModalCloseBtn.addEventListener('click', () => accountsModal.classList.remove('show'));
 
   /* ============================================================
      CONNECTION UI
@@ -2377,6 +2944,10 @@
   }
 
   function toggleValve(id) {
+    if (state.currentAccount && state.currentAccount.role !== 'admin') {
+      toast('Il tuo profilo non può controllare le valvole');
+      return;
+    }
     if (!state.deviceOnline) {
       toast('Dispositivo offline: comando non inviato');
       return;
@@ -2434,6 +3005,7 @@
     modalTitle.textContent = `${valve.name}`;
     modalSubtitle.textContent = `${valve.zone} · V0${valveId}`;
     modalEl.style.setProperty('--valve-rgb', VALVE_COLORS_RGB[valve.color] || VALVE_COLORS_RGB.green);
+    modalEl.classList.toggle('readonly', !(state.currentAccount && state.currentAccount.role === 'admin'));
 
     modalConflictBanner.classList.remove('show');
     renderModal();
@@ -2757,12 +3329,14 @@
     if (state.initialSyncTimer) clearTimeout(state.initialSyncTimer);
     updateSyncBanner();
 
-    // Se le credenziali sono ricordate, ripristina i campi (login one-tap);
-    // altrimenti svuota la password come prima.
+    // Il logout dimentica il profilo attivo: il prossimo accesso mostra di
+    // nuovo la scelta ("dispositivo condiviso" come default più sicuro).
+    state.currentAccount = null;
+    clearCurrentAccountId();
+
+    // Se la password è ricordata, ripristinala (login one-tap); altrimenti svuotala.
     const rememberedOnLogout = loadRememberedLogin();
     if (rememberedOnLogout) {
-      brokerHostEl.value = rememberedOnLogout.host || '';
-      brokerUserEl.value = rememberedOnLogout.username || '';
       brokerPassEl.value = rememberedOnLogout.password || '';
       rememberMeEl.checked = true;
     } else {
@@ -2772,9 +3346,11 @@
 
     screens.hub.classList.remove('active');
     screens.garden.classList.remove('active');
+    screens.account.classList.remove('active');
     setTimeout(() => {
       screens.hub.hidden = true;
       screens.garden.hidden = true;
+      screens.account.hidden = true;
       screens.login.hidden = false;
       requestAnimationFrame(() => requestAnimationFrame(() => {
         screens.login.classList.add('active');
@@ -2806,7 +3382,12 @@
   else             greetText.textContent = 'Buonasera';
 
   // Debug
-  window.__hub = { state, screens, toggleValve, openModal };
+  window.__hub = {
+    state, screens, toggleValve, openModal,
+    afterBrokerConnected, transitionToHub, transitionToAccountPicker,
+    loadAccounts, saveAccounts, renderAccountList, renderAccountsModalList,
+    activateAccount, applyAccountToSession
+  };
 })();
 </script>
 
