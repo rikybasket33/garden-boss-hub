@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gardenboss-shell-v1';
+const CACHE_NAME = 'gardenboss-shell-v2';
 const SHELL_ASSETS = [
   './',
   './index.html',
@@ -23,11 +23,15 @@ self.addEventListener('fetch', e => {
   // Solo richieste GET same-origin: mai la CDN mqtt.min.js, mai il socket WSS
   // (i WebSocket non passano comunque dall'evento fetch).
   if (e.request.method !== 'GET' || new URL(e.request.url).origin !== self.location.origin) return;
+  // Network-first: online si vede sempre l'ultima versione pubblicata: la
+  // cache è solo un fallback per l'uso offline, mai la fonte primaria
+  // (altrimenti un aggiornamento del sito può restare invisibile a tempo
+  // indeterminato per chi ha già installato la PWA).
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request).then(resp => {
+    fetch(e.request).then(resp => {
       const copy = resp.clone();
       caches.open(CACHE_NAME).then(c => c.put(e.request, copy));
       return resp;
-    }).catch(() => cached))
+    }).catch(() => caches.match(e.request))
   );
 });
