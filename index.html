@@ -3,28 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#0f2027">
+<meta name="theme-color" content="#05090a">
 <title>Smart Home Hub</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/favicon-32.png" type="image/png">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Garden Boss">
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
   :root {
-    --green: #34c759;
-    --green-dim: #2ecc71;
-    --blue: #0a84ff;
+    /* Neon-green-on-matte-black brand palette (Garden Boss enclosure: black + neon green) */
+    --green: #39ff7a;
+    --green-dim: #22c55e;
+    --green-rgb: 57, 255, 122;
+    --blue: #2da3ff;
     --orange: #ff9f0a;
-    --red: #ff3b30;
+    --red: #ff4d5e;
     --purple: #bf5af2;
-    --text: #ffffff;
-    --text-muted: rgba(255, 255, 255, 0.65);
-    --text-faint: rgba(255, 255, 255, 0.45);
-    --glass-bg: rgba(255, 255, 255, 0.10);
-    --glass-bg-strong: rgba(255, 255, 255, 0.16);
-    --glass-border: rgba(255, 255, 255, 0.18);
-    --glass-border-strong: rgba(255, 255, 255, 0.30);
-    --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.18);
-    --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.28);
+    --yellow: #ffd60a;
+    --text: #eafff1;
+    --text-muted: rgba(230, 255, 236, 0.65);
+    --text-faint: rgba(230, 255, 236, 0.42);
+    --glass-bg: rgba(255, 255, 255, 0.06);
+    --glass-bg-strong: rgba(255, 255, 255, 0.11);
+    --glass-border: rgba(120, 255, 170, 0.14);
+    --glass-border-strong: rgba(120, 255, 170, 0.28);
+    --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.45);
+    --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.6);
     --ease-ios: cubic-bezier(0.22, 1, 0.36, 1);
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   }
@@ -40,10 +49,10 @@
   body {
     min-height: 100vh;
     background:
-      radial-gradient(ellipse at top left, #2d6a4f 0%, transparent 55%),
-      radial-gradient(ellipse at bottom right, #1d4ed8 0%, transparent 55%),
-      radial-gradient(ellipse at center, #134e4a 0%, transparent 70%),
-      linear-gradient(160deg, #0f2027 0%, #1a3a2e 50%, #0a1e3a 100%);
+      radial-gradient(ellipse at top left, rgba(57, 255, 122, 0.12) 0%, transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(57, 255, 122, 0.07) 0%, transparent 55%),
+      radial-gradient(ellipse at center, rgba(18, 36, 26, 0.6) 0%, transparent 70%),
+      linear-gradient(160deg, #050a07 0%, #070d09 50%, #030503 100%);
     background-size: 200% 200%, 200% 200%, 200% 200%, 100% 100%;
     background-attachment: fixed;
     animation: bgShift 22s ease-in-out infinite;
@@ -71,7 +80,7 @@
   }
   body::after {
     width: 320px; height: 320px;
-    background: #5e60ce;
+    background: rgba(57, 255, 122, 0.55);
     bottom: -100px; right: -80px;
     animation: float2 22s ease-in-out infinite;
   }
@@ -126,6 +135,8 @@
   }
   .login-card {
     width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
     background: var(--glass-bg);
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
@@ -145,7 +156,7 @@
     background: linear-gradient(135deg, var(--green), var(--green-dim));
     display: flex; align-items: center; justify-content: center;
     margin: 0 auto 18px;
-    box-shadow: 0 12px 30px rgba(52, 199, 89, 0.4);
+    box-shadow: 0 12px 30px rgba(57, 255, 122, 0.4);
     animation: logoFloat 3.5s ease-in-out infinite;
   }
   .login-logo svg { width: 32px; height: 32px; fill: white; }
@@ -177,12 +188,13 @@
     border-radius: 12px;
     outline: none;
     transition: all 0.25s ease;
+    text-overflow: ellipsis;
   }
   .input-wrap input::placeholder { color: var(--text-faint); }
   .input-wrap input:focus {
     border-color: var(--green);
     background: rgba(255, 255, 255, 0.12);
-    box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.18);
+    box-shadow: 0 0 0 4px rgba(57, 255, 122, 0.18);
   }
   .input-wrap .input-icon {
     position: absolute;
@@ -219,11 +231,11 @@
     cursor: pointer;
     margin-top: 10px;
     transition: transform 0.15s ease, box-shadow 0.25s ease, opacity 0.25s ease;
-    box-shadow: 0 6px 20px rgba(52, 199, 89, 0.4);
+    box-shadow: 0 6px 20px rgba(57, 255, 122, 0.4);
     position: relative;
     overflow: hidden;
   }
-  .login-btn:hover { box-shadow: 0 8px 26px rgba(52, 199, 89, 0.5); }
+  .login-btn:hover { box-shadow: 0 8px 26px rgba(57, 255, 122, 0.5); }
   .login-btn:active { transform: scale(0.98); }
   .login-btn:disabled { opacity: 0.7; cursor: not-allowed; }
   .btn-label { transition: opacity 0.2s ease; }
@@ -324,8 +336,8 @@
     animation: pulse 2.2s ease-in-out infinite;
   }
   @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.55); }
-    50% { box-shadow: 0 0 0 6px rgba(52, 199, 89, 0); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(57, 255, 122, 0.55); }
+    50% { box-shadow: 0 0 0 6px rgba(57, 255, 122, 0); }
   }
 
   /* ============================================================
@@ -395,9 +407,9 @@
     margin-bottom: 14px;
   }
   .device-icon-wrap svg { width: 24px; height: 24px; }
-  .device-icon-wrap.green { background: rgba(52, 199, 89, 0.2); border: 1px solid rgba(52, 199, 89, 0.35); }
+  .device-icon-wrap.green { background: rgba(57, 255, 122, 0.2); border: 1px solid rgba(57, 255, 122, 0.35); }
   .device-icon-wrap.green svg { fill: var(--green); }
-  .device-icon-wrap.blue { background: rgba(10, 132, 255, 0.2); border: 1px solid rgba(10, 132, 255, 0.35); }
+  .device-icon-wrap.blue { background: rgba(45, 163, 255, 0.2); border: 1px solid rgba(45, 163, 255, 0.35); }
   .device-icon-wrap.blue svg { fill: var(--blue); }
   .device-icon-wrap.orange { background: rgba(255, 159, 10, 0.2); border: 1px solid rgba(255, 159, 10, 0.35); }
   .device-icon-wrap.orange svg { fill: var(--orange); }
@@ -467,8 +479,8 @@
   .summary-icon {
     width: 44px; height: 44px;
     border-radius: 12px;
-    background: rgba(52, 199, 89, 0.18);
-    border: 1px solid rgba(52, 199, 89, 0.3);
+    background: rgba(57, 255, 122, 0.18);
+    border: 1px solid rgba(57, 255, 122, 0.3);
     display: flex; align-items: center; justify-content: center;
   }
   .summary-icon svg { width: 22px; height: 22px; fill: var(--green); }
@@ -491,10 +503,13 @@
     overflow: hidden;
     transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
   }
+  .valve {
+    --valve-rgb: var(--green-rgb);
+  }
   .valve.on {
-    background: linear-gradient(150deg, rgba(52, 199, 89, 0.22), rgba(52, 199, 89, 0.08));
-    border-color: rgba(52, 199, 89, 0.5);
-    box-shadow: 0 8px 32px rgba(52, 199, 89, 0.2);
+    background: linear-gradient(150deg, rgba(var(--valve-rgb), 0.22), rgba(var(--valve-rgb), 0.08));
+    border-color: rgba(var(--valve-rgb), 0.5);
+    box-shadow: 0 8px 32px rgba(var(--valve-rgb), 0.2);
   }
   .valve.on::before {
     content: "";
@@ -502,7 +517,7 @@
     inset: -1px;
     border-radius: 20px;
     padding: 1px;
-    background: linear-gradient(135deg, rgba(52, 199, 89, 0.6), transparent 60%);
+    background: linear-gradient(135deg, rgba(var(--valve-rgb), 0.6), transparent 60%);
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
@@ -515,7 +530,7 @@
     bottom: -50px; right: -50px;
     width: 140px; height: 140px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(52, 199, 89, 0.3), transparent 70%);
+    background: radial-gradient(circle, rgba(var(--valve-rgb), 0.3), transparent 70%);
     animation: ripple 3s ease-in-out infinite;
     pointer-events: none;
   }
@@ -547,11 +562,11 @@
     transition: fill 0.3s ease, transform 0.4s ease;
   }
   .valve.on .valve-icon {
-    background: rgba(52, 199, 89, 0.25);
-    border-color: rgba(52, 199, 89, 0.4);
+    background: rgba(var(--valve-rgb), 0.25);
+    border-color: rgba(var(--valve-rgb), 0.4);
   }
   .valve.on .valve-icon svg {
-    fill: var(--green);
+    fill: rgb(var(--valve-rgb));
     animation: drop 1.6s ease-in-out infinite;
   }
   @keyframes drop {
@@ -587,14 +602,22 @@
     transition: transform 0.35s var(--ease-ios);
   }
   .valve.on .switch {
-    background: var(--green);
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 16px rgba(52, 199, 89, 0.4);
+    background: rgb(var(--valve-rgb));
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 16px rgba(var(--valve-rgb), 0.4);
   }
   .valve.on .switch::after { transform: translateX(22px); }
 
   .valve.pending { opacity: 0.85; }
+  .valve.pending .switch {
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2), 0 0 0 4px rgba(var(--valve-rgb), 0.25);
+    animation: switchPulse 1s ease-in-out infinite;
+  }
   .valve.pending .switch::after {
     animation: knobPulse 1.2s ease-in-out infinite;
+  }
+  @keyframes switchPulse {
+    0%, 100% { box-shadow: inset 0 1px 2px rgba(0,0,0,0.2), 0 0 0 4px rgba(var(--valve-rgb), 0.28); }
+    50%      { box-shadow: inset 0 1px 2px rgba(0,0,0,0.2), 0 0 0 7px rgba(var(--valve-rgb), 0.08); }
   }
   @keyframes knobPulse {
     0%, 100% { box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
@@ -641,9 +664,9 @@
   .schedule-chip:hover { background: rgba(255, 255, 255, 0.14); }
   .schedule-chip:active { transform: scale(0.95); }
   .schedule-chip.active {
-    background: rgba(52, 199, 89, 0.2);
-    border-color: rgba(52, 199, 89, 0.5);
-    color: var(--green);
+    background: rgba(var(--valve-rgb), 0.2);
+    border-color: rgba(var(--valve-rgb), 0.5);
+    color: rgb(var(--valve-rgb));
   }
   .schedule-chip.disabled {
     opacity: 0.5;
@@ -655,6 +678,53 @@
     border-color: rgba(255, 255, 255, 0.2);
   }
   .schedule-chip-empty svg { fill: var(--text-faint); }
+
+  /* 24h schedule timeline */
+  .valve-timeline {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--glass-border);
+  }
+  .vt-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-faint);
+    margin-bottom: 6px;
+  }
+  .vt-track {
+    position: relative;
+    height: 26px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--glass-border);
+    overflow: hidden;
+  }
+  .vt-tick {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+  }
+  .vt-block {
+    position: absolute;
+    top: 3px; bottom: 3px;
+    border-radius: 5px;
+    min-width: 4px;
+    background: rgba(var(--valve-rgb), 0.38);
+    border: 1px solid rgba(var(--valve-rgb), 0.75);
+    box-shadow: 0 0 8px rgba(var(--valve-rgb), 0.45);
+    cursor: pointer;
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  }
+  .vt-block:hover, .vt-block:active {
+    background: rgba(var(--valve-rgb), 0.58);
+    transform: scaleY(1.12);
+  }
+  .vt-block.disabled { opacity: 0.35; }
 
   /* ============================================================
      MODAL (Schedule Editor)
@@ -797,7 +867,7 @@
     background: var(--green);
     border-color: var(--green);
     color: white;
-    box-shadow: 0 4px 12px rgba(52, 199, 89, 0.35);
+    box-shadow: 0 4px 12px rgba(57, 255, 122, 0.35);
   }
 
   .days-shortcuts {
@@ -936,8 +1006,8 @@
   }
   .duration-preset:hover { background: rgba(255, 255, 255, 0.12); color: white; }
   .duration-preset.active {
-    background: rgba(52, 199, 89, 0.2);
-    border-color: rgba(52, 199, 89, 0.5);
+    background: rgba(57, 255, 122, 0.2);
+    border-color: rgba(57, 255, 122, 0.5);
     color: var(--green);
   }
 
@@ -1000,9 +1070,9 @@
   .modal-btn-primary {
     color: white;
     background: linear-gradient(135deg, var(--green), var(--green-dim));
-    box-shadow: 0 4px 14px rgba(52, 199, 89, 0.35);
+    box-shadow: 0 4px 14px rgba(57, 255, 122, 0.35);
   }
-  .modal-btn-primary:hover { box-shadow: 0 6px 20px rgba(52, 199, 89, 0.5); }
+  .modal-btn-primary:hover { box-shadow: 0 6px 20px rgba(57, 255, 122, 0.5); }
   .modal-btn-secondary {
     color: var(--text-muted);
     background: rgba(255, 255, 255, 0.08);
@@ -1042,8 +1112,8 @@
     transition: all 0.3s ease;
   }
   .sync-banner.synced {
-    background: rgba(52, 199, 89, 0.10);
-    border-color: rgba(52, 199, 89, 0.25);
+    background: rgba(57, 255, 122, 0.10);
+    border-color: rgba(57, 255, 122, 0.25);
     color: var(--green);
   }
   .sync-banner.stale {
@@ -1067,9 +1137,9 @@
 
   /* Flash on external update */
   @keyframes flashUpdate {
-    0%   { box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.5); }
-    50%  { box-shadow: 0 0 0 6px rgba(10, 132, 255, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(10, 132, 255, 0); }
+    0%   { box-shadow: 0 0 0 0 rgba(45, 163, 255, 0.5); }
+    50%  { box-shadow: 0 0 0 6px rgba(45, 163, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(45, 163, 255, 0); }
   }
   .schedule-chip.flash-update {
     animation: flashUpdate 1.2s ease-out 1;
@@ -1138,6 +1208,46 @@
     opacity: 1; transform: translateY(0);
     transition: opacity 0.5s var(--ease-ios), transform 0.5s var(--ease-ios);
   }
+
+  /* Remember-me checkbox (login screen) */
+  .remember-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 2px 0 18px;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+  }
+  .remember-row input {
+    position: absolute;
+    opacity: 0;
+    width: 0; height: 0;
+  }
+  .remember-box {
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    border: 1.5px solid rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+  .remember-row input:checked + .remember-box {
+    background: var(--green);
+    border-color: var(--green);
+    box-shadow: 0 0 10px rgba(57, 255, 122, 0.5);
+  }
+  .remember-row input:checked + .remember-box::after {
+    content: "";
+    position: absolute;
+    left: 6px; top: 2px;
+    width: 5px; height: 10px;
+    border: solid #05090a;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
 </style>
 </head>
 <body>
@@ -1190,6 +1300,12 @@
           </button>
         </div>
       </div>
+
+      <label class="remember-row" for="rememberMe">
+        <input type="checkbox" id="rememberMe">
+        <span class="remember-box" aria-hidden="true"></span>
+        <span>Ricordami su questo dispositivo</span>
+      </label>
 
       <button class="login-btn" id="loginBtn">
         <span class="btn-label">Accedi</span>
@@ -1490,11 +1606,18 @@
   /* ============================================================
      CONFIG
      ============================================================ */
+  // RGB triples (matched to the physical zone LEDs: V1 verde, V2 rosso, V3 blu, V4 giallo)
+  const VALVE_COLORS_RGB = {
+    green:  '57, 255, 122',
+    red:    '255, 77, 94',
+    blue:   '45, 163, 255',
+    yellow: '255, 214, 10'
+  };
   const VALVES = [
-    { id: 1, name: 'Prato',  zone: 'Giardino frontale' },
-    { id: 2, name: 'Orto',   zone: 'Zona retro' },
-    { id: 3, name: 'Aiuole', zone: 'Lato est' },
-    { id: 4, name: 'Vasi',   zone: 'Terrazza' }
+    { id: 1, name: 'Prato',  zone: 'Giardino frontale', color: 'green'  },
+    { id: 2, name: 'Orto',   zone: 'Zona retro',         color: 'red'   },
+    { id: 3, name: 'Aiuole', zone: 'Lato est',           color: 'blue'  },
+    { id: 4, name: 'Vasi',   zone: 'Terrazza',           color: 'yellow'}
   ];
 
   const SLOTS_PER_VALVE = 3;
@@ -1560,6 +1683,7 @@
   const brokerHostEl = document.getElementById('brokerHost');
   const brokerUserEl = document.getElementById('brokerUser');
   const brokerPassEl = document.getElementById('brokerPass');
+  const rememberMeEl = document.getElementById('rememberMe');
   const loginBtn     = document.getElementById('loginBtn');
   const loginError   = document.getElementById('loginError');
   const loginErrorText = document.getElementById('loginErrorText');
@@ -1742,6 +1866,29 @@
   }, 15000);
 
   /* ============================================================
+     LOGIN — persistenza credenziali ("Ricordami")
+     ============================================================ */
+  const REMEMBER_KEY = 'gbHub.rememberedLogin';
+
+  function loadRememberedLogin() {
+    try {
+      const raw = localStorage.getItem(REMEMBER_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+  function saveRememberedLogin(host, username, password) {
+    try { localStorage.setItem(REMEMBER_KEY, JSON.stringify({ host, username, password })); }
+    catch (e) { /* storage disabilitato/quota piena: non bloccante */ }
+  }
+  function clearRememberedLogin() {
+    try { localStorage.removeItem(REMEMBER_KEY); } catch (e) {}
+  }
+
+  rememberMeEl.addEventListener('change', () => {
+    if (!rememberMeEl.checked) clearRememberedLogin();
+  });
+
+  /* ============================================================
      LOGIN
      ============================================================ */
   togglePwd.addEventListener('click', () => {
@@ -1770,6 +1917,17 @@
   });
 
   const DEFAULT_BROKER = '441f1bb64b9243fc98f7a730d5312a6a.s1.eu.hivemq.cloud';
+
+  // Precompila con l'ultimo login salvato (se l'utente aveva spuntato "Ricordami").
+  // Solo autofill: la connessione parte comunque da un tap esplicito su "Accedi".
+  const remembered = loadRememberedLogin();
+  if (remembered) {
+    brokerHostEl.value = remembered.host || '';
+    brokerUserEl.value = remembered.username || '';
+    brokerPassEl.value = remembered.password || '';
+    rememberMeEl.checked = true;
+  }
+
   brokerHostEl.addEventListener('focus', function autofillOnce() {
     if (brokerHostEl.value.trim() === '') {
       brokerHostEl.value = DEFAULT_BROKER;
@@ -1819,6 +1977,9 @@
       if (resolved) return;
       resolved = true;
       clearTimeout(safetyTimeout);
+      // Persisti le credenziali solo ora che sono state validate da una connessione riuscita
+      if (rememberMeEl.checked) saveRememberedLogin(host, username, password);
+      else clearRememberedLogin();
       client.end(true, () => startMainSession(host, username, password));
     });
 
@@ -2062,6 +2223,7 @@
     const el = document.createElement('div');
     el.className = 'valve';
     el.dataset.id = v.id;
+    el.style.setProperty('--valve-rgb', VALVE_COLORS_RGB[v.color] || VALVE_COLORS_RGB.green);
     el.innerHTML = `
       <div class="valve-main" data-toggle>
         <div class="valve-icon">${VALVE_ICON_SVG}</div>
@@ -2073,6 +2235,14 @@
           <div class="valve-zone">${v.zone}</div>
         </div>
         <div class="switch" role="switch" aria-checked="false" tabindex="0"></div>
+      </div>
+      <div class="valve-timeline">
+        <div class="vt-labels"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>
+        <div class="vt-track" data-timeline-track>
+          <div class="vt-tick" style="left:25%"></div>
+          <div class="vt-tick" style="left:50%"></div>
+          <div class="vt-tick" style="left:75%"></div>
+        </div>
       </div>
       <div class="schedules-row" data-schedules></div>
     `;
@@ -2132,7 +2302,41 @@
       row.appendChild(addChip);
     }
 
+    renderTimeline(id);
     activeCountEl.textContent = Object.values(state.valves).filter(v => v.on).length;
+  }
+
+  /* ============================================================
+     24H SCHEDULE TIMELINE
+     ============================================================ */
+  function addTimelineBlock(track, id, slot, startMin, endMin, sched) {
+    const block = document.createElement('div');
+    block.className = 'vt-block' + (sched.enabled ? '' : ' disabled');
+    block.style.left  = (startMin / 1440 * 100) + '%';
+    block.style.width = Math.max((endMin - startMin) / 1440 * 100, 0.4) + '%';
+    block.title = `${pad2(sched.hh)}:${pad2(sched.mm)} · ${sched.durationMin}m · ${formatDays(sched.days)}`;
+    block.addEventListener('click', () => openModal(id, slot));
+    track.appendChild(block);
+  }
+
+  function renderTimeline(id) {
+    const el = valveList.querySelector(`.valve[data-id="${id}"]`);
+    if (!el) return;
+    const track = el.querySelector('[data-timeline-track]');
+    track.querySelectorAll('.vt-block').forEach(b => b.remove());
+
+    const schedules = state.schedules[id];
+    for (let slot = 0; slot < SLOTS_PER_VALVE; slot++) {
+      const sched = schedules[slot];
+      if (!sched) continue;
+      const startMin = sched.hh * 60 + sched.mm;
+      const endMin = startMin + sched.durationMin;
+      addTimelineBlock(track, id, slot, startMin, Math.min(endMin, 1440), sched);
+      if (endMin > 1440) {
+        // Turno che scavalla la mezzanotte: disegna anche il segmento dopo le 00:00
+        addTimelineBlock(track, id, slot, 0, endMin - 1440, sched);
+      }
+    }
   }
 
   function updateHubStats() {
@@ -2181,7 +2385,7 @@
         updateHubStats();
         toast(`V0${id}: nessuna conferma — stato non modificato`);
       }
-    }, 4000);
+    }, 2000);
 
     toast(`Valvola ${id} → ${target ? 'ON' : 'OFF'}`);
   }
@@ -2534,7 +2738,17 @@
     if (state.initialSyncTimer) clearTimeout(state.initialSyncTimer);
     updateSyncBanner();
 
-    brokerPassEl.value = '';
+    // Se le credenziali sono ricordate, ripristina i campi (login one-tap);
+    // altrimenti svuota la password come prima.
+    const rememberedOnLogout = loadRememberedLogin();
+    if (rememberedOnLogout) {
+      brokerHostEl.value = rememberedOnLogout.host || '';
+      brokerUserEl.value = rememberedOnLogout.username || '';
+      brokerPassEl.value = rememberedOnLogout.password || '';
+      rememberMeEl.checked = true;
+    } else {
+      brokerPassEl.value = '';
+    }
     clearLoginError();
 
     screens.hub.classList.remove('active');
@@ -2575,6 +2789,14 @@
   // Debug
   window.__hub = { state, screens, toggleValve, openModal };
 })();
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW registration failed:', err));
+    });
+  }
 </script>
 
 </body>
