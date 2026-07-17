@@ -20,6 +20,7 @@
     --green: #39ff7a;
     --green-dim: #22c55e;
     --green-rgb: 57, 255, 122;
+    --valve-rgb: var(--green-rgb); /* fallback for controls outside a .valve card (e.g. modal) */
     --blue: #2da3ff;
     --orange: #ff9f0a;
     --red: #ff4d5e;
@@ -310,6 +311,13 @@
 
   .greeting h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
   .greeting p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .greeting .hub-brand-tag {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--green);
+  }
 
   .conn-pill {
     display: flex;
@@ -397,8 +405,24 @@
   }
   .device-card:active { transform: scale(0.97); }
   .device-card:hover { background: var(--glass-bg-strong); }
-  .device-card.coming-soon { opacity: 0.55; cursor: not-allowed; }
+  .device-card.coming-soon { opacity: 0.5; cursor: not-allowed; filter: saturate(0.4); }
   .device-card.coming-soon:active { transform: none; }
+  .device-card.coming-soon:hover { background: var(--glass-bg); }
+
+  /* Il prodotto reale ha un accento di brand discreto, cosi si distingue
+     a colpo d'occhio dalle tile placeholder ancora dormienti. */
+  .device-card.featured {
+    border-color: rgba(57, 255, 122, 0.3);
+    box-shadow: var(--shadow-soft), 0 0 0 1px rgba(57, 255, 122, 0.08) inset;
+  }
+  .device-card.featured::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--green), transparent 85%);
+    opacity: 0.85;
+  }
 
   .device-icon-wrap {
     width: 44px; height: 44px;
@@ -409,12 +433,8 @@
   .device-icon-wrap svg { width: 24px; height: 24px; }
   .device-icon-wrap.green { background: rgba(57, 255, 122, 0.2); border: 1px solid rgba(57, 255, 122, 0.35); }
   .device-icon-wrap.green svg { fill: var(--green); }
-  .device-icon-wrap.blue { background: rgba(45, 163, 255, 0.2); border: 1px solid rgba(45, 163, 255, 0.35); }
-  .device-icon-wrap.blue svg { fill: var(--blue); }
-  .device-icon-wrap.orange { background: rgba(255, 159, 10, 0.2); border: 1px solid rgba(255, 159, 10, 0.35); }
-  .device-icon-wrap.orange svg { fill: var(--orange); }
-  .device-icon-wrap.purple { background: rgba(191, 90, 242, 0.2); border: 1px solid rgba(191, 90, 242, 0.35); }
-  .device-icon-wrap.purple svg { fill: var(--purple); }
+  .device-icon-wrap.dormant { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); }
+  .device-icon-wrap.dormant svg { fill: var(--text-faint); }
 
   .device-name { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 3px; }
   .device-status { font-size: 12px; color: var(--text-muted); }
@@ -425,10 +445,10 @@
     top: 12px; right: 12px;
     font-size: 10px; font-weight: 600;
     padding: 4px 8px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.06);
     border: 1px solid var(--glass-border);
     border-radius: 100px;
-    color: var(--text-muted);
+    color: var(--text-faint);
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -550,15 +570,15 @@
   .valve-icon {
     width: 42px; height: 42px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(var(--valve-rgb), 0.10);
+    border: 1px solid rgba(var(--valve-rgb), 0.22);
     display: flex; align-items: center; justify-content: center;
     transition: all 0.3s ease;
     flex-shrink: 0;
   }
   .valve-icon svg {
     width: 22px; height: 22px;
-    fill: var(--text-muted);
+    fill: rgba(var(--valve-rgb), 0.75);
     transition: fill 0.3s ease, transform 0.4s ease;
   }
   .valve.on .valve-icon {
@@ -601,11 +621,11 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
     transition: transform 0.35s var(--ease-ios);
   }
-  .valve.on .switch {
+  .valve.on .switch, .switch.on {
     background: rgb(var(--valve-rgb));
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 16px rgba(var(--valve-rgb), 0.4);
   }
-  .valve.on .switch::after { transform: translateX(22px); }
+  .valve.on .switch::after, .switch.on::after { transform: translateX(22px); }
 
   .valve.pending { opacity: 0.85; }
   .valve.pending .switch {
@@ -864,10 +884,10 @@
   }
   .day-pill:active { transform: scale(0.92); }
   .day-pill.selected {
-    background: var(--green);
-    border-color: var(--green);
-    color: white;
-    box-shadow: 0 4px 12px rgba(57, 255, 122, 0.35);
+    background: rgb(var(--valve-rgb));
+    border-color: rgb(var(--valve-rgb));
+    color: #05090a;
+    box-shadow: 0 4px 12px rgba(var(--valve-rgb), 0.35);
   }
 
   .days-shortcuts {
@@ -1006,9 +1026,9 @@
   }
   .duration-preset:hover { background: rgba(255, 255, 255, 0.12); color: white; }
   .duration-preset.active {
-    background: rgba(57, 255, 122, 0.2);
-    border-color: rgba(57, 255, 122, 0.5);
-    color: var(--green);
+    background: rgba(var(--valve-rgb), 0.2);
+    border-color: rgba(var(--valve-rgb), 0.5);
+    color: rgb(var(--valve-rgb));
   }
 
   /* Schedule slot tabs (1, 2, 3) */
@@ -1047,7 +1067,7 @@
     margin-left: 6px;
     vertical-align: middle;
   }
-  .slot-tab .slot-dot.has-data { background: var(--green); }
+  .slot-tab .slot-dot.has-data { background: rgb(var(--valve-rgb)); }
 
   /* Modal action row */
   .modal-actions {
@@ -1068,11 +1088,11 @@
   }
   .modal-btn:active { transform: scale(0.98); }
   .modal-btn-primary {
-    color: white;
-    background: linear-gradient(135deg, var(--green), var(--green-dim));
-    box-shadow: 0 4px 14px rgba(57, 255, 122, 0.35);
+    color: #05090a;
+    background: rgb(var(--valve-rgb));
+    box-shadow: 0 4px 14px rgba(var(--valve-rgb), 0.35);
   }
-  .modal-btn-primary:hover { box-shadow: 0 6px 20px rgba(57, 255, 122, 0.5); }
+  .modal-btn-primary:hover { box-shadow: 0 6px 20px rgba(var(--valve-rgb), 0.5); }
   .modal-btn-secondary {
     color: var(--text-muted);
     background: rgba(255, 255, 255, 0.08);
@@ -1333,7 +1353,7 @@
       <div class="top-bar-left">
         <div class="greeting">
           <h2 id="greetText">Casa</h2>
-          <p id="brokerLabel">—</p>
+          <p class="hub-brand-tag">Ricci's Industries · Smart Home</p>
         </div>
       </div>
       <div class="conn-pill" id="hubConnPill">
@@ -1356,7 +1376,7 @@
     <div class="section-title">Dispositivi</div>
 
     <div class="device-grid">
-      <div class="device-card stagger" data-device="gardenboss">
+      <div class="device-card featured stagger" data-device="gardenboss">
         <div>
           <div class="device-icon-wrap green">
             <svg viewBox="0 0 24 24"><path d="M12 2C8 8 5 12 5 16a7 7 0 0 0 14 0c0-4-3-8-7-14zm0 17a5 5 0 0 1-5-5c0-2.5 2-5.5 5-10 3 4.5 5 7.5 5 10a5 5 0 0 1-5 5z"/></svg>
@@ -1372,9 +1392,9 @@
       </div>
 
       <div class="device-card coming-soon stagger">
-        <span class="device-badge">Soon</span>
+        <span class="device-badge">Presto</span>
         <div>
-          <div class="device-icon-wrap blue">
+          <div class="device-icon-wrap dormant">
             <svg viewBox="0 0 24 24"><path d="M12 3a4 4 0 0 0-4 4v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-2V7a4 4 0 0 0-4-4zm-2 4a2 2 0 1 1 4 0v3h-4V7zm2 8a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></svg>
           </div>
           <div class="device-name">Smart Lock</div>
@@ -1383,9 +1403,9 @@
       </div>
 
       <div class="device-card coming-soon stagger">
-        <span class="device-badge">Soon</span>
+        <span class="device-badge">Presto</span>
         <div>
-          <div class="device-icon-wrap orange">
+          <div class="device-icon-wrap dormant">
             <svg viewBox="0 0 24 24"><path d="M9 21h6v-1H9v1zm3-19a7 7 0 0 0-4 12.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26A7 7 0 0 0 12 2zm2 14h-4v-1.41l-.59-.42A5 5 0 1 1 17 10a4.94 4.94 0 0 1-2.41 4.17l-.59.42V16z"/></svg>
           </div>
           <div class="device-name">Smart Lights</div>
@@ -1394,9 +1414,9 @@
       </div>
 
       <div class="device-card coming-soon stagger">
-        <span class="device-badge">Soon</span>
+        <span class="device-badge">Presto</span>
         <div>
-          <div class="device-icon-wrap purple">
+          <div class="device-icon-wrap dormant">
             <svg viewBox="0 0 24 24"><path d="M22 11h-1a9 9 0 0 0-18 0H2a1 1 0 0 0 0 2h1a9 9 0 0 0 18 0h1a1 1 0 0 0 0-2zm-10 7a7 7 0 1 1 7-7 7 7 0 0 1-7 7zm0-12a5 5 0 0 0-5 5 1 1 0 0 0 2 0 3 3 0 0 1 3-3 1 1 0 0 0 0-2z"/></svg>
           </div>
           <div class="device-name">Climate</div>
@@ -1693,7 +1713,6 @@
   // Hub
   const hubConnPill  = document.getElementById('hubConnPill');
   const hubConnText  = document.getElementById('hubConnText');
-  const brokerLabel  = document.getElementById('brokerLabel');
   const greetText    = document.getElementById('greetText');
   const hubActiveDevices = document.getElementById('hubActiveDevices');
   const hubOpenValves    = document.getElementById('hubOpenValves');
@@ -2065,7 +2084,6 @@
 
     state.client.on('message', handleMqttMessage);
 
-    brokerLabel.textContent = `Broker: ${host}`;
     setLoginLoading(false);
     transitionToHub();
   }
@@ -2415,6 +2433,7 @@
 
     modalTitle.textContent = `${valve.name}`;
     modalSubtitle.textContent = `${valve.zone} · V0${valveId}`;
+    modalEl.style.setProperty('--valve-rgb', VALVE_COLORS_RGB[valve.color] || VALVE_COLORS_RGB.green);
 
     modalConflictBanner.classList.remove('show');
     renderModal();
