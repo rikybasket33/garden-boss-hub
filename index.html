@@ -598,9 +598,10 @@
   .valve-name-row {
     display: flex; align-items: baseline; gap: 8px;
   }
-  .valve-name { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
-  .valve-num { font-size: 11px; font-weight: 600; color: var(--text-faint); letter-spacing: 0.1em; text-transform: uppercase; }
-  .valve-zone { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  /* min-width:0 + overflow-wrap: i nomi lunghi vanno a capo dentro la card
+     invece di schiacciare la sigla V0x fuori dal riquadro */
+  .valve-name { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; min-width: 0; overflow-wrap: anywhere; }
+  .valve-num { font-size: 11px; font-weight: 600; color: var(--text-faint); letter-spacing: 0.1em; text-transform: uppercase; flex: 0 0 auto; }
 
   .switch {
     position: relative;
@@ -1633,7 +1634,7 @@
       </div>
       <div class="stat-card stagger">
         <div class="stat-card-label">Valvole aperte</div>
-        <div class="stat-card-value"><span id="hubOpenValves">0</span><span class="unit">/4</span></div>
+        <div class="stat-card-value"><span id="hubOpenValves">0</span><span class="unit">/<span id="hubOpenValvesTotal">4</span></span></div>
       </div>
     </div>
 
@@ -1719,7 +1720,7 @@
     <div class="summary">
       <div>
         <div class="summary-label">Valvole attive</div>
-        <div class="summary-value"><span id="activeCount">0</span> / 4</div>
+        <div class="summary-value"><span id="activeCount">0</span> / <span id="activeCountTotal">4</span></div>
       </div>
       <div class="summary-icon">
         <svg viewBox="0 0 24 24"><path d="M12 2C8 8 5 12 5 16a7 7 0 0 0 14 0c0-4-3-8-7-14zm0 17a5 5 0 0 1-5-5c0-2.5 2-5.5 5-10 3 4.5 5 7.5 5 10a5 5 0 0 1-5 5z"/></svg>
@@ -1890,18 +1891,20 @@
   /* ============================================================
      CONFIG
      ============================================================ */
-  // RGB triples (matched to the physical zone LEDs: V1 verde, V2 rosso, V3 blu, V4 giallo)
+  // RGB triples (matched to the physical zone LEDs: V2 rosso, V3 blu, V4 giallo)
   const VALVE_COLORS_RGB = {
     green:  '57, 255, 122',
     red:    '255, 77, 94',
     blue:   '45, 163, 255',
     yellow: '255, 214, 10'
   };
+  // Gli id restano quelli fisici del Garden Boss (topic MQTT gardenboss/.../{id}):
+  // la V01 e' stata smantellata, quindi sparisce dalla lista ma gli altri id
+  // NON vengono rinumerati, altrimenti i comandi finirebbero sulla valvola sbagliata.
   const VALVES = [
-    { id: 1, name: 'Prato',  zone: 'Giardino frontale', color: 'green'  },
-    { id: 2, name: 'Orto',   zone: 'Zona retro',         color: 'red'   },
-    { id: 3, name: 'Aiuole', zone: 'Lato est',           color: 'blue'  },
-    { id: 4, name: 'Vasi',   zone: 'Terrazza',           color: 'yellow'}
+    { id: 2, name: 'Fasce laterali + Cortile anteriore', color: 'red'   },
+    { id: 3, name: 'Orto',                               color: 'blue'  },
+    { id: 4, name: 'Cortile posteriore',                 color: 'yellow'}
   ];
 
   const SLOTS_PER_VALVE = 3;
@@ -1928,6 +1931,10 @@
     connected: false,
     brokerHost: '',
     deviceOnline: false,
+    // Ultimo messaggio LIVE (non retained) ricevuto dall'ESP: prova diretta che
+    // il dispositivo sta trasmettendo adesso, indipendentemente dal LWT retained.
+    lastDeviceMsgAt: null,
+    probeTimer: null,
     currentAccount: null,  // { id, name, pin, role: 'admin'|'guest' } — profilo attivo nella sessione
     valves: {},
     // schedules: { valveId: { 0: scheduleObj|null, 1: ..., 2: ... } }
@@ -2009,6 +2016,7 @@
   const greetText    = document.getElementById('greetText');
   const hubActiveDevices = document.getElementById('hubActiveDevices');
   const hubOpenValves    = document.getElementById('hubOpenValves');
+  const hubOpenValvesTotal = document.getElementById('hubOpenValvesTotal');
   const gbStatusEl   = document.getElementById('gbStatus');
   const logoutBtn    = document.getElementById('logoutBtn');
 
@@ -2018,6 +2026,7 @@
   const gbBack       = document.getElementById('gbBack');
   const valveList    = document.getElementById('valveList');
   const activeCountEl = document.getElementById('activeCount');
+  const activeCountTotalEl = document.getElementById('activeCountTotal');
   const syncBanner    = document.getElementById('syncBanner');
   const syncBannerText = document.getElementById('syncBannerText');
   const syncBannerTime = document.getElementById('syncBannerTime');
@@ -2311,8 +2320,11 @@
     state.brokerHost = host;
     state.client = mqtt.connect(url, {
       clientId, username, password,
-      clean: true, reconnectPeriod: 3000,
-      connectTimeout: 8000, keepalive: 30
+      clean: true, reconnectPeriod: 2000,
+      // keepalive corto: dopo che il telefono si risveglia il WebSocket puo'
+      // restare "zombie" (aperto ma morto). Con 15 s mqtt.js se ne accorge in
+      // ~22 s e riconnette da solo, invece di lasciare la UI ferma su dati vecchi.
+      connectTimeout: 8000, keepalive: 15
     });
 
     state.client.on('connect', () => {
@@ -2331,7 +2343,7 @@
       });
 
       // Request all schedules on connect (fallback se i retained non arrivano)
-      state.client.publish(SCHEDULE_REQUEST_ALL, '1', { qos: 0, retain: false });
+      probeDevice();
 
       // Dopo 2 secondi consideriamo concluso il sync iniziale (i retained dovrebbero
       // essere arrivati tutti). Se non è arrivato nulla, il banner mostrerà "stale".
@@ -2378,13 +2390,40 @@
     }
   }
 
-  function handleMqttMessage(topic, payload) {
+  // Un messaggio consegnato con retain=0 e' una pubblicazione avvenuta ADESSO
+  // (per spec MQTT il broker azzera il flag sulle consegne live e lo mette a 1
+  // solo sui retained inviati al momento della subscribe). Quindi: se arriva
+  // live da un topic del dispositivo, l'ESP e' acceso in questo istante — e
+  // questo batte un LWT retained rimasto indietro.
+  //
+  // Serve davvero: quando l'ESP si riconnette con lo stesso client-id, il broker
+  // chiude la vecchia sessione e pubblica il Will "offline"; l'ESP subito dopo
+  // pubblica "online". Se le due arrivano invertite, il retained resta incastrato
+  // su "offline" fino alla riconnessione successiva e il sito mente per minuti.
+  function markDeviceAlive() {
+    state.lastDeviceMsgAt = Date.now();
+    if (state.deviceOnline) return;
+    state.deviceOnline = true;
+    renderDeviceStatus();
+    updateSyncBanner();
+  }
+
+  // Chiede all'ESP di ripubblicare tutti gli schedule: e' anche il nostro "ping"
+  // applicativo, perche' la risposta arriva live e fa scattare markDeviceAlive().
+  function probeDevice() {
+    if (!state.client || !state.connected) return;
+    state.client.publish(SCHEDULE_REQUEST_ALL, '1', { qos: 0, retain: false });
+  }
+
+  function handleMqttMessage(topic, payload, packet) {
     const text = payload.toString().trim();
+    const isRetained = !!(packet && packet.retain);
 
     // Valve status: gardenboss/status/valve/{id}
     let m = topic.match(/^gardenboss\/status\/valve\/(\d+)$/);
     if (m) {
       const id = parseInt(m[1], 10);
+      if (!isRetained) markDeviceAlive();
       if (!state.valves[id]) return;
       const isOn = text === '1';
       const v = state.valves[id];
@@ -2399,11 +2438,16 @@
     // Device status (LWT): gardenboss/status/device
     if (topic === STATUS_DEVICE_TOPIC) {
       state.deviceOnline = (text === 'online');
-      gbStatusEl.textContent = state.deviceOnline ? 'Online' : 'Offline';
-      gbStatusEl.classList.toggle('active', state.deviceOnline);
-      valveList.classList.toggle('device-offline', !state.deviceOnline);
-      updateDeviceCount();
+      renderDeviceStatus();
       updateSyncBanner();
+      // Se ci viene detto "offline", non fidarsi sulla parola: il retained puo'
+      // essere stantio. Un probe verifica; se l'ESP c'e', risponde e markDeviceAlive()
+      // rimette la UI a posto. Se e' davvero spento nessuno risponde e non si
+      // innesca nessun loop (questo ramo scatta solo alla ricezione di un LWT).
+      if (!state.deviceOnline) {
+        if (state.probeTimer) clearTimeout(state.probeTimer);
+        state.probeTimer = setTimeout(probeDevice, 1500);
+      }
       return;
     }
 
@@ -2412,6 +2456,7 @@
     if (m) {
       const vid = parseInt(m[1], 10);
       const slot = parseInt(m[2], 10);
+      if (!isRetained) markDeviceAlive();
       if (!state.schedules[vid] || slot < 0 || slot >= SLOTS_PER_VALVE) return;
 
       // Empty payload = no schedule in this slot (cleared)
@@ -2783,19 +2828,46 @@
     hubActiveDevices.textContent = (state.connected && state.deviceOnline) ? '1' : '0';
   }
 
+  // Unico punto che scrive la pillola di stato del Garden Boss.
+  // Distinzione importante: "il MIO browser non e' connesso al broker" NON
+  // significa "il Garden Boss e' spento". Prima i due casi venivano confusi e
+  // bastava un cambio rete / schermo bloccato per far comparire "Offline" con
+  // l'ESP perfettamente acceso. Ora, se non siamo connessi, dichiariamo di non
+  // sapere ("In attesa…") invece di affermare il falso.
+  function renderDeviceStatus() {
+    const usable = state.connected && state.deviceOnline;
+    gbStatusEl.textContent = !state.connected
+      ? 'In attesa…'
+      : (state.deviceOnline ? 'Online' : 'Offline');
+    gbStatusEl.classList.toggle('active', usable);
+    // I controlli restano disabilitati se non possiamo consegnare il comando.
+    valveList.classList.toggle('device-offline', !usable);
+    updateDeviceCount();
+  }
+
   function setConnectionUI(connected) {
     [hubConnPill, gbConnPill].forEach(p => p.classList.toggle('connected', connected));
     const txt = connected ? 'Connesso' : 'Disconnesso';
     hubConnText.textContent = txt;
     gbConnText.textContent  = txt;
-    if (!connected) {
-      state.deviceOnline = false;
-      gbStatusEl.textContent = 'Offline';
-      gbStatusEl.classList.remove('active');
-      valveList.classList.add('device-offline');
-    }
-    updateDeviceCount();
+    // state.deviceOnline NON viene azzerato: e' l'ultimo valore noto del LWT e
+    // alla riconnessione il retained lo riconferma (o lo corregge) subito.
+    renderDeviceStatus();
   }
+
+  // Su telefono la PWA viene congelata a schermo bloccato: il WebSocket muore
+  // in silenzio. Senza questo, alla riapertura si vedeva "Offline" per decine di
+  // secondi (fino allo scadere del keepalive) con l'ESP acceso. Al ritorno in
+  // primo piano forziamo il riaggancio, o almeno un probe se siamo gia' su.
+  function ensureConnection() {
+    const c = state.client;
+    if (!c) return;
+    if (c.connected) { probeDevice(); return; }
+    if (!c.reconnecting) { try { c.reconnect(); } catch (e) { /* client chiuso */ } }
+  }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) ensureConnection(); });
+  window.addEventListener('online',   ensureConnection);
+  window.addEventListener('pageshow', ensureConnection);
 
   /* ============================================================
      VALVE LIST RENDERING
@@ -2817,7 +2889,6 @@
             <div class="valve-name">${v.name}</div>
             <div class="valve-num">V0${v.id}</div>
           </div>
-          <div class="valve-zone">${v.zone}</div>
         </div>
         <div class="switch" role="switch" aria-checked="false" tabindex="0"></div>
       </div>
@@ -3003,7 +3074,7 @@
     }
 
     modalTitle.textContent = `${valve.name}`;
-    modalSubtitle.textContent = `${valve.zone} · V0${valveId}`;
+    modalSubtitle.textContent = `V0${valveId}`;
     modalEl.style.setProperty('--valve-rgb', VALVE_COLORS_RGB[valve.color] || VALVE_COLORS_RGB.green);
     modalEl.classList.toggle('readonly', !(state.currentAccount && state.currentAccount.role === 'admin'));
 
@@ -3312,6 +3383,9 @@
       state.client = null;
     }
     state.connected = false;
+    state.deviceOnline = false;
+    state.lastDeviceMsgAt = null;
+    if (state.probeTimer) { clearTimeout(state.probeTimer); state.probeTimer = null; }
     setConnectionUI(false);
 
     VALVES.forEach(v => {
@@ -3373,7 +3447,9 @@
      INIT
      ============================================================ */
   VALVES.forEach(v => renderValve(v.id));
-  valveList.classList.add('device-offline'); // finché il LWT non conferma 'online'
+  hubOpenValvesTotal.textContent = VALVES.length;
+  activeCountTotalEl.textContent = VALVES.length;
+  renderDeviceStatus(); // finché il LWT non conferma 'online' i controlli restano spenti
 
   const h = new Date().getHours();
   if      (h < 6)  greetText.textContent = 'Buonanotte';
@@ -3384,6 +3460,7 @@
   // Debug
   window.__hub = {
     state, screens, toggleValve, openModal,
+    handleMqttMessage, renderDeviceStatus, markDeviceAlive, probeDevice, ensureConnection,
     afterBrokerConnected, transitionToHub, transitionToAccountPicker,
     loadAccounts, saveAccounts, renderAccountList, renderAccountsModalList,
     activateAccount, applyAccountToSession
