@@ -1898,13 +1898,13 @@
     blue:   '45, 163, 255',
     yellow: '255, 214, 10'
   };
-  // Gli id restano quelli fisici del Garden Boss (topic MQTT gardenboss/.../{id}):
-  // la V01 e' stata smantellata, quindi sparisce dalla lista ma gli altri id
-  // NON vengono rinumerati, altrimenti i comandi finirebbero sulla valvola sbagliata.
+  // Gli id corrispondono a quelli fisici del Garden Boss (topic MQTT gardenboss/.../{id}):
+  // V01 ripristinata a 4 zone complete (ECO-001: Rework pin D14 / GPIO 14).
   const VALVES = [
-    { id: 2, name: 'Fasce laterali + Cortile anteriore', color: 'red'   },
-    { id: 3, name: 'Orto',                               color: 'blue'  },
-    { id: 4, name: 'Cortile posteriore',                 color: 'yellow'}
+    { id: 1, name: 'Fasce laterali',     color: 'green' },
+    { id: 2, name: 'Cortile anteriore',  color: 'red'   },
+    { id: 3, name: 'Orto',               color: 'blue'  },
+    { id: 4, name: 'Cortile Posteriore', color: 'yellow'}
   ];
 
   const SLOTS_PER_VALVE = 3;
