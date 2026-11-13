@@ -1909,7 +1909,7 @@
 
 <div class="ptr-indicator" id="ptrIndicator" aria-hidden="true">
   <svg width="15" height="15" aria-hidden="true"><use href="#icon-refresh"/></svg>
-  <span id="ptrText">Scorri per ricaricare</span>
+  <span id="ptrText">Scorri per aggiornare</span>
 </div>
 
 <div id="liveAnnouncer" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
@@ -1920,7 +1920,7 @@
 <section class="screen entering-fade active" id="loginScreen">
   <div class="container">
     <div class="login-card">
-      <button type="button" class="refresh-btn card-corner" id="loginRefreshBtn" aria-label="Ricarica pagina" title="Ricarica pagina">
+      <button type="button" class="refresh-btn card-corner" id="loginRefreshBtn" aria-label="Aggiorna schermata" title="Aggiorna schermata">
         <svg width="16" height="16" aria-hidden="true"><use href="#icon-refresh"/></svg>
       </button>
       <div class="login-logo">
@@ -1972,7 +1972,7 @@
 <section class="screen entering-fade" id="accountScreen" hidden>
   <div class="container">
     <div class="account-top-actions">
-      <button type="button" class="refresh-btn" id="accountRefreshBtn" aria-label="Ricarica pagina" title="Ricarica pagina">
+      <button type="button" class="refresh-btn" id="accountRefreshBtn" aria-label="Aggiorna schermata" title="Aggiorna schermata">
         <svg width="16" height="16" aria-hidden="true"><use href="#icon-refresh"/></svg>
       </button>
     </div>
@@ -2136,7 +2136,7 @@
         </div>
       </div>
       <div class="top-bar-right">
-        <button type="button" class="refresh-btn" id="hubRefreshBtn" aria-label="Ricarica pagina" title="Ricarica pagina">
+        <button type="button" class="refresh-btn" id="hubRefreshBtn" aria-label="Aggiorna schermata" title="Aggiorna schermata">
           <svg width="16" height="16" aria-hidden="true"><use href="#icon-refresh"/></svg>
         </button>
         <div class="conn-pill" id="hubConnPill">
@@ -2259,7 +2259,7 @@
         </div>
       </div>
       <div class="top-bar-right">
-        <button type="button" class="refresh-btn" id="gbRefreshBtn" aria-label="Ricarica pagina" title="Ricarica pagina">
+        <button type="button" class="refresh-btn" id="gbRefreshBtn" aria-label="Aggiorna schermata" title="Aggiorna schermata">
           <svg width="16" height="16" aria-hidden="true"><use href="#icon-refresh"/></svg>
         </button>
         <div class="conn-pill" id="gbConnPill">
@@ -3005,8 +3005,50 @@
   /* ============================================================
      MAIN MQTT SESSION
      ============================================================ */
+  const ACCOUNT_SYNC_TOPICS = [HUB_ACCOUNTS_FILTER, HUB_REQUESTS_FILTER, HUB_META_TOPIC];
+  const DEVICE_SYNC_TOPICS  = [STATUS_VALVE_FILTER, STATUS_DEVICE_TOPIC, SCHEDULE_GET_FILTER];
   let syncWaveAccounts = null;
   let syncWaveRequests = null;
+  let accountsSyncWaiters = [];
+  let brokerConnectWaiters = [];
+
+  function waitForAccountsSync() {
+    return new Promise(resolve => {
+      if (state.accountsSynced) { resolve(); return; }
+      accountsSyncWaiters.push(resolve);
+    });
+  }
+
+  function beginAccountsResync() {
+    state.accountsSynced = false;
+    syncWaveAccounts = {};
+    syncWaveRequests = {};
+    renderAccountScreen();
+  }
+
+  function armDeviceInitialSyncTimer(delayMs) {
+    if (state.initialSyncTimer) clearTimeout(state.initialSyncTimer);
+    state.initialSyncTimer = setTimeout(() => {
+      state.initialSyncDone = true;
+      updateSyncBanner();
+    }, delayMs);
+  }
+
+  function resubscribeMqttTopics(topics, onDone) {
+    if (!state.client || !state.connected) {
+      if (onDone) onDone(new Error('not_connected'));
+      return;
+    }
+    state.client.unsubscribe(topics, () => {
+      if (!state.client || !state.connected) {
+        if (onDone) onDone(new Error('disconnected'));
+        return;
+      }
+      state.client.subscribe(topics, { qos: 1 }, err => {
+        if (onDone) onDone(err || null);
+      });
+    });
+  }
 
   function scheduleAccountsSyncComplete(delayMs) {
     if (state.accountsSynced) return;
@@ -3030,6 +3072,10 @@
     renderAccountScreen();
     renderAdminApprovals();
     if (accountsDialog.open) renderAccountsModalList();
+    if (accountsSyncWaiters.length) {
+      const pending = accountsSyncWaiters.splice(0);
+      pending.forEach(fn => fn());
+    }
   }
 
   function startMainSession(host, username, password) {
@@ -3056,6 +3102,10 @@
     state.client.on('connect', () => {
       state.connected = true;
       setConnectionUI(true);
+      if (brokerConnectWaiters.length) {
+        const waiters = brokerConnectWaiters.splice(0);
+        waiters.forEach(fn => fn());
+      }
 
       // Reset sync state
       state.initialSyncDone = false;
@@ -3063,19 +3113,9 @@
       state.lastScheduleUpdate = null;
       updateSyncBanner();
 
-      state.accountsSynced = false;
-      syncWaveAccounts = {};
-      syncWaveRequests = {};
-      renderAccountScreen();
+      beginAccountsResync();
 
-      const topics = [
-        STATUS_VALVE_FILTER,
-        STATUS_DEVICE_TOPIC,
-        SCHEDULE_GET_FILTER,
-        HUB_ACCOUNTS_FILTER,
-        HUB_REQUESTS_FILTER,
-        HUB_META_TOPIC
-      ];
+      const topics = [...DEVICE_SYNC_TOPICS, ...ACCOUNT_SYNC_TOPICS];
       state.client.subscribe(topics, { qos: 1 }, err => {
         if (err) {
           console.error('Subscribe error:', err);
@@ -3094,11 +3134,7 @@
 
       // Dopo 2 secondi consideriamo concluso il sync iniziale (i retained dovrebbero
       // essere arrivati tutti). Se non è arrivato nulla, il banner mostrerà "stale".
-      if (state.initialSyncTimer) clearTimeout(state.initialSyncTimer);
-      state.initialSyncTimer = setTimeout(() => {
-        state.initialSyncDone = true;
-        updateSyncBanner();
-      }, 2000);
+      armDeviceInitialSyncTimer(2000);
     });
 
     state.client.on('reconnect', () => {
@@ -4614,6 +4650,9 @@
     syncWaveRequests = null;
     if (state.accountsSyncTimer) { clearTimeout(state.accountsSyncTimer); state.accountsSyncTimer = null; }
     if (state.accountsSyncMaxTimer) { clearTimeout(state.accountsSyncMaxTimer); state.accountsSyncMaxTimer = null; }
+    if (accountsSyncWaiters.length) accountsSyncWaiters.splice(0).forEach(fn => fn());
+    brokerConnectWaiters.splice(0);
+    stopRefreshUI();
     pendingPinAccount = null;
 
     if (pinDialog.open) pinDialog.close();
@@ -4649,65 +4688,174 @@
   }
 
   /* ============================================================
-     REFRESH & PULL-TO-REFRESH (PWA mobile & accessibilità)
+     REFRESH & PULL-TO-REFRESH (aggiornamento in-place senza logout)
      ============================================================ */
   const ptrIndicator = document.getElementById('ptrIndicator');
   const ptrText      = document.getElementById('ptrText');
   const ptrIconSvg   = ptrIndicator ? ptrIndicator.querySelector('svg') : null;
   const refreshBtns  = Array.from(document.querySelectorAll('.refresh-btn'));
   const PTR_THRESHOLD = 64;
-  let isReloading = false;
+  let isRefreshing = false;
 
   function prefersReducedMotion() {
     return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   }
 
-  function triggerAppReload() {
-    if (isReloading) return;
-    isReloading = true;
+  function updateGreeting() {
+    const h = new Date().getHours();
+    if      (h < 6)  greetText.textContent = 'Buonanotte';
+    else if (h < 12) greetText.textContent = 'Buongiorno';
+    else if (h < 18) greetText.textContent = 'Buon pomeriggio';
+    else             greetText.textContent = 'Buonasera';
+  }
 
+  function waitForBrokerConnect() {
+    return new Promise(resolve => {
+      if (state.connected) { resolve(true); return; }
+      brokerConnectWaiters.push(() => resolve(true));
+    });
+  }
+
+  function startRefreshUI() {
+    isRefreshing = true;
     refreshBtns.forEach(btn => {
       btn.classList.add('is-reloading');
       btn.disabled = true;
     });
-
     if (ptrIndicator && ptrText) {
       ptrIndicator.classList.remove('dragging', 'ready');
       ptrIndicator.classList.add('refreshing');
-      ptrText.textContent = 'Ricarica in corso…';
+      ptrText.textContent = 'Aggiornamento…';
       ptrIndicator.style.opacity = '1';
       ptrIndicator.style.transform = 'translate3d(-50%, 0, 0)';
       if (ptrIconSvg) ptrIconSvg.style.transform = '';
     }
-    announceStatus('Ricaricamento pagina in corso');
+    announceStatus('Aggiornamento della schermata in corso');
+  }
 
-    const swCheck = ('serviceWorker' in navigator && navigator.serviceWorker.getRegistration)
-      ? Promise.race([
-          navigator.serviceWorker.getRegistration().then(reg => (reg ? reg.update() : null)).catch(() => null),
-          new Promise(res => setTimeout(res, 200))
-        ])
+  function stopRefreshUI(statusMsg) {
+    isRefreshing = false;
+    refreshBtns.forEach(btn => {
+      btn.classList.remove('is-reloading');
+      btn.disabled = false;
+    });
+    if (ptrIndicator) {
+      ptrIndicator.classList.remove('dragging', 'ready', 'refreshing');
+      ptrIndicator.style.opacity = '';
+      ptrIndicator.style.transform = '';
+      if (ptrIconSvg) ptrIconSvg.style.transform = '';
+      if (ptrText) ptrText.textContent = 'Scorri per aggiornare';
+    }
+    if (statusMsg) {
+      announceStatus(statusMsg);
+      toast(statusMsg);
+    }
+  }
+
+  async function refreshCurrentScreen() {
+    if (isRefreshing) return;
+    startRefreshUI();
+
+    const waitMs = ms => new Promise(res => setTimeout(res, ms));
+    const swRegPromise = ('serviceWorker' in navigator && navigator.serviceWorker.getRegistration)
+      ? navigator.serviceWorker.getRegistration().then(reg => (reg ? reg.update() : null)).catch(() => null)
       : Promise.resolve();
 
-    Promise.all([swCheck, new Promise(res => setTimeout(res, 180))]).then(() => {
+    // Se si e' gia' sulla schermata di login, un reload pulito aggiorna l'intera app.
+    if (currentScreenKey === 'login') {
+      await Promise.all([Promise.race([swRegPromise, waitMs(200)]), waitMs(180)]);
       if (state.client) {
         try { state.client.end(true); } catch (e) {}
         state.client = null;
       }
       window.location.reload();
+      return;
+    }
+
+    // Sulle schermate autenticate aggiorna solo i dati e lo stato della vista corrente,
+    // mantenendo sessione MQTT, account attivo e schermata corrente.
+    const minSpin = waitMs(480);
+
+    if (!state.client || !state.connected) {
+      ensureConnection();
+      const gotConn = await Promise.race([waitForBrokerConnect(), waitMs(1800).then(() => false)]);
+      if (!gotConn || !state.connected) {
+        if (currentScreenKey === 'account') renderAccountScreen();
+        else { renderDeviceStatus(); updateSyncBanner(); }
+        await minSpin;
+        stopRefreshUI('Broker non raggiungibile');
+        return;
+      }
+      await Promise.all([minSpin, Promise.race([waitForAccountsSync(), waitMs(1200)])]);
+      stopRefreshUI(
+        currentScreenKey === 'account' ? 'Account aggiornati'
+          : currentScreenKey === 'hub' ? 'Dashboard aggiornata'
+          : 'Stato valvole aggiornato'
+      );
+      return;
+    }
+
+    if (currentScreenKey === 'account') {
+      beginAccountsResync();
+      if (state.accountsSyncMaxTimer) clearTimeout(state.accountsSyncMaxTimer);
+      state.accountsSyncMaxTimer = setTimeout(completeAccountsSync, 1400);
+      resubscribeMqttTopics(ACCOUNT_SYNC_TOPICS, err => {
+        if (err) { completeAccountsSync(); return; }
+        scheduleAccountsSyncComplete(450);
+      });
+      await Promise.all([minSpin, Promise.race([waitForAccountsSync(), waitMs(1600)])]);
+      stopRefreshUI('Account aggiornati');
+      return;
+    }
+
+    if (currentScreenKey === 'hub') {
+      updateGreeting();
+      applyAccountToSession();
+      renderDeviceStatus();
+      updateHubStats();
+      beginAccountsResync();
+      if (state.accountsSyncMaxTimer) clearTimeout(state.accountsSyncMaxTimer);
+      state.accountsSyncMaxTimer = setTimeout(completeAccountsSync, 1400);
+      resubscribeMqttTopics([...DEVICE_SYNC_TOPICS, ...ACCOUNT_SYNC_TOPICS], err => {
+        if (!err) probeDevice();
+        if (err) { completeAccountsSync(); return; }
+        scheduleAccountsSyncComplete(450);
+      });
+      await Promise.all([minSpin, Promise.race([waitForAccountsSync(), waitMs(1600)])]);
+      applyAccountToSession();
+      renderDeviceStatus();
+      updateHubStats();
+      stopRefreshUI('Dashboard aggiornata');
+      return;
+    }
+
+    // currentScreenKey === 'garden'
+    state.initialSyncDone = false;
+    updateSyncBanner();
+    VALVES.forEach(v => renderValve(v.id));
+    renderDeviceStatus();
+
+    const subSync = new Promise(resolve => {
+      resubscribeMqttTopics(DEVICE_SYNC_TOPICS, () => {
+        probeDevice();
+        armDeviceInitialSyncTimer(1500);
+        setTimeout(resolve, 450);
+      });
     });
+    await Promise.all([minSpin, Promise.race([subSync, waitMs(1600)])]);
+    if (!state.initialSyncDone) {
+      state.initialSyncDone = true;
+      updateSyncBanner();
+    }
+    VALVES.forEach(v => renderValve(v.id));
+    renderDeviceStatus();
+    stopRefreshUI('Stato valvole aggiornato');
   }
 
-  refreshBtns.forEach(btn => btn.addEventListener('click', () => triggerAppReload()));
+  refreshBtns.forEach(btn => btn.addEventListener('click', () => refreshCurrentScreen()));
 
   window.addEventListener('pageshow', e => {
-    if (!e.persisted) return;
-    isReloading = false;
-    refreshBtns.forEach(btn => { btn.classList.remove('is-reloading'); btn.disabled = false; });
-    if (ptrIndicator) {
-      ptrIndicator.classList.remove('dragging', 'ready', 'refreshing');
-      ptrIndicator.style.opacity = '';
-      ptrIndicator.style.transform = '';
-    }
+    if (e.persisted) stopRefreshUI();
   });
 
   function setupPullToRefresh(screenEl) {
@@ -4723,19 +4871,19 @@
       if (clearContainer && container) {
         container.style.transition = 'transform 0.25s var(--ease-ios)';
         container.style.transform = '';
-        setTimeout(() => { if (!isReloading) container.style.transition = ''; }, 260);
+        setTimeout(() => { if (!isRefreshing) container.style.transition = ''; }, 260);
       }
-      if (ptrIndicator && !isReloading) {
+      if (ptrIndicator && !isRefreshing) {
         ptrIndicator.classList.remove('dragging', 'ready');
         ptrIndicator.style.opacity = '';
         ptrIndicator.style.transform = '';
         if (ptrIconSvg) ptrIconSvg.style.transform = '';
-        if (ptrText) ptrText.textContent = 'Scorri per ricaricare';
+        if (ptrText) ptrText.textContent = 'Scorri per aggiornare';
       }
     }
 
     screenEl.addEventListener('touchstart', e => {
-      if (isReloading || e.touches.length !== 1) return;
+      if (isRefreshing || e.touches.length !== 1) return;
       if (screenEl.hidden || screenEl.scrollTop > 1) return;
       if (document.querySelector('dialog[open]') || modalEl.classList.contains('show')) return;
       if (e.target && e.target.closest('input, select, textarea, dialog, #scheduleModal')) return;
@@ -4747,7 +4895,7 @@
     }, { passive: true });
 
     screenEl.addEventListener('touchmove', e => {
-      if (!tracking || isReloading) return;
+      if (!tracking || isRefreshing) return;
       if (e.touches.length !== 1) { tracking = false; pulling = false; resetPtr(true); return; }
       const touch = e.touches[0];
       const dx = touch.clientX - startX;
@@ -4781,24 +4929,24 @@
         ptrIndicator.style.transform = `translate3d(-50%, ${pillY}px, 0)`;
         ptrIndicator.classList.toggle('ready', ready);
         if (ptrIconSvg) ptrIconSvg.style.transform = `rotate(${Math.round(progress * 210)}deg)`;
-        if (ptrText) ptrText.textContent = ready ? 'Rilascia per ricaricare' : 'Scorri per ricaricare';
+        if (ptrText) ptrText.textContent = ready ? 'Rilascia per aggiornare' : 'Scorri per aggiornare';
       }
     }, { passive: false });
 
     function finishTouch(cancelled) {
       if (!tracking) return;
-      const shouldReload = !cancelled && pulling && pullDist >= PTR_THRESHOLD;
+      const shouldRefresh = !cancelled && pulling && pullDist >= PTR_THRESHOLD;
       const hadPull = pulling;
       tracking = false;
       pulling = false;
       pullDist = 0;
 
-      if (shouldReload) {
+      if (shouldRefresh) {
         if (container) {
           container.style.transition = 'transform 0.25s var(--ease-ios)';
           container.style.transform = '';
         }
-        triggerAppReload();
+        refreshCurrentScreen();
       } else if (hadPull) {
         resetPtr(true);
       }
@@ -4824,12 +4972,7 @@
   hubOpenValvesTotal.textContent = VALVES.length;
   activeCountTotalEl.textContent = VALVES.length;
   renderDeviceStatus(); // finché il LWT non conferma 'online' i controlli restano spenti
-
-  const h = new Date().getHours();
-  if      (h < 6)  greetText.textContent = 'Buonanotte';
-  else if (h < 12) greetText.textContent = 'Buongiorno';
-  else if (h < 18) greetText.textContent = 'Buon pomeriggio';
-  else             greetText.textContent = 'Buonasera';
+  updateGreeting();
 
   // Debug
   window.__hub = {
@@ -4839,7 +4982,7 @@
     getSortedAccounts, getSortedRequests, isAdmin, canControlDevices,
     renderAccountScreen, renderAccountsModalList, renderAdminApprovals,
     approveRequest, rejectRequest, activateAccount, applyAccountToSession,
-    triggerAppReload
+    refreshCurrentScreen
   };
 })();
 </script>
