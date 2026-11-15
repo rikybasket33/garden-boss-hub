@@ -431,7 +431,7 @@
      ============================================================ */
   .stats-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 12px;
     margin-bottom: 24px;
   }
@@ -440,13 +440,32 @@
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid var(--glass-border);
-    border-radius: 18px;
-    padding: 16px;
+    border-radius: 20px;
+    padding: 16px 18px;
     box-shadow: var(--shadow-soft);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
   }
-  .stat-card-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
-  .stat-card-value { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
-  .stat-card-value .unit { font-size: 13px; font-weight: 500; color: var(--text-muted); margin-left: 2px; }
+  .stat-card-info { min-width: 0; }
+  .stat-card-label { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
+  .stat-card-value {
+    font-size: 22px; font-weight: 700; letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-card-value .is-active-count { color: var(--green); }
+  .stat-card-value .unit { font-size: 14px; font-weight: 500; color: var(--text-muted); margin-left: 2px; }
+  .stat-card-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: rgba(57, 255, 122, 0.16);
+    border: 1px solid rgba(57, 255, 122, 0.3);
+    color: var(--green);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .stat-card-icon svg { width: 22px; height: 22px; }
 
   .section-title {
     font-size: 13px; font-weight: 600;
@@ -458,13 +477,14 @@
 
   .device-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
     margin-bottom: 24px;
   }
 
   .device-card {
     position: relative;
+    min-width: 0;
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -500,6 +520,101 @@
     height: 3px;
     background: linear-gradient(90deg, var(--green), transparent 85%);
     opacity: 0.85;
+  }
+
+  .device-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 14px;
+    min-width: 0;
+  }
+  .device-card-head .device-icon-wrap {
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  .device-valves-pill {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 44px;
+    min-width: 0;
+    max-width: calc(100% - 50px);
+    padding: 5px 10px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+    flex-shrink: 0;
+  }
+  .device-valves-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    line-height: 1.1;
+  }
+  .device-valves-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(230, 255, 236, 0.35);
+    flex-shrink: 0;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+  .device-valves-count {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .device-valves-total {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+  .device-valves-label {
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.1;
+    color: var(--text-muted);
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+  .device-valves-pill.is-offline {
+    opacity: 0.68;
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.09);
+  }
+  .device-valves-pill.is-offline .device-valves-count {
+    color: var(--text-muted);
+  }
+  .device-valves-pill.is-active {
+    background: rgba(57, 255, 122, 0.14);
+    border-color: rgba(57, 255, 122, 0.42);
+    box-shadow: 0 0 14px rgba(57, 255, 122, 0.18), inset 0 1px 0 rgba(57, 255, 122, 0.14);
+  }
+  .device-valves-pill.is-active .device-valves-dot {
+    background: var(--green);
+    box-shadow: 0 0 6px rgba(57, 255, 122, 0.8);
+    animation: pulse 2.2s ease-in-out infinite;
+  }
+  .device-valves-pill.is-active .device-valves-count {
+    color: var(--green);
+  }
+  .device-valves-pill.is-active .device-valves-total {
+    color: rgba(180, 255, 205, 0.78);
+  }
+  .device-valves-pill.is-active .device-valves-label {
+    color: rgba(234, 255, 241, 0.88);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .device-valves-pill.is-active .device-valves-dot { animation: none; }
   }
 
   .device-icon-wrap {
@@ -2104,6 +2219,658 @@
     margin: 0;
     padding: 0;
   }
+
+  /* ============================================================
+     ACTIVATION CALENDAR (Pulsante & Sheet Dialog)
+     ============================================================ */
+  .calendar-entry-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 15px;
+    margin: -10px 0 22px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    box-shadow: var(--shadow-soft);
+    color: var(--text);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.2s ease, border-color 0.25s ease;
+  }
+  .calendar-entry-btn:hover { background: var(--glass-bg-strong); }
+  .calendar-entry-btn:active { transform: scale(0.985); }
+  .calendar-entry-btn.has-overlap {
+    border-color: rgba(255, 159, 10, 0.45);
+    background: linear-gradient(155deg, rgba(255, 159, 10, 0.12), rgba(255, 255, 255, 0.05));
+  }
+  .calendar-entry-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(57, 255, 122, 0.14);
+    border: 1px solid rgba(57, 255, 122, 0.3);
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+  }
+  .calendar-entry-icon svg { width: 20px; height: 20px; }
+  .calendar-entry-btn.has-overlap .calendar-entry-icon {
+    background: rgba(255, 159, 10, 0.18);
+    border-color: rgba(255, 159, 10, 0.42);
+    color: var(--orange);
+  }
+  .calendar-entry-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .calendar-entry-title {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+  .calendar-entry-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .calendar-entry-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 9px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .calendar-entry-badge.is-overlap {
+    background: rgba(255, 159, 10, 0.2);
+    border: 1px solid rgba(255, 159, 10, 0.45);
+    color: #ffd591;
+  }
+  .calendar-entry-badge.is-ok {
+    background: rgba(57, 255, 122, 0.14);
+    border: 1px solid rgba(57, 255, 122, 0.3);
+    color: var(--green);
+  }
+  .calendar-entry-badge.is-empty {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+  }
+  .calendar-entry-chevron {
+    width: 16px;
+    height: 16px;
+    color: var(--text-faint);
+    flex-shrink: 0;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  .calendar-entry-btn:hover .calendar-entry-chevron {
+    transform: translateX(2px);
+    color: var(--text-muted);
+  }
+
+  dialog.sheet-dialog.calendar-dialog {
+    padding: 20px 16px 24px;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+  }
+  dialog.sheet-dialog.calendar-dialog::-webkit-scrollbar {
+    width: 6px;
+  }
+  dialog.sheet-dialog.calendar-dialog::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  dialog.sheet-dialog.calendar-dialog::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+  }
+  dialog.sheet-dialog.calendar-dialog::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.35);
+  }
+  .calendar-dialog .modal-header { margin-bottom: 16px; }
+  @media (min-width: 600px) {
+    dialog.sheet-dialog.calendar-dialog {
+      max-width: 660px;
+      padding: 24px 24px 28px;
+    }
+  }
+
+  .cal-days-row {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 5px;
+    margin-bottom: 14px;
+  }
+  @media (min-width: 600px) {
+    .cal-days-row { gap: 8px; }
+  }
+  .cal-day-pill {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 48px;
+    padding: 7px 2px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1.5px solid transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-ios);
+    user-select: none;
+  }
+  .cal-day-pill:hover { background: rgba(255, 255, 255, 0.11); color: var(--text); }
+  .cal-day-pill:active { transform: scale(0.94); }
+  .cal-day-pill.is-today {
+    border-color: rgba(57, 255, 122, 0.42);
+    background: rgba(57, 255, 122, 0.08);
+    color: var(--text);
+  }
+  .cal-day-pill.is-today .cal-day-name {
+    text-decoration: underline;
+    text-decoration-color: var(--green);
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1.5px;
+  }
+  .cal-day-pill.selected {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.72);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.32);
+  }
+  .cal-day-pill.is-today.selected {
+    background: rgba(57, 255, 122, 0.18);
+    border-color: var(--green);
+  }
+  .cal-day-name {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .cal-day-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.14);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+  }
+  .cal-day-dot.has-turns {
+    background: rgba(57, 255, 122, 0.78);
+  }
+  .cal-day-dot.has-overlap {
+    background: #ff9f0a;
+    box-shadow: 0 0 7px rgba(255, 159, 10, 0.9);
+  }
+
+  .cal-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .cal-range-info {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .cal-view-switch {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--glass-border);
+    gap: 3px;
+  }
+  .cal-view-btn {
+    padding: 6px 11px;
+    border-radius: 7px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .cal-view-btn:hover:not(:disabled) { color: var(--text); }
+  .cal-view-btn.active {
+    background: rgba(57, 255, 122, 0.18);
+    border-color: rgba(57, 255, 122, 0.35);
+    color: var(--green);
+  }
+  .cal-view-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .cal-timeline-card {
+    --cal-label-w: 96px;
+    --cal-col-gap: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 12px 12px 14px;
+    margin-bottom: 14px;
+  }
+  @media (min-width: 600px) {
+    .cal-timeline-card {
+      --cal-label-w: 150px;
+      --cal-col-gap: 14px;
+      padding: 14px 16px 16px;
+    }
+  }
+  .cal-axis-row {
+    display: grid;
+    grid-template-columns: var(--cal-label-w) minmax(0, 1fr);
+    gap: var(--cal-col-gap);
+    align-items: end;
+    margin-bottom: 8px;
+  }
+  .cal-axis-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .cal-axis-track {
+    position: relative;
+    height: 16px;
+  }
+  .cal-axis-tick {
+    position: absolute;
+    top: 0;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    transform: translateX(-50%);
+  }
+  .cal-axis-tick.is-first { left: 0; transform: none; }
+  .cal-axis-tick.is-last { right: 0; left: auto; transform: none; }
+
+  .cal-rows-stage { position: relative; }
+  .cal-grid-overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--cal-label-w) + var(--cal-col-gap));
+    right: 0;
+    pointer-events: none;
+  }
+  .cal-grid-overlay.back { z-index: 1; }
+  .cal-grid-overlay.front { z-index: 4; }
+  .cal-grid-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .cal-overlap-band {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    min-width: 3px;
+    border-radius: 4px;
+    background: rgba(255, 159, 10, 0.16);
+    border-left: 1px solid rgba(255, 94, 58, 0.52);
+    border-right: 1px solid rgba(255, 94, 58, 0.52);
+  }
+  .cal-now-line {
+    position: absolute;
+    top: -4px;
+    bottom: -4px;
+    width: 1.5px;
+    background: rgba(57, 255, 122, 0.85);
+    box-shadow: 0 0 8px rgba(57, 255, 122, 0.65);
+    transform: translateX(-50%);
+  }
+  .cal-now-dot {
+    position: absolute;
+    top: -3px;
+    left: 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    transform: translateX(-50%);
+    box-shadow: 0 0 8px rgba(57, 255, 122, 0.85);
+  }
+
+  .cal-rows {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .cal-row {
+    display: grid;
+    grid-template-columns: var(--cal-label-w) minmax(0, 1fr);
+    gap: var(--cal-col-gap);
+    align-items: center;
+    --valve-rgb: var(--green-rgb);
+  }
+  .cal-row-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+  .cal-valve-code {
+    flex: 0 0 auto;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    padding: 2px 5px;
+    border-radius: 6px;
+    background: rgb(var(--valve-rgb));
+    color: var(--valve-fg, #05090a);
+    line-height: 1.2;
+  }
+  .cal-valve-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgb(var(--valve-text-rgb, var(--valve-rgb)));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  @media (min-width: 600px) {
+    .cal-valve-name { font-size: 12px; }
+  }
+  .cal-row-track {
+    position: relative;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.035);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+  }
+  .cal-bar {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    min-width: 6px;
+    border-radius: 6px;
+    padding: 0 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: rgb(var(--valve-rgb));
+    color: var(--valve-fg, #05090a);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 2px 10px rgba(var(--valve-rgb), 0.35);
+    cursor: pointer;
+    z-index: 3;
+    transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+  }
+  .cal-bar:hover, .cal-bar:active {
+    filter: brightness(1.1);
+    transform: scaleY(1.06);
+  }
+  .cal-bar.has-overlap {
+    outline: 1.5px solid #ff9f0a;
+    box-shadow: 0 0 0 2px rgba(255, 77, 94, 0.38), 0 2px 12px rgba(var(--valve-rgb), 0.45);
+  }
+  .cal-bar.is-disabled {
+    background: repeating-linear-gradient(
+      -45deg,
+      rgba(var(--valve-rgb), 0.24) 0 4px,
+      rgba(var(--valve-rgb), 0.08) 4px 8px
+    );
+    color: rgb(var(--valve-text-rgb, var(--valve-rgb)));
+    border: 1px dashed rgba(var(--valve-text-rgb, var(--valve-rgb)), 0.55);
+    box-shadow: none;
+    opacity: 0.65;
+  }
+  .cal-bar-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+  }
+
+  .cal-status-box {
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .cal-status-box.is-overlap {
+    background: rgba(255, 159, 10, 0.11);
+    border-color: rgba(255, 159, 10, 0.42);
+  }
+  .cal-status-box.is-ok {
+    background: rgba(57, 255, 122, 0.09);
+    border-color: rgba(57, 255, 122, 0.28);
+  }
+  .cal-status-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .cal-status-box.is-overlap .cal-status-head { color: #ffd591; }
+  .cal-status-box.is-ok .cal-status-head { color: var(--green); }
+  .cal-status-box.is-empty .cal-status-head { color: var(--text-muted); font-weight: 600; }
+  .cal-status-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+  .cal-overlap-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .cal-overlap-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 9px 10px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.24);
+    border: 1px solid rgba(255, 159, 10, 0.26);
+  }
+  .cal-overlap-time {
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffe2b3;
+    font-variant-numeric: tabular-nums;
+  }
+  .cal-overlap-valves {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .cal-valve-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(var(--valve-rgb), 0.16);
+    border: 1px solid rgba(var(--valve-rgb), 0.48);
+    color: rgb(var(--valve-text-rgb, var(--valve-rgb)));
+    max-width: 100%;
+  }
+  .cal-valve-chip-code {
+    padding: 1px 5px;
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 700;
+    background: rgb(var(--valve-rgb));
+    color: var(--valve-fg, #05090a);
+    flex-shrink: 0;
+  }
+  .cal-valve-chip-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cal-section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 2px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .cal-agenda-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .cal-agenda-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.18s ease, transform 0.15s ease, border-color 0.2s ease;
+  }
+  .cal-agenda-item:hover {
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(var(--valve-rgb), 0.45);
+  }
+  .cal-agenda-item:active { transform: scale(0.99); }
+  .cal-agenda-item.is-overlap {
+    border-color: rgba(255, 159, 10, 0.45);
+    background: rgba(255, 159, 10, 0.07);
+  }
+  .cal-agenda-item.is-disabled {
+    opacity: 0.6;
+    border-style: dashed;
+  }
+  .cal-agenda-swatch {
+    width: 4px;
+    align-self: stretch;
+    min-height: 30px;
+    border-radius: 4px;
+    background: rgb(var(--valve-rgb));
+    flex-shrink: 0;
+  }
+  .cal-agenda-main { flex: 1; min-width: 0; }
+  .cal-agenda-top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .cal-agenda-time {
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+  }
+  .cal-agenda-dur {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .cal-agenda-valve-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 3px;
+    min-width: 0;
+  }
+  .cal-agenda-valve-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgb(var(--valve-text-rgb, var(--valve-rgb)));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cal-agenda-meta {
+    font-size: 11px;
+    color: var(--text-faint);
+    white-space: nowrap;
+  }
+  .cal-agenda-badge {
+    padding: 3px 8px;
+    border-radius: 100px;
+    font-size: 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .cal-agenda-badge.overlap {
+    background: rgba(255, 159, 10, 0.22);
+    border: 1px solid rgba(255, 159, 10, 0.45);
+    color: #ffd591;
+  }
+  .cal-agenda-badge.disabled {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px dashed rgba(255, 255, 255, 0.22);
+    color: var(--text-faint);
+    font-weight: 600;
+  }
+  .cal-agenda-chevron {
+    width: 15px;
+    height: 15px;
+    color: var(--text-faint);
+    flex-shrink: 0;
+  }
+  .cal-agenda-empty {
+    padding: 16px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px dashed var(--glass-border);
+  }
 </style>
 </head>
 <body>
@@ -2389,6 +3156,54 @@
   </form>
 </dialog>
 
+<!-- Calendario di attivazione dialog (timeline multi-valvola, nativo <dialog>) -->
+<dialog class="sheet-dialog calendar-dialog" id="calendarDialog" closedby="any" aria-labelledby="calendarDialogTitle">
+  <div class="modal-grabber" aria-hidden="true"></div>
+  <div class="modal-header">
+    <div>
+      <h2 class="modal-title" id="calendarDialogTitle">Calendario di attivazione</h2>
+      <div class="modal-subtitle" id="calendarDialogSubtitle">—</div>
+    </div>
+    <button type="button" class="modal-close" id="calendarCloseBtn" aria-label="Chiudi">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="cal-days-row" id="calendarDaysRow" role="tablist" aria-label="Giorni della settimana"></div>
+
+  <div class="cal-toolbar">
+    <div class="cal-range-info" id="calendarRangeInfo">00:00 – 24:00</div>
+    <div class="cal-view-switch" id="calendarViewSwitch" role="group" aria-label="Scala oraria">
+      <button type="button" class="cal-view-btn active" data-view="24h" aria-pressed="true">24 ore</button>
+      <button type="button" class="cal-view-btn" data-view="zoom" aria-pressed="false">Fascia attiva</button>
+    </div>
+  </div>
+
+  <div class="cal-timeline-card">
+    <div class="cal-axis-row">
+      <div class="cal-axis-label">Zone</div>
+      <div class="cal-axis-track" id="calendarAxisTrack"></div>
+    </div>
+    <div class="cal-rows-stage">
+      <div class="cal-grid-overlay back" id="calendarOverlayBack" aria-hidden="true"></div>
+      <div class="cal-rows" id="calendarTimelineRows"></div>
+      <div class="cal-grid-overlay front" id="calendarOverlayFront" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <div class="cal-status-box is-empty" id="calendarStatusBox" role="status"></div>
+
+  <div class="cal-agenda-section">
+    <div class="cal-section-label">
+      <span>Attivazioni del giorno</span>
+      <span id="calendarAgendaCount">0</span>
+    </div>
+    <div class="cal-agenda-list" id="calendarAgendaList"></div>
+  </div>
+</dialog>
+
 <!-- =============================================================
      HUB HOME SCREEN
      ============================================================= -->
@@ -2442,12 +3257,18 @@
 
     <div class="stats-row">
       <div class="stat-card stagger">
-        <div class="stat-card-label">Dispositivi attivi</div>
-        <div class="stat-card-value"><span id="hubActiveDevices">0</span><span class="unit">/4</span></div>
-      </div>
-      <div class="stat-card stagger">
-        <div class="stat-card-label">Valvole aperte</div>
-        <div class="stat-card-value"><span id="hubOpenValves">0</span><span class="unit">/<span id="hubOpenValvesTotal">4</span></span></div>
+        <div class="stat-card-info">
+          <div class="stat-card-label">Dispositivi attivi</div>
+          <div class="stat-card-value"><span id="hubActiveDevices">0</span><span class="unit">/4</span></div>
+        </div>
+        <div class="stat-card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7.5" height="7.5" rx="2"/>
+            <rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/>
+            <rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/>
+            <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/>
+          </svg>
+        </div>
       </div>
     </div>
 
@@ -2456,8 +3277,17 @@
     <div class="device-grid">
       <div class="device-card featured stagger" data-device="gardenboss">
         <div>
-          <div class="device-icon-wrap green">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8 8 5 12 5 16a7 7 0 0 0 14 0c0-4-3-8-7-14zm0 17a5 5 0 0 1-5-5c0-2.5 2-5.5 5-10 3 4.5 5 7.5 5 10a5 5 0 0 1-5 5z"/></svg>
+          <div class="device-card-head">
+            <div class="device-icon-wrap green">
+              <svg viewBox="0 0 24 24"><path d="M12 2C8 8 5 12 5 16a7 7 0 0 0 14 0c0-4-3-8-7-14zm0 17a5 5 0 0 1-5-5c0-2.5 2-5.5 5-10 3 4.5 5 7.5 5 10a5 5 0 0 1-5 5z"/></svg>
+            </div>
+            <div class="device-valves-pill is-offline" id="gbValvesPill" aria-label="Valvole aperte: 0 su 4">
+              <div class="device-valves-top">
+                <span class="device-valves-dot" aria-hidden="true"></span>
+                <span class="device-valves-count"><span id="hubOpenValves">0</span><span class="device-valves-total">/<span id="hubOpenValvesTotal">4</span></span></span>
+              </div>
+              <span class="device-valves-label" id="hubOpenValvesLabel">aperte</span>
+            </div>
           </div>
           <div class="device-name">Garden Boss</div>
           <div class="device-status active" id="gbStatus">In attesa…</div>
@@ -2544,6 +3374,27 @@
         <svg viewBox="0 0 24 24"><path d="M12 2C8 8 5 12 5 16a7 7 0 0 0 14 0c0-4-3-8-7-14zm0 17a5 5 0 0 1-5-5c0-2.5 2-5.5 5-10 3 4.5 5 7.5 5 10a5 5 0 0 1-5 5z"/></svg>
       </div>
     </div>
+
+    <button type="button" class="calendar-entry-btn" id="openCalendarBtn" aria-haspopup="dialog">
+      <span class="calendar-entry-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="3"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+          <line x1="7" y1="14" x2="13" y2="14"/>
+          <line x1="11" y1="18" x2="17" y2="18"/>
+        </svg>
+      </span>
+      <span class="calendar-entry-text">
+        <span class="calendar-entry-title">Calendario di attivazione</span>
+        <span class="calendar-entry-sub" id="calendarEntrySub">Confronta gli orari delle zone</span>
+      </span>
+      <span class="calendar-entry-badge is-empty" id="calendarEntryBadge">24h</span>
+      <svg class="calendar-entry-chevron" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 6 15 12 9 18"/>
+      </svg>
+    </button>
 
     <div class="section-title">Zone</div>
 
@@ -2902,6 +3753,8 @@
   const hubActiveDevices = document.getElementById('hubActiveDevices');
   const hubOpenValves    = document.getElementById('hubOpenValves');
   const hubOpenValvesTotal = document.getElementById('hubOpenValvesTotal');
+  const hubOpenValvesLabel = document.getElementById('hubOpenValvesLabel');
+  const gbValvesPill     = document.getElementById('gbValvesPill');
   const gbStatusEl   = document.getElementById('gbStatus');
   const logoutBtn    = document.getElementById('logoutBtn');
 
@@ -3354,6 +4207,7 @@
       modalTitle.textContent = getValveName(modalState.valveId);
       applyValveTheme(modalEl, modalState.valveId);
     }
+    refreshCalendarViews();
   }
 
   function armDeviceInitialSyncTimer(delayMs) {
@@ -3652,6 +4506,7 @@
       if (renameValveDialog.open && renamingValveId === id) {
         renameValveResetBtn.hidden = !hasCustomValvePrefs(id);
       }
+      refreshCalendarViews();
       return;
     }
 
@@ -3725,6 +4580,7 @@
       state.lastScheduleUpdate = Date.now();
       updateSyncBanner();
       renderValve(vid);
+      refreshCalendarViews();
 
       // Se l'utente ha il modal aperto su questa valvola e qualcosa è cambiato
       // (per uno slot diverso da quello in editing, o per quello in editing ma
@@ -3933,6 +4789,7 @@
       if (pinDialog.open) pinDialog.close();
       if (newAccountDialog.open) newAccountDialog.close();
       if (renameValveDialog.open) renameValveDialog.close();
+      if (calendarDialog.open) calendarDialog.close();
       if (modalEl.classList.contains('show')) closeModal();
       toast('Account rimosso dall\'amministratore');
       transitionToAccountPicker();
@@ -4468,7 +5325,9 @@
   // Il contatore riflette il dispositivo (LWT), non la connessione al broker:
   // essere connessi a HiveMQ non significa che il Garden Boss sia acceso.
   function updateDeviceCount() {
-    hubActiveDevices.textContent = (state.connected && state.deviceOnline) ? '1' : '0';
+    const active = (state.connected && state.deviceOnline) ? 1 : 0;
+    hubActiveDevices.textContent = String(active);
+    hubActiveDevices.classList.toggle('is-active-count', active > 0);
   }
 
   // Unico punto che scrive la pillola di stato del Garden Boss.
@@ -4486,6 +5345,7 @@
     // I controlli restano disabilitati se non possiamo consegnare il comando.
     valveList.classList.toggle('device-offline', !usable);
     updateDeviceCount();
+    updateHubStats();
   }
 
   function setConnectionUI(connected) {
@@ -4940,6 +5800,7 @@
         modalTitle.textContent = getValveName(vid);
         applyValveTheme(modalEl, vid);
       }
+      refreshCalendarViews();
       renameValveDialog.close();
       const msg = `V0${vid}: impostazioni predefinite ripristinate`;
       toast(msg);
@@ -4966,6 +5827,7 @@
       modalTitle.textContent = getValveName(vid);
       applyValveTheme(modalEl, vid);
     }
+    refreshCalendarViews();
     renameValveDialog.close();
     const msg = (nameChanged && colorChanged)
       ? `V0${vid} personalizzata ("${nextName}")`
@@ -5001,6 +5863,7 @@
       modalTitle.textContent = getValveName(vid);
       applyValveTheme(modalEl, vid);
     }
+    refreshCalendarViews();
     renameValveDialog.close();
     const msg = `V0${vid}: impostazioni predefinite ripristinate`;
     toast(msg);
@@ -5042,7 +5905,21 @@
 
   function updateHubStats() {
     const n = Object.values(state.valves).filter(v => v.on).length;
-    hubOpenValves.textContent = n;
+    const total = VALVES.length;
+    const usable = !!(state.connected && state.deviceOnline);
+    hubOpenValves.textContent = String(n);
+    if (hubOpenValvesTotal) hubOpenValvesTotal.textContent = String(total);
+    if (hubOpenValvesLabel) hubOpenValvesLabel.textContent = n === 1 ? 'aperta' : 'aperte';
+    if (gbValvesPill) {
+      gbValvesPill.classList.toggle('is-active', usable && n > 0);
+      gbValvesPill.classList.toggle('is-offline', !usable);
+      gbValvesPill.setAttribute(
+        'aria-label',
+        usable
+          ? `Valvole aperte: ${n} su ${total}`
+          : `Valvole aperte: ${n} su ${total} (dispositivo offline)`
+      );
+    }
   }
 
   /* ============================================================
@@ -5364,6 +6241,7 @@
         state.schedulesEverReceived = true;
         renderValve(vid);
         updateSyncBanner();
+        refreshCalendarViews();
       });
     });
 
@@ -5396,10 +6274,757 @@
       state.lastScheduleUpdate = Date.now();
       renderValve(vid);
       updateSyncBanner();
+      refreshCalendarViews();
       toast(state.deviceOnline ? 'Schedule eliminato' : 'Eliminato (in attesa di sync con dispositivo)');
       closeModal();
     });
   });
+
+  /* ============================================================
+     ACTIVATION CALENDAR (Timeline multi-valvola & Sovrapposizioni)
+     ============================================================ */
+  const openCalendarBtn       = document.getElementById('openCalendarBtn');
+  const calendarEntrySub      = document.getElementById('calendarEntrySub');
+  const calendarEntryBadge    = document.getElementById('calendarEntryBadge');
+  const calendarDialog        = document.getElementById('calendarDialog');
+  const calendarDialogSubtitle = document.getElementById('calendarDialogSubtitle');
+  const calendarCloseBtn      = document.getElementById('calendarCloseBtn');
+  const calendarDaysRow       = document.getElementById('calendarDaysRow');
+  const calendarRangeInfo     = document.getElementById('calendarRangeInfo');
+  const calendarViewSwitch    = document.getElementById('calendarViewSwitch');
+  const calendarAxisTrack     = document.getElementById('calendarAxisTrack');
+  const calendarOverlayBack   = document.getElementById('calendarOverlayBack');
+  const calendarTimelineRows  = document.getElementById('calendarTimelineRows');
+  const calendarOverlayFront  = document.getElementById('calendarOverlayFront');
+  const calendarStatusBox     = document.getElementById('calendarStatusBox');
+  const calendarAgendaCount   = document.getElementById('calendarAgendaCount');
+  const calendarAgendaList    = document.getElementById('calendarAgendaList');
+
+  const CALENDAR_DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+  const DAY_SHORT_IT = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+  const DAY_FULL_IT  = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+  const CHEVRON_RIGHT_SVG = '<svg class="cal-agenda-chevron" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>';
+
+  const calendarState = {
+    selectedDay: new Date().getDay(),
+    zoomMode: '24h'
+  };
+
+  function formatMinutesHHMM(min) {
+    const clamped = Math.max(0, Math.min(1440, Math.round(min)));
+    if (clamped === 1440) return '24:00';
+    return `${pad2(Math.floor(clamped / 60))}:${pad2(clamped % 60)}`;
+  }
+
+  function getSegmentsForDay(day) {
+    const d = ((day % 7) + 7) % 7;
+    const prevDay = (d + 6) % 7;
+    const nextDay = (d + 1) % 7;
+    const segments = [];
+
+    VALVES.forEach(v => {
+      const schedules = state.schedules[v.id];
+      if (!schedules) return;
+      for (let slot = 0; slot < SLOTS_PER_VALVE; slot++) {
+        const sched = schedules[slot];
+        if (!sched) continue;
+        const startMin = sched.hh * 60 + sched.mm;
+        const endMin = startMin + sched.durationMin;
+        const spansMidnight = endMin > 1440;
+
+        if (sched.days[d]) {
+          const segEnd = Math.min(endMin, 1440);
+          if (segEnd > startMin) {
+            segments.push({
+              valveId: v.id,
+              slot,
+              enabled: !!sched.enabled,
+              startMin,
+              endMin: segEnd,
+              sliceDurationMin: segEnd - startMin,
+              totalDurationMin: sched.durationMin,
+              origHH: sched.hh,
+              origMM: sched.mm,
+              spansMidnight,
+              isCarryover: false,
+              sourceDay: d,
+              otherDay: nextDay,
+              carryoverEndMin: spansMidnight ? Math.min(endMin - 1440, 1440) : null,
+              hasOverlap: false
+            });
+          }
+        }
+
+        if (spansMidnight && sched.days[prevDay]) {
+          const carryEnd = Math.min(endMin - 1440, 1440);
+          if (carryEnd > 0) {
+            segments.push({
+              valveId: v.id,
+              slot,
+              enabled: !!sched.enabled,
+              startMin: 0,
+              endMin: carryEnd,
+              sliceDurationMin: carryEnd,
+              totalDurationMin: sched.durationMin,
+              origHH: sched.hh,
+              origMM: sched.mm,
+              spansMidnight: true,
+              isCarryover: true,
+              sourceDay: prevDay,
+              otherDay: d,
+              carryoverEndMin: carryEnd,
+              hasOverlap: false
+            });
+          }
+        }
+      }
+    });
+
+    segments.sort((a, b) => {
+      if (a.startMin !== b.startMin) return a.startMin - b.startMin;
+      if (a.valveId !== b.valveId) return a.valveId - b.valveId;
+      return a.slot - b.slot;
+    });
+
+    return segments;
+  }
+
+  function computeOverlapsFromSegments(activeSegments) {
+    if (!activeSegments.length) return [];
+    const boundarySet = new Set();
+    activeSegments.forEach(seg => {
+      boundarySet.add(seg.startMin);
+      boundarySet.add(seg.endMin);
+    });
+    const boundaries = Array.from(boundarySet).sort((a, b) => a - b);
+    const rawOverlaps = [];
+
+    for (let i = 0; i < boundaries.length - 1; i++) {
+      const a = boundaries[i];
+      const b = boundaries[i + 1];
+      if (b <= a) continue;
+      const valveSet = new Set();
+      activeSegments.forEach(seg => {
+        if (seg.startMin <= a && seg.endMin >= b) {
+          valveSet.add(seg.valveId);
+        }
+      });
+      if (valveSet.size >= 2) {
+        rawOverlaps.push({
+          startMin: a,
+          endMin: b,
+          durationMin: b - a,
+          valveIds: Array.from(valveSet).sort((x, y) => x - y)
+        });
+      }
+    }
+
+    const merged = [];
+    rawOverlaps.forEach(ov => {
+      const prev = merged[merged.length - 1];
+      if (
+        prev &&
+        prev.endMin === ov.startMin &&
+        prev.valveIds.length === ov.valveIds.length &&
+        prev.valveIds.every((id, idx) => id === ov.valveIds[idx])
+      ) {
+        prev.endMin = ov.endMin;
+        prev.durationMin = prev.endMin - prev.startMin;
+      } else {
+        merged.push({ ...ov });
+      }
+    });
+
+    return merged;
+  }
+
+  function analyzeDaySchedules(day) {
+    const normDay = ((day % 7) + 7) % 7;
+    const segments = getSegmentsForDay(normDay);
+    const activeSegments = segments.filter(s => s.enabled);
+    const disabledSegments = segments.filter(s => !s.enabled);
+    const overlaps = computeOverlapsFromSegments(activeSegments);
+
+    if (overlaps.length) {
+      activeSegments.forEach(seg => {
+        seg.hasOverlap = overlaps.some(ov =>
+          ov.valveIds.includes(seg.valveId) &&
+          seg.startMin < ov.endMin &&
+          seg.endMin > ov.startMin
+        );
+      });
+    }
+
+    return {
+      day: normDay,
+      segments,
+      activeSegments,
+      disabledSegments,
+      overlaps
+    };
+  }
+
+  function analyzeWeekSchedules() {
+    const byDay = {};
+    const overlapDays = [];
+    let totalOverlapIntervals = 0;
+    let totalActiveTurns = 0;
+
+    CALENDAR_DAY_ORDER.forEach(d => {
+      const dayData = analyzeDaySchedules(d);
+      byDay[d] = dayData;
+      totalActiveTurns += dayData.activeSegments.length;
+      if (dayData.overlaps.length > 0) {
+        overlapDays.push(d);
+        totalOverlapIntervals += dayData.overlaps.length;
+      }
+    });
+
+    let activeScheduleCount = 0;
+    let totalScheduleCount = 0;
+    VALVES.forEach(v => {
+      const scheds = state.schedules[v.id];
+      if (!scheds) return;
+      for (let slot = 0; slot < SLOTS_PER_VALVE; slot++) {
+        const sched = scheds[slot];
+        if (!sched) continue;
+        totalScheduleCount++;
+        if (sched.enabled && Array.isArray(sched.days) && sched.days.some(Boolean)) {
+          activeScheduleCount++;
+        }
+      }
+    });
+
+    return {
+      byDay,
+      overlapDays,
+      totalOverlapIntervals,
+      totalActiveTurns,
+      activeScheduleCount,
+      totalScheduleCount
+    };
+  }
+
+  function computeActiveTimeWindow(dayData) {
+    const source = dayData.activeSegments.length ? dayData.activeSegments : dayData.segments;
+    if (!source.length) return { startMin: 0, endMin: 1440, stepMin: 360 };
+
+    let minStart = 1440;
+    let maxEnd = 0;
+    source.forEach(s => {
+      if (s.startMin < minStart) minStart = s.startMin;
+      if (s.endMin > maxEnd) maxEnd = s.endMin;
+    });
+
+    const rawSpan = Math.max(1, maxEnd - minStart);
+    const pad = Math.min(60, Math.max(15, Math.round(rawSpan * 0.25)));
+    const targetStart = Math.max(0, minStart - pad);
+    const targetEnd = Math.min(1440, maxEnd + pad);
+    const neededSpan = targetEnd - targetStart;
+
+    const steps = [15, 20, 30, 45, 60, 90, 120, 150, 180, 240, 300, 360];
+    for (const step of steps) {
+      const windowSpan = step * 4;
+      if (windowSpan < neededSpan) continue;
+      if (windowSpan >= 1440) return { startMin: 0, endMin: 1440, stepMin: 360 };
+
+      const mid = (minStart + maxEnd) / 2;
+      let startMin = Math.round((mid - windowSpan / 2) / 15) * 15;
+      startMin = Math.max(0, Math.min(1440 - windowSpan, startMin));
+      let endMin = startMin + windowSpan;
+
+      if (startMin > minStart) {
+        startMin = Math.max(0, Math.floor((minStart - 5) / 15) * 15);
+        endMin = startMin + windowSpan;
+      }
+      if (endMin < maxEnd) {
+        endMin = Math.min(1440, Math.ceil((maxEnd + 5) / 15) * 15);
+        startMin = Math.max(0, endMin - windowSpan);
+      }
+      if (startMin <= minStart && endMin >= maxEnd) {
+        return { startMin, endMin, stepMin: step };
+      }
+    }
+    return { startMin: 0, endMin: 1440, stepMin: 360 };
+  }
+
+  function renderCalendarEntryButton() {
+    if (!openCalendarBtn || !calendarEntrySub || !calendarEntryBadge) return;
+    const week = analyzeWeekSchedules();
+    const todayDow = new Date().getDay();
+    const todayData = week.byDay[todayDow];
+
+    openCalendarBtn.classList.toggle('has-overlap', week.totalOverlapIntervals > 0);
+    calendarEntryBadge.className = 'calendar-entry-badge';
+
+    if (week.totalOverlapIntervals > 0) {
+      calendarEntryBadge.classList.add('is-overlap');
+      calendarEntryBadge.textContent = week.totalOverlapIntervals === 1
+        ? '⚠ 1 conflitto'
+        : `⚠ ${week.totalOverlapIntervals} conflitti`;
+
+      const dayList = week.overlapDays.map(d => DAY_SHORT_IT[d]).join(', ');
+      if (todayData.overlaps.length > 0 && week.overlapDays.length === 1) {
+        calendarEntrySub.textContent = todayData.overlaps.length === 1
+          ? 'Oggi: 1 sovrapposizione attiva'
+          : `Oggi: ${todayData.overlaps.length} sovrapposizioni attive`;
+      } else if (todayData.overlaps.length > 0) {
+        calendarEntrySub.textContent = `Conflitti oggi e ${week.overlapDays.filter(d => d !== todayDow).map(d => DAY_SHORT_IT[d]).join(', ')}`;
+      } else {
+        calendarEntrySub.textContent = `Sovrapposizioni: ${dayList}`;
+      }
+    } else if (week.activeScheduleCount > 0) {
+      calendarEntryBadge.classList.add('is-ok');
+      calendarEntryBadge.textContent = '✓ OK';
+      const schedLabel = week.activeScheduleCount === 1 ? '1 schedule attivo' : `${week.activeScheduleCount} schedule attivi`;
+      const todayPart = todayData.activeSegments.length === 0
+        ? 'nessun turno oggi'
+        : `${todayData.activeSegments.length} ${todayData.activeSegments.length === 1 ? 'turno' : 'turni'} oggi`;
+      calendarEntrySub.textContent = `${schedLabel} · ${todayPart}`;
+    } else {
+      calendarEntryBadge.classList.add('is-empty');
+      calendarEntryBadge.textContent = '24h';
+      calendarEntrySub.textContent = week.totalScheduleCount > 0
+        ? `Nessuno schedule attivo (${week.totalScheduleCount} disattivat${week.totalScheduleCount === 1 ? 'o' : 'i'})`
+        : `Confronta gli orari delle ${VALVES.length} zone`;
+    }
+  }
+
+  function renderCalendarDaysRow(weekData, todayDow) {
+    calendarDaysRow.innerHTML = '';
+    CALENDAR_DAY_ORDER.forEach(day => {
+      const info = weekData.byDay[day];
+      const hasOverlap = info.overlaps.length > 0;
+      const hasTurns = info.activeSegments.length > 0;
+      const isSelected = day === calendarState.selectedDay;
+      const isToday = day === todayDow;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'cal-day-pill' + (isSelected ? ' selected' : '') + (isToday ? ' is-today' : '');
+      btn.dataset.day = String(day);
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', String(isSelected));
+      const statusLabel = hasOverlap
+        ? `${info.overlaps.length} ${info.overlaps.length === 1 ? 'sovrapposizione' : 'sovrapposizioni'}`
+        : (hasTurns ? `${info.activeSegments.length} ${info.activeSegments.length === 1 ? 'turno attivo' : 'turni attivi'}` : 'nessun turno attivo');
+      btn.setAttribute('aria-label', `${DAY_FULL_IT[day]}${isToday ? ' (oggi)' : ''}, ${statusLabel}`);
+      if (isToday) btn.title = `${DAY_FULL_IT[day]} (oggi)`;
+
+      const nameEl = document.createElement('span');
+      nameEl.className = 'cal-day-name';
+      nameEl.textContent = DAY_SHORT_IT[day];
+
+      const dotEl = document.createElement('span');
+      dotEl.className = 'cal-day-dot' + (hasOverlap ? ' has-overlap' : (hasTurns ? ' has-turns' : ''));
+      dotEl.setAttribute('aria-hidden', 'true');
+
+      btn.appendChild(nameEl);
+      btn.appendChild(dotEl);
+      btn.addEventListener('click', () => setCalendarDay(day));
+      calendarDaysRow.appendChild(btn);
+    });
+  }
+
+  function renderCalendarViewSwitch(dayData) {
+    const canZoom = dayData.segments.length > 0;
+    if (!canZoom && calendarState.zoomMode === 'zoom') {
+      calendarState.zoomMode = '24h';
+    }
+    calendarViewSwitch.querySelectorAll('.cal-view-btn').forEach(btn => {
+      const mode = btn.dataset.view;
+      const isActive = mode === calendarState.zoomMode;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-pressed', String(isActive));
+      if (mode === 'zoom') {
+        btn.disabled = !canZoom;
+      }
+    });
+  }
+
+  function renderCalendarTimeline(dayData, todayDow) {
+    const useZoom = calendarState.zoomMode === 'zoom' && dayData.segments.length > 0;
+    const win = useZoom
+      ? computeActiveTimeWindow(dayData)
+      : { startMin: 0, endMin: 1440, stepMin: 360 };
+    const viewStart = win.startMin;
+    const viewEnd = win.endMin;
+    const viewSpan = Math.max(1, viewEnd - viewStart);
+
+    calendarRangeInfo.textContent = useZoom
+      ? `Fascia attiva · ${formatMinutesHHMM(viewStart)} – ${formatMinutesHHMM(viewEnd)}`
+      : 'Giornata intera · 00:00 – 24:00';
+
+    // 1. Asse orario (00, 06, 12, 18, 24 oppure 5 tacche sulla fascia attiva)
+    calendarAxisTrack.innerHTML = '';
+    for (let i = 0; i <= 4; i++) {
+      const tickMin = viewStart + Math.round((viewSpan * i) / 4);
+      const pct = i * 25;
+      const tickEl = document.createElement('span');
+      tickEl.className = 'cal-axis-tick' + (i === 0 ? ' is-first' : (i === 4 ? ' is-last' : ''));
+      if (i > 0 && i < 4) tickEl.style.left = pct + '%';
+      tickEl.textContent = useZoom ? formatMinutesHHMM(tickMin) : pad2(Math.round(tickMin / 60));
+      calendarAxisTrack.appendChild(tickEl);
+    }
+
+    // 2. Overlay posteriore (bande di sovrapposizione) & anteriore (griglia verticale + linea "ora")
+    calendarOverlayBack.innerHTML = '';
+    calendarOverlayFront.innerHTML = '';
+
+    [25, 50, 75].forEach(pct => {
+      const line = document.createElement('div');
+      line.className = 'cal-grid-line';
+      line.style.left = pct + '%';
+      calendarOverlayFront.appendChild(line);
+    });
+
+    dayData.overlaps.forEach(ov => {
+      const visStart = Math.max(ov.startMin, viewStart);
+      const visEnd = Math.min(ov.endMin, viewEnd);
+      if (visEnd <= visStart) return;
+      const leftPct = ((visStart - viewStart) / viewSpan) * 100;
+      const widthPct = ((visEnd - visStart) / viewSpan) * 100;
+      const band = document.createElement('div');
+      band.className = 'cal-overlap-band';
+      band.style.left = leftPct + '%';
+      band.style.width = widthPct + '%';
+      calendarOverlayBack.appendChild(band);
+    });
+
+    if (dayData.day === todayDow) {
+      const now = new Date();
+      const nowMin = now.getHours() * 60 + now.getMinutes();
+      if (nowMin >= viewStart && nowMin <= viewEnd) {
+        const nowPct = ((nowMin - viewStart) / viewSpan) * 100;
+        const nowLine = document.createElement('div');
+        nowLine.className = 'cal-now-line';
+        nowLine.style.left = nowPct + '%';
+        nowLine.title = `Ora attuale: ${formatMinutesHHMM(nowMin)}`;
+        const dot = document.createElement('div');
+        dot.className = 'cal-now-dot';
+        nowLine.appendChild(dot);
+        calendarOverlayFront.appendChild(nowLine);
+      }
+    }
+
+    // 3. Righe parallele V01–V04 con tema reale della valvola
+    calendarTimelineRows.innerHTML = '';
+    VALVES.forEach(v => {
+      const row = document.createElement('div');
+      row.className = 'cal-row';
+      row.dataset.valveId = String(v.id);
+      applyValveTheme(row, v.id);
+
+      const vName = getValveName(v.id);
+
+      const labelCell = document.createElement('div');
+      labelCell.className = 'cal-row-label';
+      const codeEl = document.createElement('span');
+      codeEl.className = 'cal-valve-code';
+      codeEl.textContent = `V0${v.id}`;
+      const nameEl = document.createElement('span');
+      nameEl.className = 'cal-valve-name';
+      nameEl.textContent = vName;
+      nameEl.title = `${vName} (V0${v.id})`;
+      labelCell.appendChild(codeEl);
+      labelCell.appendChild(nameEl);
+
+      const trackCell = document.createElement('div');
+      trackCell.className = 'cal-row-track';
+
+      const rowSegments = dayData.segments.filter(s => s.valveId === v.id);
+      rowSegments.forEach(seg => {
+        const visStart = Math.max(seg.startMin, viewStart);
+        const visEnd = Math.min(seg.endMin, viewEnd);
+        if (visEnd <= visStart) return;
+
+        const leftPct = Math.max(0, Math.min(100, ((visStart - viewStart) / viewSpan) * 100));
+        const widthPct = Math.max(0.5, ((visEnd - visStart) / viewSpan) * 100);
+
+        const bar = document.createElement('button');
+        bar.type = 'button';
+        bar.className = 'cal-bar' + (seg.hasOverlap ? ' has-overlap' : '') + (seg.enabled ? '' : ' is-disabled');
+        bar.dataset.valveId = String(seg.valveId);
+        bar.dataset.slot = String(seg.slot);
+        bar.style.left = leftPct + '%';
+        bar.style.width = Math.min(widthPct, 100 - leftPct) + '%';
+
+        const timeText = `${formatMinutesHHMM(seg.startMin)}–${formatMinutesHHMM(seg.endMin)}`;
+        const statusDesc = !seg.enabled
+          ? 'disattivato'
+          : (seg.hasOverlap ? 'in sovrapposizione' : 'attivo');
+        bar.title = `${vName} (V0${v.id}) · Slot ${seg.slot + 1} · ${timeText} (${seg.sliceDurationMin}m) · ${statusDesc}`;
+        bar.setAttribute('aria-label', `${vName}, Slot ${seg.slot + 1}, dalle ${formatMinutesHHMM(seg.startMin)} alle ${formatMinutesHHMM(seg.endMin)}, ${seg.sliceDurationMin} minuti, ${statusDesc}. Tocca per modificare`);
+
+        const estTrackPx = window.innerWidth >= 600 ? 430 : 196;
+        const estBarPx = (widthPct / 100) * estTrackPx;
+        if (estBarPx >= 26) {
+          const span = document.createElement('span');
+          span.className = 'cal-bar-label';
+          span.textContent = estBarPx >= 82
+            ? `${formatMinutesHHMM(seg.startMin)} · ${seg.sliceDurationMin}m`
+            : `${seg.sliceDurationMin}m`;
+          bar.appendChild(span);
+        }
+
+        bar.addEventListener('click', () => openScheduleFromCalendar(seg.valveId, seg.slot));
+        trackCell.appendChild(bar);
+      });
+
+      row.appendChild(labelCell);
+      row.appendChild(trackCell);
+      calendarTimelineRows.appendChild(row);
+    });
+  }
+
+  function renderCalendarStatusBox(dayData) {
+    calendarStatusBox.innerHTML = '';
+    calendarStatusBox.className = 'cal-status-box';
+
+    if (dayData.overlaps.length > 0) {
+      calendarStatusBox.classList.add('is-overlap');
+      const head = document.createElement('div');
+      head.className = 'cal-status-head';
+      head.textContent = dayData.overlaps.length === 1
+        ? '⚠ 1 sovrapposizione rilevata'
+        : `⚠ ${dayData.overlaps.length} sovrapposizioni rilevate`;
+
+      const sub = document.createElement('div');
+      sub.className = 'cal-status-sub';
+      sub.textContent = 'Più valvole attive contemporaneamente nello stesso intervallo:';
+
+      const list = document.createElement('div');
+      list.className = 'cal-overlap-list';
+
+      dayData.overlaps.forEach(ov => {
+        const item = document.createElement('div');
+        item.className = 'cal-overlap-item';
+
+        const timeEl = document.createElement('div');
+        timeEl.className = 'cal-overlap-time';
+        timeEl.textContent = `${formatMinutesHHMM(ov.startMin)} – ${formatMinutesHHMM(ov.endMin)} · ${ov.durationMin} min`;
+
+        const valvesWrap = document.createElement('div');
+        valvesWrap.className = 'cal-overlap-valves';
+
+        ov.valveIds.forEach(vid => {
+          const chip = document.createElement('span');
+          chip.className = 'cal-valve-chip';
+          chip.dataset.valveId = String(vid);
+          applyValveTheme(chip, vid);
+
+          const code = document.createElement('span');
+          code.className = 'cal-valve-chip-code';
+          code.textContent = `V0${vid}`;
+
+          const name = document.createElement('span');
+          name.className = 'cal-valve-chip-name';
+          name.textContent = getValveName(vid);
+
+          chip.appendChild(code);
+          chip.appendChild(name);
+          valvesWrap.appendChild(chip);
+        });
+
+        item.appendChild(timeEl);
+        item.appendChild(valvesWrap);
+        list.appendChild(item);
+      });
+
+      calendarStatusBox.appendChild(head);
+      calendarStatusBox.appendChild(sub);
+      calendarStatusBox.appendChild(list);
+      return;
+    }
+
+    if (dayData.activeSegments.length > 0) {
+      calendarStatusBox.classList.add('is-ok');
+      const head = document.createElement('div');
+      head.className = 'cal-status-head';
+      head.textContent = '✓ Nessuna sovrapposizione in questo giorno';
+
+      const sub = document.createElement('div');
+      sub.className = 'cal-status-sub';
+      const activeText = dayData.activeSegments.length === 1
+        ? '1 attivazione attiva'
+        : `${dayData.activeSegments.length} attivazioni attive`;
+      const disabledText = dayData.disabledSegments.length > 0
+        ? ` · ${dayData.disabledSegments.length} disattivat${dayData.disabledSegments.length === 1 ? 'a' : 'e'} (esclus${dayData.disabledSegments.length === 1 ? 'a' : 'e'} dai conflitti)`
+        : '';
+      sub.textContent = activeText + disabledText;
+
+      calendarStatusBox.appendChild(head);
+      calendarStatusBox.appendChild(sub);
+      return;
+    }
+
+    calendarStatusBox.classList.add('is-empty');
+    const head = document.createElement('div');
+    head.className = 'cal-status-head';
+    head.textContent = 'Nessuna attivazione attiva in questo giorno';
+
+    const sub = document.createElement('div');
+    sub.className = 'cal-status-sub';
+    sub.textContent = dayData.disabledSegments.length > 0
+      ? `${dayData.disabledSegments.length} ${dayData.disabledSegments.length === 1 ? 'turno disattivato' : 'turni disattivati'} (ignorati nel calcolo sovrapposizioni)`
+      : 'Tocca una zona nella schermata precedente per impostare uno schedule.';
+
+    calendarStatusBox.appendChild(head);
+    calendarStatusBox.appendChild(sub);
+  }
+
+  function renderCalendarAgenda(dayData) {
+    calendarAgendaCount.textContent = String(dayData.segments.length);
+    calendarAgendaList.innerHTML = '';
+
+    if (!dayData.segments.length) {
+      const empty = document.createElement('div');
+      empty.className = 'cal-agenda-empty';
+      empty.textContent = 'Nessun turno programmato per questo giorno.';
+      calendarAgendaList.appendChild(empty);
+      return;
+    }
+
+    dayData.segments.forEach(seg => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'cal-agenda-item' + (seg.hasOverlap ? ' is-overlap' : '') + (seg.enabled ? '' : ' is-disabled');
+      btn.dataset.valveId = String(seg.valveId);
+      btn.dataset.slot = String(seg.slot);
+      applyValveTheme(btn, seg.valveId);
+
+      const swatch = document.createElement('span');
+      swatch.className = 'cal-agenda-swatch';
+      swatch.setAttribute('aria-hidden', 'true');
+
+      const main = document.createElement('span');
+      main.className = 'cal-agenda-main';
+
+      const top = document.createElement('span');
+      top.className = 'cal-agenda-top';
+
+      const timeEl = document.createElement('span');
+      timeEl.className = 'cal-agenda-time';
+      timeEl.textContent = `${formatMinutesHHMM(seg.startMin)} – ${formatMinutesHHMM(seg.endMin)}`;
+
+      const durEl = document.createElement('span');
+      durEl.className = 'cal-agenda-dur';
+      if (seg.isCarryover) {
+        durEl.textContent = `· ${seg.sliceDurationMin} min (da ${DAY_SHORT_IT[seg.sourceDay]} ${pad2(seg.origHH)}:${pad2(seg.origMM)})`;
+      } else if (seg.spansMidnight) {
+        durEl.textContent = `· ${seg.sliceDurationMin} min (continua ${DAY_SHORT_IT[seg.otherDay]} ${formatMinutesHHMM(seg.carryoverEndMin)})`;
+      } else {
+        durEl.textContent = `· ${seg.sliceDurationMin} min`;
+      }
+
+      top.appendChild(timeEl);
+      top.appendChild(durEl);
+
+      const valveRow = document.createElement('span');
+      valveRow.className = 'cal-agenda-valve-row';
+
+      const vNameEl = document.createElement('span');
+      vNameEl.className = 'cal-agenda-valve-name';
+      vNameEl.textContent = getValveName(seg.valveId);
+
+      const metaEl = document.createElement('span');
+      metaEl.className = 'cal-agenda-meta';
+      metaEl.textContent = `V0${seg.valveId} · Slot ${seg.slot + 1}`;
+
+      valveRow.appendChild(vNameEl);
+      valveRow.appendChild(metaEl);
+
+      main.appendChild(top);
+      main.appendChild(valveRow);
+
+      btn.appendChild(swatch);
+      btn.appendChild(main);
+
+      if (seg.hasOverlap) {
+        const badge = document.createElement('span');
+        badge.className = 'cal-agenda-badge overlap';
+        badge.textContent = 'Sovrapposizione';
+        btn.appendChild(badge);
+      } else if (!seg.enabled) {
+        const badge = document.createElement('span');
+        badge.className = 'cal-agenda-badge disabled';
+        badge.textContent = 'Disattivato';
+        btn.appendChild(badge);
+      }
+
+      btn.insertAdjacentHTML('beforeend', CHEVRON_RIGHT_SVG);
+      btn.addEventListener('click', () => openScheduleFromCalendar(seg.valveId, seg.slot));
+      calendarAgendaList.appendChild(btn);
+    });
+  }
+
+  function renderCalendarDialog() {
+    const todayDow = new Date().getDay();
+    const weekData = analyzeWeekSchedules();
+    const dayData = weekData.byDay[calendarState.selectedDay] || analyzeDaySchedules(calendarState.selectedDay);
+
+    const activeCount = dayData.activeSegments.length;
+    const dayLabel = DAY_FULL_IT[dayData.day] + (dayData.day === todayDow ? ' (oggi)' : '');
+    const turnSummary = activeCount === 0
+      ? 'nessuna attivazione attiva'
+      : (activeCount === 1 ? '1 attivazione attiva' : `${activeCount} attivazioni attive`);
+    calendarDialogSubtitle.textContent = `${dayLabel} · ${turnSummary}`;
+
+    renderCalendarDaysRow(weekData, todayDow);
+    renderCalendarViewSwitch(dayData);
+    renderCalendarTimeline(dayData, todayDow);
+    renderCalendarStatusBox(dayData);
+    renderCalendarAgenda(dayData);
+  }
+
+  function refreshCalendarViews() {
+    renderCalendarEntryButton();
+    if (calendarDialog && calendarDialog.open) {
+      renderCalendarDialog();
+    }
+  }
+
+  function setCalendarDay(day) {
+    calendarState.selectedDay = ((day % 7) + 7) % 7;
+    renderCalendarDialog();
+  }
+
+  function setCalendarZoom(mode) {
+    calendarState.zoomMode = mode === 'zoom' ? 'zoom' : '24h';
+    renderCalendarDialog();
+  }
+
+  function openCalendarDialog() {
+    calendarState.selectedDay = new Date().getDay();
+    calendarState.zoomMode = '24h';
+    renderCalendarDialog();
+    if (!calendarDialog.open) calendarDialog.showModal();
+  }
+
+  function closeCalendarDialog() {
+    if (calendarDialog && calendarDialog.open) calendarDialog.close();
+  }
+
+  function openScheduleFromCalendar(valveId, slot) {
+    closeCalendarDialog();
+    openModal(valveId, slot);
+  }
+
+  openCalendarBtn.addEventListener('click', openCalendarDialog);
+  calendarCloseBtn.addEventListener('click', closeCalendarDialog);
+  calendarDialog.addEventListener('close', () => { calendarDialog.returnValue = ''; });
+  calendarViewSwitch.querySelectorAll('.cal-view-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      setCalendarZoom(btn.dataset.view);
+    });
+  });
+
+  setInterval(() => {
+    if (calendarDialog && calendarDialog.open && calendarState.selectedDay === new Date().getDay()) {
+      renderCalendarDialog();
+    }
+  }, 30000);
 
   /* ============================================================
      NAVIGATION
@@ -5466,7 +7091,9 @@
     if (newAccountDialog.open) newAccountDialog.close();
     if (accountsDialog.open) accountsDialog.close();
     if (renameValveDialog.open) renameValveDialog.close();
+    if (calendarDialog.open) calendarDialog.close();
     if (modalEl.classList.contains('show')) closeModal();
+    refreshCalendarViews();
 
     // Se la password è ricordata, ripristinala (login one-tap); altrimenti svuotala.
     const rememberedOnLogout = loadRememberedLogin();
@@ -5671,6 +7298,7 @@
     }
     VALVES.forEach(v => renderValve(v.id));
     renderDeviceStatus();
+    refreshCalendarViews();
     stopRefreshUI('Stato valvole aggiornato');
   }
 
@@ -5795,12 +7423,15 @@
   activeCountTotalEl.textContent = VALVES.length;
   renderDeviceStatus(); // finché il LWT non conferma 'online' i controlli restano spenti
   updateGreeting();
+  refreshCalendarViews();
 
   // Debug
   window.__hub = {
     state, screens, showScreen, toggleValve, openModal,
     getValveName, getValveColor, getValveColorLabel, hasCustomValvePrefs,
     resolveColorTheme, openRenameValveModal,
+    openCalendarDialog, closeCalendarDialog, refreshCalendarViews,
+    analyzeDaySchedules, analyzeWeekSchedules, setCalendarDay, setCalendarZoom,
     handleMqttMessage, renderDeviceStatus, markDeviceAlive, probeDevice, ensureConnection,
     afterBrokerConnected, transitionToHub, transitionToAccountPicker,
     getSortedAccounts, getSortedRequests, isAdmin, canControlDevices,
