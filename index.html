@@ -21,6 +21,8 @@
     --green-dim: #22c55e;
     --green-rgb: 57, 255, 122;
     --valve-rgb: var(--green-rgb); /* fallback for controls outside a .valve card (e.g. modal) */
+    --valve-text-rgb: var(--valve-rgb); /* schiarita per testo leggibile su vetro scuro */
+    --valve-fg: #05090a; /* testo ad alto contrasto su sfondi pieni rgb(var(--valve-rgb)) */
     --blue: #2da3ff;
     --orange: #ff9f0a;
     --red: #ff4d5e;
@@ -791,7 +793,7 @@
   .schedule-chip.active {
     background: rgba(var(--valve-rgb), 0.2);
     border-color: rgba(var(--valve-rgb), 0.5);
-    color: rgb(var(--valve-rgb));
+    color: rgb(var(--valve-text-rgb, var(--valve-rgb)));
   }
   .schedule-chip.disabled {
     opacity: 0.5;
@@ -991,7 +993,7 @@
   .day-pill.selected {
     background: rgb(var(--valve-rgb));
     border-color: rgb(var(--valve-rgb));
-    color: #05090a;
+    color: var(--valve-fg, #05090a);
     box-shadow: 0 4px 12px rgba(var(--valve-rgb), 0.35);
   }
 
@@ -1133,7 +1135,7 @@
   .duration-preset.active {
     background: rgba(var(--valve-rgb), 0.2);
     border-color: rgba(var(--valve-rgb), 0.5);
-    color: rgb(var(--valve-rgb));
+    color: rgb(var(--valve-text-rgb, var(--valve-rgb)));
   }
 
   /* Schedule slot tabs (1, 2, 3) */
@@ -1193,7 +1195,7 @@
   }
   .modal-btn:active { transform: scale(0.98); }
   .modal-btn-primary {
-    color: #05090a;
+    color: var(--valve-fg, #05090a);
     background: rgb(var(--valve-rgb));
     box-shadow: 0 4px 14px rgba(var(--valve-rgb), 0.35);
   }
@@ -1931,6 +1933,177 @@
     border-color: rgb(var(--valve-rgb));
     box-shadow: 0 0 0 4px rgba(var(--valve-rgb), 0.18);
   }
+  .rename-valve-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+  .rename-valve-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(var(--valve-rgb), 0.2);
+    border: 1px solid rgba(var(--valve-rgb), 0.45);
+    box-shadow: 0 4px 14px rgba(var(--valve-rgb), 0.22);
+    transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .rename-valve-badge svg {
+    width: 21px;
+    height: 21px;
+    fill: rgb(var(--valve-rgb));
+    transition: fill 0.25s ease;
+  }
+
+  .color-field { margin-bottom: 14px; }
+  .color-field-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0 4px 10px;
+  }
+  .color-field-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+  }
+  .color-field-current {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgb(var(--valve-text-rgb, var(--valve-rgb)));
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .color-swatch-grid {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 7px;
+    margin-bottom: 12px;
+  }
+  .color-swatch {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.16);
+    background: rgb(var(--swatch-rgb));
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.26), 0 2px 8px rgba(0, 0, 0, 0.35);
+    color: var(--swatch-fg, #05090a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.18s var(--ease-spring), border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .color-swatch:hover { transform: scale(1.08); border-color: rgba(255, 255, 255, 0.48); }
+  .color-swatch:active { transform: scale(0.92); }
+  .color-swatch:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
+  .color-swatch.selected {
+    border-color: #ffffff;
+    transform: scale(1.06);
+    box-shadow:
+      0 0 0 2px rgba(20, 26, 22, 0.95),
+      0 0 0 4px rgba(var(--swatch-rgb), 0.78),
+      0 4px 14px rgba(var(--swatch-rgb), 0.45);
+  }
+  .color-swatch svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 0.18s ease, transform 0.2s var(--ease-spring);
+    pointer-events: none;
+  }
+  .color-swatch.selected svg { opacity: 1; transform: scale(1); }
+  .color-swatch.is-default::before {
+    content: "";
+    position: absolute;
+    bottom: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+  }
+  @media (pointer: coarse) {
+    .color-swatch::after { content: ""; position: absolute; inset: -4px; }
+  }
+
+  .custom-color-pill {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 44px;
+    padding: 9px 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+  }
+  .custom-color-pill:hover {
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.24);
+    color: var(--text);
+  }
+  .custom-color-pill.selected {
+    background: rgba(var(--valve-rgb), 0.14);
+    border-color: rgba(var(--valve-rgb), 0.65);
+    color: var(--text);
+  }
+  .custom-color-pill:has(.custom-color-native:focus-visible) {
+    outline: 2px solid rgb(var(--valve-rgb));
+    outline-offset: 2px;
+  }
+  .custom-color-preview {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--custom-color-hex, conic-gradient(from 0deg, #ff4d5e, #ffd60a, #39ff7a, #00e5ff, #2da3ff, #bf5af2, #ff64b4, #ff4d5e));
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  }
+  .custom-color-text { flex: 1; text-align: left; }
+  .custom-color-hex {
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.07);
+    padding: 3px 8px;
+    border-radius: 100px;
+  }
+  .custom-color-pill.selected .custom-color-hex {
+    color: rgb(var(--valve-text-rgb, var(--valve-rgb)));
+    background: rgba(var(--valve-rgb), 0.18);
+  }
+  .custom-color-native {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
 </style>
 </head>
 <body>
@@ -2158,13 +2331,18 @@
   <button type="button" class="modal-btn modal-btn-secondary" id="switchToPickerBtn" style="width:100%; margin-top:10px;">Torna a selezione account</button>
 </dialog>
 
-<!-- Rinomina valvola dialog (nativo <dialog>) -->
+<!-- Personalizza valvola dialog (nome e colore, nativo <dialog>) -->
 <dialog class="sheet-dialog" id="renameValveDialog" closedby="any" aria-labelledby="renameValveTitle">
   <div class="modal-grabber" aria-hidden="true"></div>
   <div class="modal-header">
-    <div>
-      <h2 class="modal-title" id="renameValveTitle">Rinomina zona</h2>
-      <div class="modal-subtitle" id="renameValveSubtitle">—</div>
+    <div class="rename-valve-title-wrap">
+      <div class="valve-icon rename-valve-badge" id="renameValvePreviewIcon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 2C8 8 5 12 5 16a7 7 0 0 0 14 0c0-4-3-8-7-14zm0 17a5 5 0 0 1-5-5c0-2.5 2-5.5 5-10 3 4.5 5 7.5 5 10a5 5 0 0 1-5 5z"/></svg>
+      </div>
+      <div>
+        <h2 class="modal-title" id="renameValveTitle">Personalizza zona</h2>
+        <div class="modal-subtitle" id="renameValveSubtitle">—</div>
+      </div>
     </div>
     <button type="button" class="modal-close" id="renameValveCloseBtn" aria-label="Chiudi">
       <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -2175,7 +2353,7 @@
   <form id="renameValveForm" novalidate>
     <div class="field">
       <label for="renameValveInput">Nome della valvola</label>
-      <span class="field-hint" id="renameValveHint">1–30 caratteri · condiviso con i membri del nucleo</span>
+      <span class="field-hint" id="renameValveHint">1–30 caratteri · nome e colore condivisi nel nucleo</span>
       <div class="input-wrap">
         <input id="renameValveInput" name="valveName" type="text" placeholder="Es. Prato anteriore" autocomplete="off" maxlength="30" minlength="1" required enterkeyhint="done" aria-describedby="renameValveHint" data-error="renameValveInputErr" aria-invalid="false">
       </div>
@@ -2183,6 +2361,19 @@
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         <span>Inserisci un nome valido (1–30 caratteri).</span>
       </div>
+    </div>
+    <div class="color-field">
+      <div class="color-field-header">
+        <span class="color-field-label" id="valveColorFieldLabel">Colore della zona</span>
+        <span class="color-field-current" id="valveColorCurrentName">Verde</span>
+      </div>
+      <div class="color-swatch-grid" id="valveColorPicker" role="radiogroup" aria-labelledby="valveColorFieldLabel"></div>
+      <label class="custom-color-pill" id="valveCustomColorBtn" for="valveCustomColorInput">
+        <span class="custom-color-preview" id="valveCustomColorPreview" aria-hidden="true"></span>
+        <span class="custom-color-text">Colore personalizzato</span>
+        <span class="custom-color-hex" id="valveCustomColorHex">#39FF7A</span>
+        <input type="color" id="valveCustomColorInput" class="custom-color-native" value="#39ff7a" aria-label="Scegli un colore personalizzato">
+      </label>
     </div>
     <div class="login-error" id="renameValveError" role="alert">
       <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -2518,20 +2709,26 @@
   /* ============================================================
      CONFIG
      ============================================================ */
-  // RGB triples (matched to the physical zone LEDs: V2 rosso, V3 blu, V4 giallo)
-  const VALVE_COLORS_RGB = {
-    green:  '57, 255, 122',
-    red:    '255, 77, 94',
-    blue:   '45, 163, 255',
-    yellow: '255, 214, 10'
-  };
+  // Palette colori predefiniti (i primi 4 corrispondono ai LED hardware su scheda)
+  const VALVE_COLOR_PRESETS = [
+    { key: 'green',  label: 'Verde',     hex: '#39ff7a', rgb: '57, 255, 122' },
+    { key: 'red',    label: 'Rosso',     hex: '#ff4d5e', rgb: '255, 77, 94'  },
+    { key: 'blue',   label: 'Blu',       hex: '#2da3ff', rgb: '45, 163, 255' },
+    { key: 'yellow', label: 'Giallo',    hex: '#ffd60a', rgb: '255, 214, 10' },
+    { key: 'orange', label: 'Arancione', hex: '#ff9f0a', rgb: '255, 159, 10' },
+    { key: 'purple', label: 'Viola',     hex: '#bf5af2', rgb: '191, 90, 242' },
+    { key: 'cyan',   label: 'Ciano',     hex: '#00e5ff', rgb: '0, 229, 255'  },
+    { key: 'pink',   label: 'Rosa',      hex: '#ff64b4', rgb: '255, 100, 180'}
+  ];
+  const VALVE_COLORS_BY_KEY = new Map(VALVE_COLOR_PRESETS.map(p => [p.key, p]));
+  const VALVE_HEX_TO_KEY = new Map(VALVE_COLOR_PRESETS.map(p => [p.hex.toLowerCase(), p.key]));
   // Gli id corrispondono a quelli fisici del Garden Boss (topic MQTT gardenboss/.../{id}):
   // V01 ripristinata a 4 zone complete (ECO-001: Rework pin D14 / GPIO 14).
   const VALVES = [
-    { id: 1, defaultName: 'Fasce laterali',     color: 'green' },
-    { id: 2, defaultName: 'Cortile anteriore',  color: 'red'   },
-    { id: 3, defaultName: 'Orto',               color: 'blue'  },
-    { id: 4, defaultName: 'Cortile Posteriore', color: 'yellow'}
+    { id: 1, defaultName: 'Fasce laterali',     defaultColor: 'green' },
+    { id: 2, defaultName: 'Cortile anteriore',  defaultColor: 'red'   },
+    { id: 3, defaultName: 'Orto',               defaultColor: 'blue'  },
+    { id: 4, defaultName: 'Cortile Posteriore', defaultColor: 'yellow'}
   ];
   const VALVE_NAME_MAX_LEN = 30;
 
@@ -2551,7 +2748,7 @@
   const SCHEDULE_DELETE = (vid, slot) => `gardenboss/schedule/delete/${vid}/${slot}`;
   const SCHEDULE_REQUEST_ALL = 'gardenboss/schedule/request';
 
-  // Account e nomi valvole condivisi su HiveMQ Cloud (retained topics, mai salvati in localStorage)
+  // Account e preferenze valvole (nome + colore) condivisi su HiveMQ Cloud (retained topics, mai salvati in localStorage)
   const HUB_ACCOUNTS_FILTER  = 'gardenboss/hub/accounts/+';
   const HUB_REQUESTS_FILTER  = 'gardenboss/hub/requests/+';
   const HUB_META_TOPIC       = 'gardenboss/hub/meta';
@@ -2582,7 +2779,7 @@
     accountsById: {},
     requestsById: {},
     hubMeta: null,
-    valveNames: {},        // { valveId: { v: 1, id, name, updatedAt, updatedBy } }
+    valvePrefs: {},        // { valveId: { v: 1, id, name, color, updatedAt, updatedBy } }
     accountsSynced: false,
     accountsSyncTimer: null,
     accountsSyncMaxTimer: null,
@@ -2682,6 +2879,11 @@
   const renameValveCancelBtn  = document.getElementById('renameValveCancelBtn');
   const renameValveSaveBtn    = document.getElementById('renameValveSaveBtn');
   const renameValveCloseBtn   = document.getElementById('renameValveCloseBtn');
+  const valveColorPicker      = document.getElementById('valveColorPicker');
+  const valveColorCurrentName = document.getElementById('valveColorCurrentName');
+  const valveCustomColorBtn   = document.getElementById('valveCustomColorBtn');
+  const valveCustomColorInput = document.getElementById('valveCustomColorInput');
+  const valveCustomColorHex   = document.getElementById('valveCustomColorHex');
 
   const accountBarBtn         = document.getElementById('accountBarBtn');
   const accountAvatar         = document.getElementById('accountAvatar');
@@ -3100,9 +3302,9 @@
   const DEVICE_SYNC_TOPICS  = [STATUS_VALVE_FILTER, STATUS_DEVICE_TOPIC, SCHEDULE_GET_FILTER, HUB_VALVES_FILTER];
   let syncWaveAccounts = null;
   let syncWaveRequests = null;
-  let syncWaveValveNames = null;
-  let valveNamesSyncTimer = null;
-  let valveNamesSyncMaxTimer = null;
+  let syncWaveValvePrefs = null;
+  let valvePrefsSyncTimer = null;
+  let valvePrefsSyncMaxTimer = null;
   let accountsSyncWaiters = [];
   let brokerConnectWaiters = [];
 
@@ -3120,36 +3322,37 @@
     renderAccountScreen();
   }
 
-  function beginValveNamesResync() {
-    syncWaveValveNames = {};
-    if (valveNamesSyncTimer) clearTimeout(valveNamesSyncTimer);
-    if (valveNamesSyncMaxTimer) clearTimeout(valveNamesSyncMaxTimer);
-    valveNamesSyncTimer = null;
-    valveNamesSyncMaxTimer = setTimeout(completeValveNamesSync, 1600);
+  function beginValvePrefsResync() {
+    syncWaveValvePrefs = {};
+    if (valvePrefsSyncTimer) clearTimeout(valvePrefsSyncTimer);
+    if (valvePrefsSyncMaxTimer) clearTimeout(valvePrefsSyncMaxTimer);
+    valvePrefsSyncTimer = null;
+    valvePrefsSyncMaxTimer = setTimeout(completeValvePrefsSync, 1600);
   }
 
-  function scheduleValveNamesSyncComplete(delayMs) {
-    if (!syncWaveValveNames) return;
-    if (valveNamesSyncTimer) clearTimeout(valveNamesSyncTimer);
-    valveNamesSyncTimer = setTimeout(completeValveNamesSync, delayMs);
+  function scheduleValvePrefsSyncComplete(delayMs) {
+    if (!syncWaveValvePrefs) return;
+    if (valvePrefsSyncTimer) clearTimeout(valvePrefsSyncTimer);
+    valvePrefsSyncTimer = setTimeout(completeValvePrefsSync, delayMs);
   }
 
-  function abortValveNamesResync() {
-    if (valveNamesSyncTimer) { clearTimeout(valveNamesSyncTimer); valveNamesSyncTimer = null; }
-    if (valveNamesSyncMaxTimer) { clearTimeout(valveNamesSyncMaxTimer); valveNamesSyncMaxTimer = null; }
-    syncWaveValveNames = null;
+  function abortValvePrefsResync() {
+    if (valvePrefsSyncTimer) { clearTimeout(valvePrefsSyncTimer); valvePrefsSyncTimer = null; }
+    if (valvePrefsSyncMaxTimer) { clearTimeout(valvePrefsSyncMaxTimer); valvePrefsSyncMaxTimer = null; }
+    syncWaveValvePrefs = null;
   }
 
-  function completeValveNamesSync() {
-    if (valveNamesSyncTimer) { clearTimeout(valveNamesSyncTimer); valveNamesSyncTimer = null; }
-    if (valveNamesSyncMaxTimer) { clearTimeout(valveNamesSyncMaxTimer); valveNamesSyncMaxTimer = null; }
-    if (syncWaveValveNames) {
-      state.valveNames = syncWaveValveNames;
-      syncWaveValveNames = null;
+  function completeValvePrefsSync() {
+    if (valvePrefsSyncTimer) { clearTimeout(valvePrefsSyncTimer); valvePrefsSyncTimer = null; }
+    if (valvePrefsSyncMaxTimer) { clearTimeout(valvePrefsSyncMaxTimer); valvePrefsSyncMaxTimer = null; }
+    if (syncWaveValvePrefs) {
+      state.valvePrefs = syncWaveValvePrefs;
+      syncWaveValvePrefs = null;
     }
-    VALVES.forEach(v => renderValveName(v.id));
+    VALVES.forEach(v => renderValveAppearance(v.id));
     if (modalState.valveId !== null) {
       modalTitle.textContent = getValveName(modalState.valveId);
+      applyValveTheme(modalEl, modalState.valveId);
     }
   }
 
@@ -3213,11 +3416,11 @@
     state.accountsById = {};
     state.requestsById = {};
     state.hubMeta = null;
-    state.valveNames = {};
+    state.valvePrefs = {};
     state.accountsSynced = false;
     syncWaveAccounts = {};
     syncWaveRequests = {};
-    syncWaveValveNames = null;
+    syncWaveValvePrefs = null;
 
     state.client = mqtt.connect(url, {
       clientId, username, password,
@@ -3243,7 +3446,7 @@
       updateSyncBanner();
 
       beginAccountsResync();
-      beginValveNamesResync();
+      beginValvePrefsResync();
 
       const topics = [...DEVICE_SYNC_TOPICS, ...ACCOUNT_SYNC_TOPICS];
       state.client.subscribe(topics, { qos: 1 }, err => {
@@ -3251,12 +3454,12 @@
           console.error('Subscribe error:', err);
           toast('Errore sottoscrizione');
           completeAccountsSync();
-          abortValveNamesResync();
+          abortValvePrefsResync();
           return;
         }
         // Dopo SUBACK attendiamo una breve finestra per ricevere i retained del nucleo
         scheduleAccountsSyncComplete(700);
-        scheduleValveNamesSyncComplete(700);
+        scheduleValvePrefsSyncComplete(700);
         if (state.accountsSyncMaxTimer) clearTimeout(state.accountsSyncMaxTimer);
         state.accountsSyncMaxTimer = setTimeout(completeAccountsSync, 1800);
       });
@@ -3393,7 +3596,7 @@
       return;
     }
 
-    // 3b. Nomi personalizzati delle valvole: gardenboss/hub/valves/{id}
+    // 3b. Preferenze personalizzate delle valvole (nome + colore): gardenboss/hub/valves/{id}
     m = topic.match(/^gardenboss\/hub\/valves\/(\d+)$/);
     if (m) {
       const id = parseInt(m[1], 10);
@@ -3402,37 +3605,52 @@
       if (text) {
         try {
           const obj = JSON.parse(text);
-          const cleanName = obj ? normalizeValveName(obj.name) : '';
-          if (cleanName && cleanName.length <= VALVE_NAME_MAX_LEN) {
-            entry = {
-              v: 1,
-              id,
-              name: cleanName,
-              updatedAt: obj.updatedAt || null,
-              updatedBy: obj.updatedBy || null
-            };
-          } else {
+          if (!obj || typeof obj !== 'object') {
+            console.warn('Invalid valve prefs payload', topic, text);
+            return;
+          }
+          const hasNameProp = Object.prototype.hasOwnProperty.call(obj, 'name') && obj.name !== null && obj.name !== undefined;
+          const cleanName = hasNameProp ? normalizeValveName(obj.name) : null;
+          if (hasNameProp && (!cleanName || cleanName.length > VALVE_NAME_MAX_LEN)) {
             console.warn('Invalid valve name payload', topic, text);
             return;
           }
-        } catch (e) { console.warn('Invalid valve name payload', topic, e); return; }
+          const hasColorProp = Object.prototype.hasOwnProperty.call(obj, 'color') && obj.color !== null && obj.color !== undefined && String(obj.color).trim() !== '';
+          const cleanColor = hasColorProp ? normalizeValveColor(obj.color) : null;
+          if (hasColorProp && !cleanColor) {
+            console.warn('Invalid valve color value', topic, obj.color);
+          }
+          if (!cleanName && !cleanColor) {
+            console.warn('Invalid valve prefs payload', topic, text);
+            return;
+          }
+          entry = {
+            v: 1,
+            id,
+            name: cleanName || null,
+            color: cleanColor || null,
+            updatedAt: obj.updatedAt || null,
+            updatedBy: obj.updatedBy || null
+          };
+        } catch (e) { console.warn('Invalid valve prefs payload', topic, e); return; }
       }
 
-      if (syncWaveValveNames) {
-        if (entry) syncWaveValveNames[id] = entry;
-        else delete syncWaveValveNames[id];
-        scheduleValveNamesSyncComplete(350);
+      if (syncWaveValvePrefs) {
+        if (entry) syncWaveValvePrefs[id] = entry;
+        else delete syncWaveValvePrefs[id];
+        scheduleValvePrefsSyncComplete(350);
       }
 
-      if (entry) state.valveNames[id] = entry;
-      else delete state.valveNames[id];
+      if (entry) state.valvePrefs[id] = entry;
+      else delete state.valvePrefs[id];
 
-      renderValveName(id);
+      renderValveAppearance(id);
       if (modalState.valveId === id) {
         modalTitle.textContent = getValveName(id);
+        applyValveTheme(modalEl, id);
       }
       if (renameValveDialog.open && renamingValveId === id) {
-        renameValveResetBtn.hidden = !entry;
+        renameValveResetBtn.hidden = !hasCustomValvePrefs(id);
       }
       return;
     }
@@ -4302,8 +4520,93 @@
   const PLUS_ICON_SVG   = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
   const PENCIL_ICON_SVG = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>';
 
+  const COLOR_CHECK_SVG = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
   function normalizeValveName(raw) {
     return String(raw || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function normalizeValveColor(raw) {
+    if (typeof raw !== 'string') return null;
+    const s = raw.trim().toLowerCase();
+    if (!s) return null;
+    if (VALVE_COLORS_BY_KEY.has(s)) return s;
+    let hex = null;
+    if (/^#[0-9a-f]{6}$/.test(s)) {
+      hex = s;
+    } else if (/^#[0-9a-f]{3}$/.test(s)) {
+      hex = '#' + s[1] + s[1] + s[2] + s[2] + s[3] + s[3];
+    }
+    if (!hex) return null;
+    return VALVE_HEX_TO_KEY.get(hex) || hex;
+  }
+
+  function parseColorToTuple(colorValue) {
+    const norm = normalizeValveColor(colorValue) || 'green';
+    const preset = VALVE_COLORS_BY_KEY.get(norm);
+    if (preset) {
+      return preset.rgb.split(',').map(n => parseInt(n.trim(), 10));
+    }
+    return [
+      parseInt(norm.slice(1, 3), 16),
+      parseInt(norm.slice(3, 5), 16),
+      parseInt(norm.slice(5, 7), 16)
+    ];
+  }
+
+  function tupleToHex([r, g, b]) {
+    return '#' + [r, g, b].map(n => Math.max(0, Math.min(255, n)).toString(16).padStart(2, '0')).join('');
+  }
+
+  function relativeLuminance(r, g, b) {
+    const toLinear = c => {
+      const s = c / 255;
+      return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+  }
+
+  function liftTupleLuminance([r, g, b], minLuminance) {
+    if (relativeLuminance(r, g, b) >= minLuminance) return [r, g, b];
+    let lo = 0;
+    let hi = 1;
+    let best = [255, 255, 255];
+    for (let i = 0; i < 12; i++) {
+      const mid = (lo + hi) / 2;
+      const cand = [
+        Math.round(r + (255 - r) * mid),
+        Math.round(g + (255 - g) * mid),
+        Math.round(b + (255 - b) * mid)
+      ];
+      if (relativeLuminance(cand[0], cand[1], cand[2]) >= minLuminance) {
+        best = cand;
+        hi = mid;
+      } else {
+        lo = mid;
+      }
+    }
+    return best;
+  }
+
+  function resolveColorTheme(colorValue) {
+    const rawTuple = parseColorToTuple(colorValue);
+    const fillTuple = liftTupleLuminance(rawTuple, 0.05);
+    const textTuple = liftTupleLuminance(fillTuple, 0.26);
+    const lum = relativeLuminance(fillTuple[0], fillTuple[1], fillTuple[2]);
+    return {
+      rgb: fillTuple.join(', '),
+      textRgb: textTuple.join(', '),
+      fg: lum < 0.18 ? '#ffffff' : '#05090a',
+      hex: tupleToHex(rawTuple)
+    };
+  }
+
+  function applyColorTheme(targetEl, colorValue) {
+    if (!targetEl) return;
+    const theme = resolveColorTheme(colorValue);
+    targetEl.style.setProperty('--valve-rgb', theme.rgb);
+    targetEl.style.setProperty('--valve-text-rgb', theme.textRgb);
+    targetEl.style.setProperty('--valve-fg', theme.fg);
   }
 
   function getValveDef(id) {
@@ -4311,13 +4614,36 @@
   }
 
   function getValveName(id) {
-    const custom = state.valveNames[id] && state.valveNames[id].name;
+    const custom = state.valvePrefs[id] && state.valvePrefs[id].name;
     if (custom) return custom;
     const def = getValveDef(id);
     return def ? def.defaultName : `Valvola ${id}`;
   }
 
-  function renderValveName(id) {
+  function getValveColor(id) {
+    const custom = state.valvePrefs[id] && state.valvePrefs[id].color;
+    if (custom) return custom;
+    const def = getValveDef(id);
+    return def ? def.defaultColor : 'green';
+  }
+
+  function getValveColorLabel(colorValue) {
+    const norm = normalizeValveColor(colorValue) || 'green';
+    const preset = VALVE_COLORS_BY_KEY.get(norm);
+    return preset ? preset.label : norm.toUpperCase();
+  }
+
+  function hasCustomValvePrefs(id) {
+    const def = getValveDef(id);
+    if (!def) return false;
+    return getValveName(id) !== def.defaultName || getValveColor(id) !== def.defaultColor;
+  }
+
+  function applyValveTheme(targetEl, id) {
+    applyColorTheme(targetEl, getValveColor(id));
+  }
+
+  function renderValveAppearance(id) {
     const el = valveList.querySelector(`.valve[data-id="${id}"]`);
     if (!el) return;
     const name = getValveName(id);
@@ -4325,22 +4651,22 @@
     if (nameEl) nameEl.textContent = name;
     const editBtn = el.querySelector('.valve-edit-btn');
     if (editBtn) {
-      editBtn.setAttribute('aria-label', `Rinomina ${name} (V0${id})`);
+      editBtn.setAttribute('aria-label', `Personalizza ${name} (V0${id})`);
     }
+    applyValveTheme(el, id);
   }
 
   VALVES.forEach(v => {
     const el = document.createElement('div');
     el.className = 'valve';
     el.dataset.id = v.id;
-    el.style.setProperty('--valve-rgb', VALVE_COLORS_RGB[v.color] || VALVE_COLORS_RGB.green);
     el.innerHTML = `
       <div class="valve-main" data-toggle>
         <div class="valve-icon">${VALVE_ICON_SVG}</div>
         <div class="valve-info">
           <div class="valve-name-row">
             <div class="valve-name"></div>
-            <button type="button" class="valve-edit-btn" title="Rinomina valvola">${PENCIL_ICON_SVG}</button>
+            <button type="button" class="valve-edit-btn" title="Personalizza zona">${PENCIL_ICON_SVG}</button>
             <div class="valve-num">V0${v.id}</div>
           </div>
         </div>
@@ -4366,13 +4692,13 @@
       toggleValve(v.id);
     });
     valveList.appendChild(el);
-    renderValveName(v.id);
+    renderValveAppearance(v.id);
   });
 
   function renderValve(id) {
     const el = valveList.querySelector(`.valve[data-id="${id}"]`);
     if (!el) return;
-    renderValveName(id);
+    renderValveAppearance(id);
     const s = state.valves[id];
     el.classList.toggle('on', s.on);
     el.classList.toggle('pending', s.pending);
@@ -4427,9 +4753,96 @@
   }
 
   /* ============================================================
-     RENAME VALVE DIALOG
+     CUSTOMIZE VALVE DIALOG (name & color)
      ============================================================ */
   let renamingValveId = null;
+  let selectedDialogColor = null;
+
+  VALVE_COLOR_PRESETS.forEach(preset => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'color-swatch';
+    btn.dataset.color = preset.key;
+    btn.setAttribute('role', 'radio');
+    btn.setAttribute('aria-checked', 'false');
+    btn.setAttribute('aria-label', preset.label);
+    btn.title = preset.label;
+    const theme = resolveColorTheme(preset.key);
+    btn.style.setProperty('--swatch-rgb', preset.rgb);
+    btn.style.setProperty('--swatch-fg', theme.fg);
+    btn.innerHTML = COLOR_CHECK_SVG;
+    btn.addEventListener('click', () => {
+      setDialogSelectedColor(preset.key);
+    });
+    valveColorPicker.appendChild(btn);
+  });
+
+  valveColorPicker.addEventListener('keydown', e => {
+    const keys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+    if (!keys.includes(e.key)) return;
+    const swatches = [...valveColorPicker.querySelectorAll('.color-swatch')];
+    if (!swatches.length) return;
+    let idx = swatches.indexOf(document.activeElement);
+    if (idx === -1) idx = swatches.findIndex(s => s.dataset.color === selectedDialogColor);
+    if (idx === -1) idx = 0;
+    e.preventDefault();
+    const step = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1 : -1;
+    const next = swatches[(idx + step + swatches.length) % swatches.length];
+    next.focus();
+    setDialogSelectedColor(next.dataset.color);
+  });
+
+  function setDialogSelectedColor(colorValue) {
+    const valve = getValveDef(renamingValveId);
+    const defaultKey = valve ? valve.defaultColor : 'green';
+    const norm = normalizeValveColor(colorValue) || defaultKey;
+    selectedDialogColor = norm;
+
+    const preset = VALVE_COLORS_BY_KEY.get(norm) || null;
+    const theme = resolveColorTheme(norm);
+    const isCustomHex = !preset;
+
+    valveColorPicker.querySelectorAll('.color-swatch').forEach(sw => {
+      const key = sw.dataset.color;
+      const swPreset = VALVE_COLORS_BY_KEY.get(key);
+      const isSelected = key === norm;
+      const isDefault = key === defaultKey;
+      sw.classList.toggle('selected', isSelected);
+      sw.classList.toggle('is-default', isDefault);
+      sw.setAttribute('aria-checked', String(isSelected));
+      const baseLabel = swPreset ? swPreset.label : key;
+      sw.setAttribute('aria-label', isDefault ? `${baseLabel} (predefinito)` : baseLabel);
+      sw.title = isDefault ? `${baseLabel} (predefinito)` : baseLabel;
+    });
+
+    valveCustomColorBtn.classList.toggle('selected', isCustomHex);
+    if (valveCustomColorInput.value.toLowerCase() !== theme.hex.toLowerCase()) {
+      valveCustomColorInput.value = theme.hex;
+    }
+    valveCustomColorHex.textContent = theme.hex.toUpperCase();
+    if (isCustomHex) {
+      valveCustomColorBtn.style.setProperty('--custom-color-hex', theme.hex);
+    } else {
+      valveCustomColorBtn.style.removeProperty('--custom-color-hex');
+    }
+
+    if (preset) {
+      valveColorCurrentName.textContent = (norm === defaultKey)
+        ? `${preset.label} · Predefinito`
+        : preset.label;
+    } else {
+      valveColorCurrentName.textContent = `Personalizzato · ${theme.hex.toUpperCase()}`;
+    }
+
+    applyColorTheme(renameValveDialog, norm);
+  }
+
+  function handleCustomColorEvent(e) {
+    const picked = normalizeValveColor(e.target.value);
+    if (picked) setDialogSelectedColor(picked);
+  }
+  valveCustomColorInput.addEventListener('input', handleCustomColorEvent);
+  valveCustomColorInput.addEventListener('change', handleCustomColorEvent);
 
   function showRenameValveError(msg) {
     renameValveErrorText.textContent = msg;
@@ -4451,15 +4864,15 @@
 
     renamingValveId = valveId;
     const curName = getValveName(valveId);
-    const hasCustom = !!state.valveNames[valveId];
+    const curColor = getValveColor(valveId);
 
-    renameValveDialog.style.setProperty('--valve-rgb', VALVE_COLORS_RGB[valve.color] || VALVE_COLORS_RGB.green);
-    renameValveTitle.textContent = 'Rinomina zona';
+    renameValveTitle.textContent = 'Personalizza zona';
     renameValveSubtitle.textContent = `V0${valveId} · predefinito: ${valve.defaultName}`;
     renameValveInput.value = curName;
+    setDialogSelectedColor(curColor);
     clearRenameValveError();
     formValidation.resetFormValidation(renameValveForm);
-    renameValveResetBtn.hidden = !hasCustom;
+    renameValveResetBtn.hidden = !hasCustomValvePrefs(valveId);
 
     if (!renameValveDialog.open) renameValveDialog.showModal();
     setTimeout(() => {
@@ -4474,6 +4887,7 @@
   renameValveDialog.addEventListener('close', () => {
     renameValveDialog.returnValue = '';
     renamingValveId = null;
+    selectedDialogColor = null;
     clearRenameValveError();
   });
 
@@ -4499,7 +4913,11 @@
       return;
     }
 
-    if (nextName === getValveName(vid)) {
+    const nextColor = normalizeValveColor(selectedDialogColor) || valve.defaultColor;
+    const nameChanged = nextName !== getValveName(vid);
+    const colorChanged = nextColor !== getValveColor(vid);
+
+    if (!nameChanged && !colorChanged) {
       renameValveDialog.close();
       toast('Nessuna modifica');
       return;
@@ -4510,19 +4928,20 @@
       return;
     }
 
-    if (nextName === valve.defaultName) {
+    if (nextName === valve.defaultName && nextColor === valve.defaultColor) {
       if (!publishRetainedJson(HUB_VALVE_TOPIC(vid), null)) {
         showRenameValveError('Connessione al broker assente. Riprova.');
         return;
       }
-      delete state.valveNames[vid];
-      if (syncWaveValveNames) delete syncWaveValveNames[vid];
-      renderValveName(vid);
+      delete state.valvePrefs[vid];
+      if (syncWaveValvePrefs) delete syncWaveValvePrefs[vid];
+      renderValveAppearance(vid);
       if (modalState.valveId === vid) {
         modalTitle.textContent = getValveName(vid);
+        applyValveTheme(modalEl, vid);
       }
       renameValveDialog.close();
-      const msg = `V0${vid}: nome predefinito ripristinato`;
+      const msg = `V0${vid}: impostazioni predefinite ripristinate`;
       toast(msg);
       announceStatus(msg);
       return;
@@ -4532,6 +4951,7 @@
       v: 1,
       id: vid,
       name: nextName,
+      color: nextColor,
       updatedAt: Date.now(),
       updatedBy: state.currentAccount ? state.currentAccount.name : ''
     };
@@ -4539,14 +4959,19 @@
       showRenameValveError('Connessione al broker assente. Riprova.');
       return;
     }
-    state.valveNames[vid] = entry;
-    if (syncWaveValveNames) syncWaveValveNames[vid] = entry;
-    renderValveName(vid);
+    state.valvePrefs[vid] = entry;
+    if (syncWaveValvePrefs) syncWaveValvePrefs[vid] = entry;
+    renderValveAppearance(vid);
     if (modalState.valveId === vid) {
       modalTitle.textContent = getValveName(vid);
+      applyValveTheme(modalEl, vid);
     }
     renameValveDialog.close();
-    const msg = `V0${vid} rinominata in "${nextName}"`;
+    const msg = (nameChanged && colorChanged)
+      ? `V0${vid} personalizzata ("${nextName}")`
+      : colorChanged
+        ? `V0${vid}: colore ${getValveColorLabel(nextColor).toLowerCase()}`
+        : `V0${vid} rinominata in "${nextName}"`;
     toast(msg);
     announceStatus(msg);
   });
@@ -4569,14 +4994,15 @@
       showRenameValveError('Connessione al broker assente. Riprova.');
       return;
     }
-    delete state.valveNames[vid];
-    if (syncWaveValveNames) delete syncWaveValveNames[vid];
-    renderValveName(vid);
+    delete state.valvePrefs[vid];
+    if (syncWaveValvePrefs) delete syncWaveValvePrefs[vid];
+    renderValveAppearance(vid);
     if (modalState.valveId === vid) {
       modalTitle.textContent = getValveName(vid);
+      applyValveTheme(modalEl, vid);
     }
     renameValveDialog.close();
-    const msg = `V0${vid}: nome predefinito ripristinato`;
+    const msg = `V0${vid}: impostazioni predefinite ripristinate`;
     toast(msg);
     announceStatus(msg);
   });
@@ -4694,7 +5120,7 @@
 
     modalTitle.textContent = getValveName(valveId);
     modalSubtitle.textContent = `V0${valveId}`;
-    modalEl.style.setProperty('--valve-rgb', VALVE_COLORS_RGB[valve.color] || VALVE_COLORS_RGB.green);
+    applyValveTheme(modalEl, valveId);
     modalEl.classList.toggle('readonly', !canControlDevices(state.currentAccount));
 
     modalConflictBanner.classList.remove('show');
@@ -5001,9 +5427,10 @@
     setConnectionUI(false);
     setLoginLoading(false);
 
-    state.valveNames = {};
-    abortValveNamesResync();
+    state.valvePrefs = {};
+    abortValvePrefsResync();
     renamingValveId = null;
+    selectedDialogColor = null;
 
     VALVES.forEach(v => {
       state.valves[v.id].on = false;
@@ -5195,18 +5622,18 @@
       renderDeviceStatus();
       updateHubStats();
       beginAccountsResync();
-      beginValveNamesResync();
+      beginValvePrefsResync();
       if (state.accountsSyncMaxTimer) clearTimeout(state.accountsSyncMaxTimer);
       state.accountsSyncMaxTimer = setTimeout(completeAccountsSync, 1400);
       resubscribeMqttTopics([...DEVICE_SYNC_TOPICS, ...ACCOUNT_SYNC_TOPICS], err => {
         if (!err) probeDevice();
         if (err) {
           completeAccountsSync();
-          abortValveNamesResync();
+          abortValvePrefsResync();
           return;
         }
         scheduleAccountsSyncComplete(450);
-        scheduleValveNamesSyncComplete(450);
+        scheduleValvePrefsSyncComplete(450);
       });
       await Promise.all([minSpin, Promise.race([waitForAccountsSync(), waitMs(1600)])]);
       applyAccountToSession();
@@ -5222,22 +5649,22 @@
     VALVES.forEach(v => renderValve(v.id));
     renderDeviceStatus();
 
-    beginValveNamesResync();
+    beginValvePrefsResync();
     const subSync = new Promise(resolve => {
       resubscribeMqttTopics(DEVICE_SYNC_TOPICS, err => {
         if (!err) probeDevice();
         armDeviceInitialSyncTimer(1500);
         if (err) {
-          abortValveNamesResync();
+          abortValvePrefsResync();
           resolve();
           return;
         }
-        scheduleValveNamesSyncComplete(450);
+        scheduleValvePrefsSyncComplete(450);
         setTimeout(resolve, 480);
       });
     });
     await Promise.all([minSpin, Promise.race([subSync, waitMs(1600)])]);
-    completeValveNamesSync();
+    completeValvePrefsSync();
     if (!state.initialSyncDone) {
       state.initialSyncDone = true;
       updateSyncBanner();
@@ -5372,7 +5799,8 @@
   // Debug
   window.__hub = {
     state, screens, showScreen, toggleValve, openModal,
-    getValveName, openRenameValveModal,
+    getValveName, getValveColor, getValveColorLabel, hasCustomValvePrefs,
+    resolveColorTheme, openRenameValveModal,
     handleMqttMessage, renderDeviceStatus, markDeviceAlive, probeDevice, ensureConnection,
     afterBrokerConnected, transitionToHub, transitionToAccountPicker,
     getSortedAccounts, getSortedRequests, isAdmin, canControlDevices,
