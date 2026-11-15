@@ -672,12 +672,39 @@
 
   .valve-info { flex: 1; min-width: 0; }
   .valve-name-row {
-    display: flex; align-items: baseline; gap: 8px;
+    display: flex; align-items: center; gap: 6px;
   }
   /* min-width:0 + overflow-wrap: i nomi lunghi vanno a capo dentro la card
-     invece di schiacciare la sigla V0x fuori dal riquadro */
+     invece di schiacciare la matita e la sigla V0x fuori dal riquadro */
   .valve-name { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; min-width: 0; overflow-wrap: anywhere; }
-  .valve-num { font-size: 11px; font-weight: 600; color: var(--text-faint); letter-spacing: 0.1em; text-transform: uppercase; flex: 0 0 auto; }
+  .valve-edit-btn {
+    position: relative;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-muted);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    flex: 0 0 auto;
+    padding: 0;
+    transition: transform 0.15s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+  .valve-edit-btn:hover {
+    background: rgba(var(--valve-rgb), 0.18);
+    border-color: rgba(var(--valve-rgb), 0.45);
+    color: var(--text);
+  }
+  .valve-edit-btn:active { transform: scale(0.9); }
+  .valve-edit-btn svg { width: 12px; height: 12px; display: block; pointer-events: none; }
+  @media (pointer: coarse) {
+    .valve-edit-btn::after {
+      content: "";
+      position: absolute;
+      inset: -7px;
+    }
+  }
+  .valve-num { font-size: 11px; font-weight: 600; color: var(--text-faint); letter-spacing: 0.1em; text-transform: uppercase; flex: 0 0 auto; margin-left: 2px; }
 
   .switch {
     position: relative;
@@ -724,6 +751,7 @@
   /* Dispositivo offline (LWT): i comandi non arriverebbero mai -> controlli spenti */
   #valveList.device-offline .switch { opacity: 0.35; }
   #valveList.device-offline .valve-main { cursor: not-allowed; }
+  #valveList.device-offline .valve-edit-btn { cursor: pointer; }
 
   /* Schedule chips row inside valve */
   .schedules-row {
@@ -1888,6 +1916,7 @@
   /* Read-only lockout for guest accounts */
   #valveList.role-readonly .valve-main { cursor: not-allowed; }
   #valveList.role-readonly .switch { opacity: 0.4; }
+  #valveList.role-readonly .valve-edit-btn { display: none; }
   #scheduleModal.readonly #modalBody,
   #scheduleModal.readonly .modal-enable-row,
   #scheduleModal.readonly .slot-tabs {
@@ -1896,6 +1925,12 @@
   }
   #scheduleModal.readonly .modal-actions .modal-btn-primary,
   #scheduleModal.readonly .modal-actions .modal-btn-danger { display: none; }
+
+  #renameValveDialog .input-wrap input { padding-right: 16px; }
+  #renameValveDialog .input-wrap input:focus {
+    border-color: rgb(var(--valve-rgb));
+    box-shadow: 0 0 0 4px rgba(var(--valve-rgb), 0.18);
+  }
 </style>
 </head>
 <body>
@@ -2121,6 +2156,46 @@
   <div class="account-list" id="accountsModalList"></div>
   <button type="button" class="modal-btn modal-btn-secondary" id="openNewAccountFromModalBtn" style="width:100%; margin-top:14px;" hidden>+ Aggiungi account approvato</button>
   <button type="button" class="modal-btn modal-btn-secondary" id="switchToPickerBtn" style="width:100%; margin-top:10px;">Torna a selezione account</button>
+</dialog>
+
+<!-- Rinomina valvola dialog (nativo <dialog>) -->
+<dialog class="sheet-dialog" id="renameValveDialog" closedby="any" aria-labelledby="renameValveTitle">
+  <div class="modal-grabber" aria-hidden="true"></div>
+  <div class="modal-header">
+    <div>
+      <h2 class="modal-title" id="renameValveTitle">Rinomina zona</h2>
+      <div class="modal-subtitle" id="renameValveSubtitle">—</div>
+    </div>
+    <button type="button" class="modal-close" id="renameValveCloseBtn" aria-label="Chiudi">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+  <form id="renameValveForm" novalidate>
+    <div class="field">
+      <label for="renameValveInput">Nome della valvola</label>
+      <span class="field-hint" id="renameValveHint">1–30 caratteri · condiviso con i membri del nucleo</span>
+      <div class="input-wrap">
+        <input id="renameValveInput" name="valveName" type="text" placeholder="Es. Prato anteriore" autocomplete="off" maxlength="30" minlength="1" required enterkeyhint="done" aria-describedby="renameValveHint" data-error="renameValveInputErr" aria-invalid="false">
+      </div>
+      <div class="field-error" id="renameValveInputErr">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>Inserisci un nome valido (1–30 caratteri).</span>
+      </div>
+    </div>
+    <div class="login-error" id="renameValveError" role="alert">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span id="renameValveErrorText">Errore</span>
+    </div>
+    <div class="modal-actions" style="margin-top: 14px; flex-wrap: wrap;">
+      <button type="button" class="modal-btn modal-btn-secondary" id="renameValveResetBtn" style="flex: 0 0 auto; padding: 14px;" hidden>Ripristina</button>
+      <button type="button" class="modal-btn modal-btn-secondary" id="renameValveCancelBtn">Annulla</button>
+      <button type="submit" class="modal-btn modal-btn-primary" id="renameValveSaveBtn">Salva</button>
+    </div>
+  </form>
 </dialog>
 
 <!-- =============================================================
@@ -2453,11 +2528,12 @@
   // Gli id corrispondono a quelli fisici del Garden Boss (topic MQTT gardenboss/.../{id}):
   // V01 ripristinata a 4 zone complete (ECO-001: Rework pin D14 / GPIO 14).
   const VALVES = [
-    { id: 1, name: 'Fasce laterali',     color: 'green' },
-    { id: 2, name: 'Cortile anteriore',  color: 'red'   },
-    { id: 3, name: 'Orto',               color: 'blue'  },
-    { id: 4, name: 'Cortile Posteriore', color: 'yellow'}
+    { id: 1, defaultName: 'Fasce laterali',     color: 'green' },
+    { id: 2, defaultName: 'Cortile anteriore',  color: 'red'   },
+    { id: 3, defaultName: 'Orto',               color: 'blue'  },
+    { id: 4, defaultName: 'Cortile Posteriore', color: 'yellow'}
   ];
+  const VALVE_NAME_MAX_LEN = 30;
 
   const SLOTS_PER_VALVE = 3;
   const MIN_DURATION_MIN = 5;
@@ -2475,12 +2551,14 @@
   const SCHEDULE_DELETE = (vid, slot) => `gardenboss/schedule/delete/${vid}/${slot}`;
   const SCHEDULE_REQUEST_ALL = 'gardenboss/schedule/request';
 
-  // Account del nucleo condivisi su HiveMQ Cloud (retained topics, mai salvati in localStorage)
+  // Account e nomi valvole condivisi su HiveMQ Cloud (retained topics, mai salvati in localStorage)
   const HUB_ACCOUNTS_FILTER  = 'gardenboss/hub/accounts/+';
   const HUB_REQUESTS_FILTER  = 'gardenboss/hub/requests/+';
   const HUB_META_TOPIC       = 'gardenboss/hub/meta';
+  const HUB_VALVES_FILTER    = 'gardenboss/hub/valves/+';
   const HUB_ACCOUNT_TOPIC    = id => `gardenboss/hub/accounts/${id}`;
   const HUB_REQUEST_TOPIC    = id => `gardenboss/hub/requests/${id}`;
+  const HUB_VALVE_TOPIC      = id => `gardenboss/hub/valves/${id}`;
 
   const ROLE_LABELS = {
     admin:  'Amministratore',
@@ -2504,6 +2582,7 @@
     accountsById: {},
     requestsById: {},
     hubMeta: null,
+    valveNames: {},        // { valveId: { v: 1, id, name, updatedAt, updatedBy } }
     accountsSynced: false,
     accountsSyncTimer: null,
     accountsSyncMaxTimer: null,
@@ -2591,6 +2670,18 @@
   const accountsModalCloseBtn = document.getElementById('accountsModalCloseBtn');
   const openNewAccountFromModalBtn = document.getElementById('openNewAccountFromModalBtn');
   const switchToPickerBtn     = document.getElementById('switchToPickerBtn');
+
+  const renameValveDialog     = document.getElementById('renameValveDialog');
+  const renameValveForm       = document.getElementById('renameValveForm');
+  const renameValveTitle      = document.getElementById('renameValveTitle');
+  const renameValveSubtitle   = document.getElementById('renameValveSubtitle');
+  const renameValveInput      = document.getElementById('renameValveInput');
+  const renameValveError      = document.getElementById('renameValveError');
+  const renameValveErrorText  = document.getElementById('renameValveErrorText');
+  const renameValveResetBtn   = document.getElementById('renameValveResetBtn');
+  const renameValveCancelBtn  = document.getElementById('renameValveCancelBtn');
+  const renameValveSaveBtn    = document.getElementById('renameValveSaveBtn');
+  const renameValveCloseBtn   = document.getElementById('renameValveCloseBtn');
 
   const accountBarBtn         = document.getElementById('accountBarBtn');
   const accountAvatar         = document.getElementById('accountAvatar');
@@ -3006,9 +3097,12 @@
      MAIN MQTT SESSION
      ============================================================ */
   const ACCOUNT_SYNC_TOPICS = [HUB_ACCOUNTS_FILTER, HUB_REQUESTS_FILTER, HUB_META_TOPIC];
-  const DEVICE_SYNC_TOPICS  = [STATUS_VALVE_FILTER, STATUS_DEVICE_TOPIC, SCHEDULE_GET_FILTER];
+  const DEVICE_SYNC_TOPICS  = [STATUS_VALVE_FILTER, STATUS_DEVICE_TOPIC, SCHEDULE_GET_FILTER, HUB_VALVES_FILTER];
   let syncWaveAccounts = null;
   let syncWaveRequests = null;
+  let syncWaveValveNames = null;
+  let valveNamesSyncTimer = null;
+  let valveNamesSyncMaxTimer = null;
   let accountsSyncWaiters = [];
   let brokerConnectWaiters = [];
 
@@ -3024,6 +3118,39 @@
     syncWaveAccounts = {};
     syncWaveRequests = {};
     renderAccountScreen();
+  }
+
+  function beginValveNamesResync() {
+    syncWaveValveNames = {};
+    if (valveNamesSyncTimer) clearTimeout(valveNamesSyncTimer);
+    if (valveNamesSyncMaxTimer) clearTimeout(valveNamesSyncMaxTimer);
+    valveNamesSyncTimer = null;
+    valveNamesSyncMaxTimer = setTimeout(completeValveNamesSync, 1600);
+  }
+
+  function scheduleValveNamesSyncComplete(delayMs) {
+    if (!syncWaveValveNames) return;
+    if (valveNamesSyncTimer) clearTimeout(valveNamesSyncTimer);
+    valveNamesSyncTimer = setTimeout(completeValveNamesSync, delayMs);
+  }
+
+  function abortValveNamesResync() {
+    if (valveNamesSyncTimer) { clearTimeout(valveNamesSyncTimer); valveNamesSyncTimer = null; }
+    if (valveNamesSyncMaxTimer) { clearTimeout(valveNamesSyncMaxTimer); valveNamesSyncMaxTimer = null; }
+    syncWaveValveNames = null;
+  }
+
+  function completeValveNamesSync() {
+    if (valveNamesSyncTimer) { clearTimeout(valveNamesSyncTimer); valveNamesSyncTimer = null; }
+    if (valveNamesSyncMaxTimer) { clearTimeout(valveNamesSyncMaxTimer); valveNamesSyncMaxTimer = null; }
+    if (syncWaveValveNames) {
+      state.valveNames = syncWaveValveNames;
+      syncWaveValveNames = null;
+    }
+    VALVES.forEach(v => renderValveName(v.id));
+    if (modalState.valveId !== null) {
+      modalTitle.textContent = getValveName(modalState.valveId);
+    }
   }
 
   function armDeviceInitialSyncTimer(delayMs) {
@@ -3086,9 +3213,11 @@
     state.accountsById = {};
     state.requestsById = {};
     state.hubMeta = null;
+    state.valveNames = {};
     state.accountsSynced = false;
     syncWaveAccounts = {};
     syncWaveRequests = {};
+    syncWaveValveNames = null;
 
     state.client = mqtt.connect(url, {
       clientId, username, password,
@@ -3114,6 +3243,7 @@
       updateSyncBanner();
 
       beginAccountsResync();
+      beginValveNamesResync();
 
       const topics = [...DEVICE_SYNC_TOPICS, ...ACCOUNT_SYNC_TOPICS];
       state.client.subscribe(topics, { qos: 1 }, err => {
@@ -3121,10 +3251,12 @@
           console.error('Subscribe error:', err);
           toast('Errore sottoscrizione');
           completeAccountsSync();
+          abortValveNamesResync();
           return;
         }
         // Dopo SUBACK attendiamo una breve finestra per ricevere i retained del nucleo
         scheduleAccountsSyncComplete(700);
+        scheduleValveNamesSyncComplete(700);
         if (state.accountsSyncMaxTimer) clearTimeout(state.accountsSyncMaxTimer);
         state.accountsSyncMaxTimer = setTimeout(completeAccountsSync, 1800);
       });
@@ -3258,6 +3390,50 @@
         state.hubMeta = null;
       }
       if (!state.accountsSynced) scheduleAccountsSyncComplete(350);
+      return;
+    }
+
+    // 3b. Nomi personalizzati delle valvole: gardenboss/hub/valves/{id}
+    m = topic.match(/^gardenboss\/hub\/valves\/(\d+)$/);
+    if (m) {
+      const id = parseInt(m[1], 10);
+      if (!state.valves[id]) return;
+      let entry = null;
+      if (text) {
+        try {
+          const obj = JSON.parse(text);
+          const cleanName = obj ? normalizeValveName(obj.name) : '';
+          if (cleanName && cleanName.length <= VALVE_NAME_MAX_LEN) {
+            entry = {
+              v: 1,
+              id,
+              name: cleanName,
+              updatedAt: obj.updatedAt || null,
+              updatedBy: obj.updatedBy || null
+            };
+          } else {
+            console.warn('Invalid valve name payload', topic, text);
+            return;
+          }
+        } catch (e) { console.warn('Invalid valve name payload', topic, e); return; }
+      }
+
+      if (syncWaveValveNames) {
+        if (entry) syncWaveValveNames[id] = entry;
+        else delete syncWaveValveNames[id];
+        scheduleValveNamesSyncComplete(350);
+      }
+
+      if (entry) state.valveNames[id] = entry;
+      else delete state.valveNames[id];
+
+      renderValveName(id);
+      if (modalState.valveId === id) {
+        modalTitle.textContent = getValveName(id);
+      }
+      if (renameValveDialog.open && renamingValveId === id) {
+        renameValveResetBtn.hidden = !entry;
+      }
       return;
     }
 
@@ -3538,6 +3714,7 @@
       if (accountsDialog.open) accountsDialog.close();
       if (pinDialog.open) pinDialog.close();
       if (newAccountDialog.open) newAccountDialog.close();
+      if (renameValveDialog.open) renameValveDialog.close();
       if (modalEl.classList.contains('show')) closeModal();
       toast('Account rimosso dall\'amministratore');
       transitionToAccountPicker();
@@ -3832,11 +4009,16 @@
     const acc = state.currentAccount;
     if (!acc) return;
     const initial = (acc.name || '?').trim().charAt(0).toUpperCase() || '?';
+    const canEdit = canControlDevices(acc);
     accountAvatar.textContent = initial;
     accountAvatar.className = 'account-avatar role-' + acc.role;
     accountBarName.textContent = acc.name;
     accountBarRole.textContent = ROLE_LABELS[acc.role] || 'Ospite';
-    valveList.classList.toggle('role-readonly', !canControlDevices(acc));
+    valveList.classList.toggle('role-readonly', !canEdit);
+    if (!canEdit && renameValveDialog.open) {
+      renameValveDialog.close();
+      toast('Il tuo profilo è ora in sola lettura');
+    }
     renderAdminApprovals();
   }
 
@@ -4115,9 +4297,37 @@
   /* ============================================================
      VALVE LIST RENDERING
      ============================================================ */
-  const VALVE_ICON_SVG = '<svg viewBox="0 0 24 24"><path d="M12 2C8 8 5 12 5 16a7 7 0 0 0 14 0c0-4-3-8-7-14zm0 17a5 5 0 0 1-5-5c0-2.5 2-5.5 5-10 3 4.5 5 7.5 5 10a5 5 0 0 1-5 5z"/></svg>';
-  const CLOCK_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
-  const PLUS_ICON_SVG  = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
+  const VALVE_ICON_SVG  = '<svg viewBox="0 0 24 24"><path d="M12 2C8 8 5 12 5 16a7 7 0 0 0 14 0c0-4-3-8-7-14zm0 17a5 5 0 0 1-5-5c0-2.5 2-5.5 5-10 3 4.5 5 7.5 5 10a5 5 0 0 1-5 5z"/></svg>';
+  const CLOCK_ICON_SVG  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+  const PLUS_ICON_SVG   = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
+  const PENCIL_ICON_SVG = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>';
+
+  function normalizeValveName(raw) {
+    return String(raw || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function getValveDef(id) {
+    return VALVES.find(v => v.id === id) || null;
+  }
+
+  function getValveName(id) {
+    const custom = state.valveNames[id] && state.valveNames[id].name;
+    if (custom) return custom;
+    const def = getValveDef(id);
+    return def ? def.defaultName : `Valvola ${id}`;
+  }
+
+  function renderValveName(id) {
+    const el = valveList.querySelector(`.valve[data-id="${id}"]`);
+    if (!el) return;
+    const name = getValveName(id);
+    const nameEl = el.querySelector('.valve-name');
+    if (nameEl) nameEl.textContent = name;
+    const editBtn = el.querySelector('.valve-edit-btn');
+    if (editBtn) {
+      editBtn.setAttribute('aria-label', `Rinomina ${name} (V0${id})`);
+    }
+  }
 
   VALVES.forEach(v => {
     const el = document.createElement('div');
@@ -4129,7 +4339,8 @@
         <div class="valve-icon">${VALVE_ICON_SVG}</div>
         <div class="valve-info">
           <div class="valve-name-row">
-            <div class="valve-name">${v.name}</div>
+            <div class="valve-name"></div>
+            <button type="button" class="valve-edit-btn" title="Rinomina valvola">${PENCIL_ICON_SVG}</button>
             <div class="valve-num">V0${v.id}</div>
           </div>
         </div>
@@ -4145,13 +4356,23 @@
       </div>
       <div class="schedules-row" data-schedules></div>
     `;
-    el.querySelector('[data-toggle]').addEventListener('click', () => toggleValve(v.id));
+    const editBtn = el.querySelector('.valve-edit-btn');
+    editBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      openRenameValveModal(v.id);
+    });
+    el.querySelector('[data-toggle]').addEventListener('click', e => {
+      if (e.target && e.target.closest('.valve-edit-btn')) return;
+      toggleValve(v.id);
+    });
     valveList.appendChild(el);
+    renderValveName(v.id);
   });
 
   function renderValve(id) {
     const el = valveList.querySelector(`.valve[data-id="${id}"]`);
     if (!el) return;
+    renderValveName(id);
     const s = state.valves[id];
     el.classList.toggle('on', s.on);
     el.classList.toggle('pending', s.pending);
@@ -4204,6 +4425,161 @@
     renderTimeline(id);
     activeCountEl.textContent = Object.values(state.valves).filter(v => v.on).length;
   }
+
+  /* ============================================================
+     RENAME VALVE DIALOG
+     ============================================================ */
+  let renamingValveId = null;
+
+  function showRenameValveError(msg) {
+    renameValveErrorText.textContent = msg;
+    renameValveError.classList.add('show');
+  }
+
+  function clearRenameValveError() {
+    renameValveError.classList.remove('show');
+    renameValveInput.classList.remove('has-custom-error');
+  }
+
+  function openRenameValveModal(valveId) {
+    if (!canControlDevices(state.currentAccount)) {
+      toast('Il tuo profilo è in sola lettura');
+      return;
+    }
+    const valve = getValveDef(valveId);
+    if (!valve) return;
+
+    renamingValveId = valveId;
+    const curName = getValveName(valveId);
+    const hasCustom = !!state.valveNames[valveId];
+
+    renameValveDialog.style.setProperty('--valve-rgb', VALVE_COLORS_RGB[valve.color] || VALVE_COLORS_RGB.green);
+    renameValveTitle.textContent = 'Rinomina zona';
+    renameValveSubtitle.textContent = `V0${valveId} · predefinito: ${valve.defaultName}`;
+    renameValveInput.value = curName;
+    clearRenameValveError();
+    formValidation.resetFormValidation(renameValveForm);
+    renameValveResetBtn.hidden = !hasCustom;
+
+    if (!renameValveDialog.open) renameValveDialog.showModal();
+    setTimeout(() => {
+      renameValveInput.focus();
+      renameValveInput.select();
+    }, 80);
+  }
+
+  renameValveInput.addEventListener('input', clearRenameValveError);
+  renameValveCancelBtn.addEventListener('click', () => renameValveDialog.close());
+  renameValveCloseBtn.addEventListener('click', () => renameValveDialog.close());
+  renameValveDialog.addEventListener('close', () => {
+    renameValveDialog.returnValue = '';
+    renamingValveId = null;
+    clearRenameValveError();
+  });
+
+  renameValveForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const vid = renamingValveId;
+    if (vid === null) return;
+    if (!canControlDevices(state.currentAccount)) {
+      renameValveDialog.close();
+      toast('Il tuo profilo è in sola lettura');
+      return;
+    }
+    const valve = getValveDef(vid);
+    if (!valve) return;
+
+    const nextName = normalizeValveName(renameValveInput.value);
+    if (!nextName || nextName.length > VALVE_NAME_MAX_LEN) {
+      renameValveInput.classList.add('has-custom-error');
+      formValidation.syncField(renameValveInput, true);
+      renameValveInput.setAttribute('aria-invalid', 'true');
+      showRenameValveError(`Inserisci un nome valido (1–${VALVE_NAME_MAX_LEN} caratteri).`);
+      renameValveInput.focus();
+      return;
+    }
+
+    if (nextName === getValveName(vid)) {
+      renameValveDialog.close();
+      toast('Nessuna modifica');
+      return;
+    }
+
+    if (!state.client || !state.connected) {
+      showRenameValveError('Connessione al broker assente. Riprova.');
+      return;
+    }
+
+    if (nextName === valve.defaultName) {
+      if (!publishRetainedJson(HUB_VALVE_TOPIC(vid), null)) {
+        showRenameValveError('Connessione al broker assente. Riprova.');
+        return;
+      }
+      delete state.valveNames[vid];
+      if (syncWaveValveNames) delete syncWaveValveNames[vid];
+      renderValveName(vid);
+      if (modalState.valveId === vid) {
+        modalTitle.textContent = getValveName(vid);
+      }
+      renameValveDialog.close();
+      const msg = `V0${vid}: nome predefinito ripristinato`;
+      toast(msg);
+      announceStatus(msg);
+      return;
+    }
+
+    const entry = {
+      v: 1,
+      id: vid,
+      name: nextName,
+      updatedAt: Date.now(),
+      updatedBy: state.currentAccount ? state.currentAccount.name : ''
+    };
+    if (!publishRetainedJson(HUB_VALVE_TOPIC(vid), entry)) {
+      showRenameValveError('Connessione al broker assente. Riprova.');
+      return;
+    }
+    state.valveNames[vid] = entry;
+    if (syncWaveValveNames) syncWaveValveNames[vid] = entry;
+    renderValveName(vid);
+    if (modalState.valveId === vid) {
+      modalTitle.textContent = getValveName(vid);
+    }
+    renameValveDialog.close();
+    const msg = `V0${vid} rinominata in "${nextName}"`;
+    toast(msg);
+    announceStatus(msg);
+  });
+
+  renameValveResetBtn.addEventListener('click', () => {
+    const vid = renamingValveId;
+    if (vid === null) return;
+    if (!canControlDevices(state.currentAccount)) {
+      renameValveDialog.close();
+      toast('Il tuo profilo è in sola lettura');
+      return;
+    }
+    if (!state.client || !state.connected) {
+      showRenameValveError('Connessione al broker assente. Riprova.');
+      return;
+    }
+    const valve = getValveDef(vid);
+    if (!valve) return;
+    if (!publishRetainedJson(HUB_VALVE_TOPIC(vid), null)) {
+      showRenameValveError('Connessione al broker assente. Riprova.');
+      return;
+    }
+    delete state.valveNames[vid];
+    if (syncWaveValveNames) delete syncWaveValveNames[vid];
+    renderValveName(vid);
+    if (modalState.valveId === vid) {
+      modalTitle.textContent = getValveName(vid);
+    }
+    renameValveDialog.close();
+    const msg = `V0${vid}: nome predefinito ripristinato`;
+    toast(msg);
+    announceStatus(msg);
+  });
 
   /* ============================================================
      24H SCHEDULE TIMELINE
@@ -4290,14 +4666,14 @@
       }
     }, 2000);
 
-    toast(`Valvola ${id} → ${target ? 'ON' : 'OFF'}`);
+    toast(`${getValveName(id)} → ${target ? 'ON' : 'OFF'}`);
   }
 
   /* ============================================================
      SCHEDULE MODAL
      ============================================================ */
   function openModal(valveId, slot) {
-    const valve = VALVES.find(v => v.id === valveId);
+    const valve = getValveDef(valveId);
     if (!valve) return;
 
     modalState.valveId = valveId;
@@ -4316,7 +4692,7 @@
       modalState.slots[slot] = defaultSchedule();
     }
 
-    modalTitle.textContent = `${valve.name}`;
+    modalTitle.textContent = getValveName(valveId);
     modalSubtitle.textContent = `V0${valveId}`;
     modalEl.style.setProperty('--valve-rgb', VALVE_COLORS_RGB[valve.color] || VALVE_COLORS_RGB.green);
     modalEl.classList.toggle('readonly', !canControlDevices(state.currentAccount));
@@ -4625,6 +5001,10 @@
     setConnectionUI(false);
     setLoginLoading(false);
 
+    state.valveNames = {};
+    abortValveNamesResync();
+    renamingValveId = null;
+
     VALVES.forEach(v => {
       state.valves[v.id].on = false;
       state.valves[v.id].pending = false;
@@ -4658,6 +5038,7 @@
     if (pinDialog.open) pinDialog.close();
     if (newAccountDialog.open) newAccountDialog.close();
     if (accountsDialog.open) accountsDialog.close();
+    if (renameValveDialog.open) renameValveDialog.close();
     if (modalEl.classList.contains('show')) closeModal();
 
     // Se la password è ricordata, ripristinala (login one-tap); altrimenti svuotala.
@@ -4814,12 +5195,18 @@
       renderDeviceStatus();
       updateHubStats();
       beginAccountsResync();
+      beginValveNamesResync();
       if (state.accountsSyncMaxTimer) clearTimeout(state.accountsSyncMaxTimer);
       state.accountsSyncMaxTimer = setTimeout(completeAccountsSync, 1400);
       resubscribeMqttTopics([...DEVICE_SYNC_TOPICS, ...ACCOUNT_SYNC_TOPICS], err => {
         if (!err) probeDevice();
-        if (err) { completeAccountsSync(); return; }
+        if (err) {
+          completeAccountsSync();
+          abortValveNamesResync();
+          return;
+        }
         scheduleAccountsSyncComplete(450);
+        scheduleValveNamesSyncComplete(450);
       });
       await Promise.all([minSpin, Promise.race([waitForAccountsSync(), waitMs(1600)])]);
       applyAccountToSession();
@@ -4835,14 +5222,22 @@
     VALVES.forEach(v => renderValve(v.id));
     renderDeviceStatus();
 
+    beginValveNamesResync();
     const subSync = new Promise(resolve => {
-      resubscribeMqttTopics(DEVICE_SYNC_TOPICS, () => {
-        probeDevice();
+      resubscribeMqttTopics(DEVICE_SYNC_TOPICS, err => {
+        if (!err) probeDevice();
         armDeviceInitialSyncTimer(1500);
-        setTimeout(resolve, 450);
+        if (err) {
+          abortValveNamesResync();
+          resolve();
+          return;
+        }
+        scheduleValveNamesSyncComplete(450);
+        setTimeout(resolve, 480);
       });
     });
     await Promise.all([minSpin, Promise.race([subSync, waitMs(1600)])]);
+    completeValveNamesSync();
     if (!state.initialSyncDone) {
       state.initialSyncDone = true;
       updateSyncBanner();
@@ -4977,6 +5372,7 @@
   // Debug
   window.__hub = {
     state, screens, showScreen, toggleValve, openModal,
+    getValveName, openRenameValveModal,
     handleMqttMessage, renderDeviceStatus, markDeviceAlive, probeDevice, ensureConnection,
     afterBrokerConnected, transitionToHub, transitionToAccountPicker,
     getSortedAccounts, getSortedRequests, isAdmin, canControlDevices,
