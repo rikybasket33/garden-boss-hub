@@ -1,7 +1,7 @@
 {
-  "name": "Garden Boss",
-  "short_name": "Garden Boss",
-  "description": "Controllo irrigazione smart a 4 zone",
+  "name": "Smart Home Hub",
+  "short_name": "Smart Home Hub",
+  "description": "Hub di controllo per dispositivi smart home",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

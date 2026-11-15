@@ -6,11 +6,12 @@
 <meta name="theme-color" content="#05090a">
 <title>Smart Home Hub</title>
 <link rel="manifest" href="./manifest.json">
-<link rel="icon" href="./icons/favicon-32.png" type="image/png">
+<link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="./icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Garden Boss">
+<meta name="apple-mobile-web-app-title" content="Smart Home Hub">
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -166,6 +167,12 @@
     animation: logoFloat 3.5s ease-in-out infinite;
   }
   .login-logo svg { width: 32px; height: 32px; fill: white; }
+  .login-logo.brand-logo {
+    background: linear-gradient(145deg, #0d1812 0%, #05090a 100%);
+    border: 1px solid rgba(57, 255, 122, 0.34);
+    box-shadow: 0 12px 30px rgba(57, 255, 122, 0.24), inset 0 1px 0 rgba(120, 255, 170, 0.14);
+  }
+  .login-logo.brand-logo svg { width: 48px; height: 48px; fill: none; }
   @keyframes logoFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 
   .login-title { text-align: center; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 6px; }
@@ -2898,8 +2905,24 @@
       <button type="button" class="refresh-btn card-corner" id="loginRefreshBtn" aria-label="Aggiorna schermata" title="Aggiorna schermata">
         <svg width="16" height="16" aria-hidden="true"><use href="#icon-refresh"/></svg>
       </button>
-      <div class="login-logo">
-        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+      <div class="login-logo brand-logo">
+        <svg aria-hidden="true" viewBox="96 96 320 320" fill="none">
+          <defs>
+            <linearGradient id="login-dh-grad" x1="126" y1="128" x2="386" y2="374" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#39ff7a"/>
+              <stop offset="100%" stop-color="#22c55e"/>
+            </linearGradient>
+          </defs>
+          <path d="M158 228 L256 144 L354 228 V356 Q354 374 336 374 H176 Q158 374 158 356 Z" fill="#39ff7a" fill-opacity="0.08"/>
+          <path d="M126 240 L256 130 L386 240" stroke="url(#login-dh-grad)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M158 226 V352 Q158 372 178 372 H214 M354 226 V352 Q354 372 334 372 H298" stroke="url(#login-dh-grad)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M256 214 L318 276 L256 338 L194 276 Z M256 214 V338 M194 276 H318" stroke="#22c55e" stroke-opacity="0.88" stroke-width="11" stroke-linejoin="round"/>
+          <circle cx="256" cy="214" r="15" fill="#39ff7a"/>
+          <circle cx="318" cy="276" r="15" fill="#39ff7a"/>
+          <circle cx="256" cy="338" r="15" fill="#39ff7a"/>
+          <circle cx="194" cy="276" r="15" fill="#39ff7a"/>
+          <circle cx="256" cy="276" r="21" fill="#39ff7a" stroke="#05090a" stroke-width="6"/>
+        </svg>
       </div>
       <h1 class="login-title">Smart Home</h1>
       <p class="login-sub">Inserisci la password per accedere all'hub</p>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <radialGradient id="dh-glow" cx="50%" cy="54%" r="50%">
+      <stop offset="0%" stop-color="#39ff7a" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#05090a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="dh-grad" x1="126" y1="128" x2="386" y2="374" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#39ff7a"/>
+      <stop offset="100%" stop-color="#22c55e"/>
+    </linearGradient>
+    <clipPath id="sq-clip">
+      <rect x="0" y="0" width="512" height="512" rx="116"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#sq-clip)">
+    <rect width="512" height="512" fill="#05090a"/>
+    <rect width="512" height="512" fill="url(#dh-glow)"/>
+    <rect x="3" y="3" width="506" height="506" rx="113" stroke="#39ff7a" stroke-opacity="0.2" stroke-width="6"/>
+    <path d="M158 228 L256 144 L354 228 V356 Q354 374 336 374 H176 Q158 374 158 356 Z" fill="#39ff7a" fill-opacity="0.08"/>
+    <path d="M126 240 L256 130 L386 240" stroke="url(#dh-grad)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M158 226 V352 Q158 372 178 372 H214 M354 226 V352 Q354 372 334 372 H298" stroke="url(#dh-grad)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M256 214 L318 276 L256 338 L194 276 Z M256 214 V338 M194 276 H318" stroke="#22c55e" stroke-opacity="0.88" stroke-width="11" stroke-linejoin="round"/>
+    <circle cx="256" cy="214" r="15" fill="#39ff7a"/>
+    <circle cx="318" cy="276" r="15" fill="#39ff7a"/>
+    <circle cx="256" cy="338" r="15" fill="#39ff7a"/>
+    <circle cx="194" cy="276" r="15" fill="#39ff7a"/>
+    <circle cx="256" cy="276" r="21" fill="#39ff7a" stroke="#05090a" stroke-width="6"/>
+  </g>
+</svg>
