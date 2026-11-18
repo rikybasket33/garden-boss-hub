@@ -2892,6 +2892,376 @@
     background: #0a1b12;
     border: 1px dashed var(--glass-border-strong);
   }
+
+  /* ============================================================
+     ONBOARDING DISPOSITIVO & GUIDA INTERATTIVA / MANUTENZIONE
+     ============================================================ */
+  .section-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 8px 4px 14px;
+  }
+  .section-title-row .section-title { margin: 0; }
+  .hub-add-device-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 11px;
+    border-radius: 100px;
+    background: rgba(57, 255, 122, 0.12);
+    border: 1px solid rgba(57, 255, 122, 0.34);
+    color: var(--green);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.14s ease, background 0.2s ease, border-color 0.2s ease;
+  }
+  .hub-add-device-btn:hover { background: rgba(57, 255, 122, 0.20); border-color: rgba(57, 255, 122, 0.55); }
+  .hub-add-device-btn:active { transform: scale(0.96); }
+  .hub-add-device-btn svg { width: 13px; height: 13px; }
+
+  .hub-setup-nudge {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 11px 14px;
+    margin: -10px 0 18px;
+    border-radius: 16px;
+    background: linear-gradient(155deg, rgba(57, 255, 122, 0.11), rgba(11, 29, 19, 0.94));
+    border: 1px solid rgba(57, 255, 122, 0.34);
+    cursor: pointer;
+    transition: transform 0.14s ease, border-color 0.2s ease;
+  }
+  .hub-setup-nudge:hover { border-color: rgba(57, 255, 122, 0.58); }
+  .hub-setup-nudge:active { transform: scale(0.985); }
+  .hub-setup-nudge[hidden] { display: none; }
+  .hub-setup-nudge-icon {
+    width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+    background: rgba(57, 255, 122, 0.16); color: var(--green);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hub-setup-nudge-icon svg { width: 18px; height: 18px; }
+  .hub-setup-nudge-body { flex: 1; min-width: 0; }
+  .hub-setup-nudge-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .hub-setup-nudge-sub { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+
+  /* Compact non-invasive entry pill placed directly below Calendar */
+  .calendar-entry-btn { margin: -10px 0 10px; }
+  .guide-entry-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 14px;
+    margin: 0 0 20px;
+    background: rgba(11, 28, 19, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(57, 255, 122, 0.18);
+    border-radius: 15px;
+    color: var(--text);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.14s ease, background 0.2s ease, border-color 0.2s ease;
+  }
+  .guide-entry-btn:hover { background: var(--glass-bg); border-color: rgba(57, 255, 122, 0.36); }
+  .guide-entry-btn:active { transform: scale(0.985); }
+  .guide-entry-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: rgba(57, 255, 122, 0.10);
+    border: 1px solid rgba(57, 255, 122, 0.24);
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .guide-entry-icon svg { width: 17px; height: 17px; }
+  .guide-entry-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .guide-entry-title { font-size: 13.5px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; color: var(--text); }
+  .guide-entry-sub {
+    font-size: 11.5px; color: var(--text-muted); margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .guide-entry-badge {
+    padding: 3px 8px;
+    border-radius: 100px;
+    font-size: 10.5px;
+    font-weight: 700;
+    background: var(--surface-nested);
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .guide-entry-badge.in-progress {
+    background: rgba(57, 255, 122, 0.14);
+    border-color: rgba(57, 255, 122, 0.38);
+    color: var(--green);
+  }
+  .guide-entry-chevron { width: 15px; height: 15px; color: var(--text-faint); flex-shrink: 0; transition: transform 0.2s ease, color 0.2s ease; }
+  .guide-entry-btn:hover .guide-entry-chevron { transform: translateX(2px); color: var(--text-muted); }
+
+  /* Add-device modal */
+  .add-device-account-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px; border-radius: 100px;
+    background: rgba(57, 255, 122, 0.10); border: 1px solid rgba(57, 255, 122, 0.28);
+    font-size: 12px; color: var(--text); margin-bottom: 14px;
+  }
+  .add-device-account-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+  .device-type-option {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px; border-radius: 16px;
+    background: rgba(57, 255, 122, 0.08);
+    border: 1.5px solid rgba(57, 255, 122, 0.48);
+    margin-bottom: 14px;
+  }
+  .device-type-thumb {
+    width: 68px; height: 42px; border-radius: 10px; object-fit: cover;
+    border: 1px solid rgba(57, 255, 122, 0.35); flex-shrink: 0; background: #041009;
+  }
+  .device-type-meta { flex: 1; min-width: 0; }
+  .device-type-name { font-size: 14px; font-weight: 700; color: var(--text); }
+  .device-type-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .setup-question-box {
+    padding: 14px; border-radius: 16px;
+    background: var(--surface-nested);
+    border: 1px solid var(--glass-border-strong);
+    margin: 12px 0 4px;
+  }
+  .setup-question-title { font-size: 13.5px; font-weight: 600; color: var(--text); line-height: 1.35; }
+  .setup-question-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+  .setup-question-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+
+  /* Guide & Maintenance Dialog */
+  dialog.sheet-dialog.guide-dialog {
+    max-width: 580px;
+    padding: 20px 18px 24px;
+  }
+  .guide-mode-tabs {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+    padding: 4px; border-radius: 14px;
+    background: #06140c; border: 1px solid var(--glass-border);
+    margin-bottom: 14px;
+  }
+  .guide-mode-tab {
+    padding: 9px 10px; border: 0; border-radius: 10px;
+    background: transparent; color: var(--text-muted);
+    font-family: inherit; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: background 0.2s ease, color 0.2s ease;
+  }
+  .guide-mode-tab.active {
+    background: rgba(57, 255, 122, 0.16);
+    color: var(--green);
+    box-shadow: inset 0 0 0 1px rgba(57, 255, 122, 0.32);
+  }
+  .guide-progress-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    font-size: 12px; color: var(--text-muted); margin-bottom: 7px;
+  }
+  .guide-progress-row strong { color: var(--text); font-weight: 600; }
+  .guide-progress-track {
+    height: 6px; width: 100%; border-radius: 999px;
+    background: rgba(57, 255, 122, 0.12); overflow: hidden; margin-bottom: 11px;
+  }
+  .guide-progress-fill {
+    height: 100%; width: 0%; border-radius: 999px;
+    background: linear-gradient(90deg, #22c55e, #39ff7a);
+    transition: width 0.28s var(--ease-ios);
+  }
+  .guide-timeline {
+    display: flex; gap: 7px; overflow-x: auto; padding: 2px 1px 4px;
+    margin-bottom: 10px; scrollbar-width: none; -ms-overflow-style: none;
+  }
+  .guide-timeline::-webkit-scrollbar { display: none; }
+  .guide-step-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 11px; border-radius: 100px; flex-shrink: 0;
+    background: #08180f; border: 1px solid var(--glass-border);
+    color: var(--text-muted); font-family: inherit; font-size: 12px; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.12s ease;
+  }
+  .guide-step-chip:active { transform: scale(0.96); }
+  .guide-step-chip-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700;
+    background: rgba(255, 255, 255, 0.08); color: var(--text-muted);
+  }
+  .guide-step-chip.done { border-color: rgba(57, 255, 122, 0.34); color: var(--text); }
+  .guide-step-chip.done .guide-step-chip-dot { background: rgba(57, 255, 122, 0.22); color: var(--green); }
+  .guide-step-chip.active {
+    background: rgba(57, 255, 122, 0.16);
+    border-color: var(--green);
+    color: #ffffff;
+  }
+  .guide-step-chip.active .guide-step-chip-dot { background: var(--green); color: #041009; }
+
+  .guide-stage-card {
+    border-radius: 18px;
+    background: #06140c;
+    border: 1px solid var(--glass-border-strong);
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .guide-stage-toolbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(9, 29, 18, 0.85);
+  }
+  .guide-media-switch { display: flex; gap: 6px; flex-wrap: wrap; }
+  .guide-media-btn {
+    padding: 5px 10px; border-radius: 100px;
+    border: 1px solid var(--glass-border);
+    background: transparent; color: var(--text-muted);
+    font-family: inherit; font-size: 11.5px; font-weight: 600;
+    cursor: pointer; transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  }
+  .guide-media-btn.active {
+    background: rgba(57, 255, 122, 0.16);
+    border-color: rgba(57, 255, 122, 0.45);
+    color: var(--green);
+  }
+  .guide-viewport-wrap {
+    position: relative; width: 100%;
+  }
+  .guide-zoom-btn {
+    position: absolute; right: 10px; bottom: 10px; z-index: 2;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 10px; border-radius: 100px;
+    border: 1px solid rgba(57, 255, 122, 0.35);
+    background: rgba(4, 16, 9, 0.80);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.48);
+    color: var(--text); font-family: inherit; font-size: 11.5px; font-weight: 600;
+    cursor: pointer; transition: transform 0.14s ease, border-color 0.18s ease;
+  }
+  .guide-zoom-btn[hidden] { display: none; }
+  .guide-zoom-btn:hover { border-color: var(--green); }
+  .guide-zoom-btn:active { transform: scale(0.95); }
+  .guide-zoom-btn svg { width: 13px; height: 13px; color: var(--green); }
+  .guide-viewport {
+    position: relative; width: 100%; aspect-ratio: 16 / 9;
+    background: #030c07; display: flex; align-items: center; justify-content: center;
+  }
+  .guide-viewport video,
+  .guide-viewport img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  .guide-viewport img { cursor: zoom-in; }
+
+  .guide-caption-box { padding: 14px 15px 16px; }
+  .guide-caption-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    margin-bottom: 8px;
+  }
+  .guide-caption-title { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+  .guide-time-pill {
+    padding: 3px 8px; border-radius: 100px;
+    background: var(--surface-nested); border: 1px solid var(--glass-border);
+    font-size: 11px; font-weight: 600; color: var(--text-muted); white-space: nowrap;
+  }
+  .guide-safety-alert {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 9px 11px; border-radius: 12px; margin-bottom: 10px;
+    background: rgba(255, 159, 10, 0.14); border: 1px solid rgba(255, 159, 10, 0.42);
+    color: #ffe2b3; font-size: 12px; line-height: 1.4;
+  }
+  .guide-safety-alert svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; color: var(--orange); }
+  .guide-lead { font-size: 13px; color: var(--text-muted); line-height: 1.45; margin-bottom: 10px; }
+  .guide-bullet-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .guide-bullet-item {
+    display: flex; align-items: flex-start; gap: 9px;
+    font-size: 12.5px; line-height: 1.45; color: var(--text);
+    padding: 8px 10px; border-radius: 11px; background: rgba(13, 33, 22, 0.65);
+    border: 1px solid rgba(57, 255, 122, 0.10);
+  }
+  .guide-bullet-num {
+    width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+    background: rgba(57, 255, 122, 0.16); color: var(--green);
+    font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .wire-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 1px 7px; border-radius: 6px; font-size: 11.5px; font-weight: 700;
+    vertical-align: baseline; margin: 0 2px;
+  }
+  .wire-chip.brown { background: rgba(190, 92, 24, 0.28); border: 1px solid rgba(255, 165, 64, 0.55); color: #ffd4a3; }
+  .wire-chip.blue  { background: rgba(45, 163, 255, 0.22); border: 1px solid rgba(45, 163, 255, 0.55); color: #bde3ff; }
+  .wire-chip.white { background: rgba(235, 245, 240, 0.16); border: 1px solid rgba(235, 245, 240, 0.45); color: #f4faf6; }
+  .wire-chip.green { background: rgba(57, 255, 122, 0.18); border: 1px solid rgba(57, 255, 122, 0.50); color: #b7ffcf; }
+  .wire-chip.red   { background: rgba(255, 77, 94, 0.20); border: 1px solid rgba(255, 77, 94, 0.52); color: #ffc5cc; }
+  .wire-chip.amber { background: rgba(255, 214, 10, 0.20); border: 1px solid rgba(255, 214, 10, 0.52); color: #fff0a8; }
+
+  .guide-tip-box {
+    margin-top: 10px; padding: 9px 11px; border-radius: 12px;
+    background: rgba(57, 255, 122, 0.08); border: 1px dashed rgba(57, 255, 122, 0.34);
+    font-size: 12px; color: var(--text-muted); line-height: 1.45;
+  }
+  .guide-tip-box strong { color: var(--green); }
+
+  .guide-footer-actions {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .guide-footer-actions .modal-btn { flex: 1; padding: 12px 10px; font-size: 13px; }
+  .guide-mark-done-btn {
+    flex: 0 0 auto !important;
+    padding: 12px 14px !important;
+    background: rgba(57, 255, 122, 0.12);
+    border: 1px solid rgba(57, 255, 122, 0.36);
+    color: var(--green);
+  }
+  .guide-mark-done-btn.is-done {
+    background: rgba(57, 255, 122, 0.24);
+    border-color: var(--green);
+    color: #ffffff;
+  }
+
+  /* Maintenance Panel */
+  .maint-list { display: flex; flex-direction: column; gap: 12px; }
+  .maint-card {
+    border-radius: 16px; padding: 14px;
+    background: #08180f; border: 1px solid var(--glass-border-strong);
+  }
+  .maint-card-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px;
+  }
+  .maint-card-title { font-size: 14.5px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .maint-pill {
+    padding: 3px 8px; border-radius: 100px; font-size: 10.5px; font-weight: 700;
+    background: rgba(57, 255, 122, 0.14); border: 1px solid rgba(57, 255, 122, 0.32); color: var(--green);
+  }
+  .maint-pill.warn { background: rgba(255, 159, 10, 0.16); border-color: rgba(255, 159, 10, 0.42); color: #ffe0ad; }
+  .maint-steps { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; color: var(--text-muted); line-height: 1.45; }
+  .maint-steps strong { color: var(--text); }
+  .maint-actions-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .maint-link-btn {
+    padding: 6px 11px; border-radius: 100px;
+    background: var(--surface-nested); border: 1px solid var(--glass-border-strong);
+    color: var(--green); font-family: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer;
+  }
+  .maint-link-btn:hover { background: var(--surface-nested-hover); }
+
+  /* Fullscreen image zoom lightbox */
+  dialog.guide-lightbox {
+    margin: auto; padding: 10px; max-width: 96vw; max-height: 94dvh;
+    background: #030b06; border: 1px solid rgba(57, 255, 122, 0.45);
+    border-radius: 16px; color: var(--text); box-shadow: var(--shadow-strong);
+  }
+  dialog.guide-lightbox::backdrop { background: rgba(2, 10, 5, 0.88); backdrop-filter: blur(8px); }
+  .guide-lightbox-wrap { position: relative; display: flex; flex-direction: column; gap: 8px; }
+  .guide-lightbox-img { max-width: 92vw; max-height: 82dvh; width: auto; height: auto; border-radius: 10px; display: block; }
+  .guide-lightbox-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 4px; font-size: 12.5px; color: var(--text-muted); }
 </style>
 </head>
 <body>
@@ -3241,6 +3611,184 @@
   </div>
 </dialog>
 
+<!-- Aggiungi / Configura Dispositivo collegato all'account -->
+<dialog class="sheet-dialog" id="addDeviceDialog" closedby="any" aria-labelledby="addDeviceTitle">
+  <div class="modal-grabber" aria-hidden="true"></div>
+  <div class="modal-header">
+    <div>
+      <h2 class="modal-title" id="addDeviceTitle">Configura nuovo dispositivo</h2>
+      <div class="modal-subtitle">Collega una centralina all'account attivo</div>
+    </div>
+    <button type="button" class="modal-close" id="addDeviceCloseBtn" aria-label="Chiudi">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="add-device-account-pill" id="addDeviceAccountPill">
+    <span class="add-device-account-dot" aria-hidden="true"></span>
+    <span id="addDeviceAccountText">Account attivo: —</span>
+  </div>
+
+  <div class="device-type-option" role="region" aria-label="Modello selezionato">
+    <img src="guide/05_ready_active.webp" alt="Garden Boss V2" class="device-type-thumb" loading="lazy">
+    <div class="device-type-meta">
+      <div class="device-type-name">Garden Boss V2 · Irrigazione</div>
+      <div class="device-type-desc">Centralina smart 4 zone · ESP32 + SSR 24V AC + OLED</div>
+    </div>
+  </div>
+
+  <div class="field" style="margin-bottom: 10px;">
+    <label for="addDeviceNameInput">Nome dispositivo (opzionale)</label>
+    <div class="input-wrap">
+      <input id="addDeviceNameInput" type="text" maxlength="28" placeholder="Es. Garden Boss" autocomplete="off">
+    </div>
+  </div>
+
+  <div class="setup-question-box">
+    <div class="setup-question-title">Vuoi usare le istruzioni interattive in app per montarlo e configurarlo?</div>
+    <div class="setup-question-sub">Include i video passo-passo su componenti interni, fissaggio a muro, cablaggio 24V (Wago e OMRON) e setup Wi-Fi dall'OLED. Potrai sempre riaprirla dopo da «Guida &amp; Manutenzione».</div>
+    <div class="setup-question-actions">
+      <button type="button" class="modal-btn modal-btn-primary" id="addDeviceStartGuideBtn">Sì, avvia guida passo-passo</button>
+      <button type="button" class="modal-btn modal-btn-secondary" id="addDeviceSkipGuideBtn">No, dispositivo già pronto</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Guida interattiva & Manutenzione -->
+<dialog class="sheet-dialog guide-dialog" id="guideDialog" closedby="any" aria-labelledby="guideDialogTitle">
+  <div class="modal-grabber" aria-hidden="true"></div>
+  <div class="modal-header">
+    <div>
+      <h2 class="modal-title" id="guideDialogTitle">Guida &amp; Manutenzione</h2>
+      <div class="modal-subtitle" id="guideDialogSub">Garden Boss V2 · Installazione guidata</div>
+    </div>
+    <button type="button" class="modal-close" id="guideCloseBtn" aria-label="Chiudi">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="guide-mode-tabs" role="tablist" aria-label="Sezioni manuale">
+    <button type="button" class="guide-mode-tab active" id="guideTabInstall" role="tab" aria-selected="true">Installazione &amp; Setup</button>
+    <button type="button" class="guide-mode-tab" id="guideTabMaint" role="tab" aria-selected="false">Manutenzione</button>
+  </div>
+
+  <!-- PANNELLO 1: TIMELINE VIDEO & SCHEMI -->
+  <div id="guideInstallPane">
+    <div class="guide-progress-row">
+      <span id="guideProgressText">Passaggio 1 di 6</span>
+      <strong id="guideCompletedText">0/6 completati</strong>
+    </div>
+    <div class="guide-progress-track" aria-hidden="true">
+      <div class="guide-progress-fill" id="guideProgressFill"></div>
+    </div>
+
+    <div class="guide-timeline" id="guideTimeline" role="tablist" aria-label="Passaggi della guida"></div>
+
+    <div class="guide-stage-card">
+      <div class="guide-stage-toolbar">
+        <div class="guide-media-switch" id="guideMediaSwitch" role="group" aria-label="Visualizzazione media"></div>
+      </div>
+      <div class="guide-viewport-wrap">
+        <div class="guide-viewport" id="guideViewport"></div>
+        <button type="button" class="guide-zoom-btn" id="guideZoomBtn" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
+          </svg>
+          <span>Ingrandisci</span>
+        </button>
+      </div>
+      <div class="guide-caption-box" id="guideCaptionBox"></div>
+    </div>
+
+    <div class="guide-footer-actions">
+      <button type="button" class="modal-btn modal-btn-secondary" id="guidePrevBtn">← Indietro</button>
+      <button type="button" class="modal-btn guide-mark-done-btn" id="guideMarkDoneBtn">Segna fatto ✓</button>
+      <button type="button" class="modal-btn modal-btn-primary" id="guideNextBtn">Avanti →</button>
+    </div>
+  </div>
+
+  <!-- PANNELLO 2: MANUTENZIONE & DIAGNOSTICA -->
+  <div id="guideMaintPane" hidden>
+    <div class="maint-list">
+      <div class="maint-card">
+        <div class="maint-card-head">
+          <div class="maint-card-title">Fine Stagione / Inverno</div>
+          <span class="maint-pill warn">Antigelo</span>
+        </div>
+        <ol class="maint-steps">
+          <li><strong>Chiudi la valvola principale</strong> a monte dell'impianto e svuota le linee di irrigazione prima delle gelate.</li>
+          <li><strong>Disattiva le programmazioni</strong> dall'app (o scollega il trasformatore 24V AC): tutte le zone e gli orari restano comunque salvati su cloud.</li>
+          <li><strong>Controlla il passacavo inferiore</strong> verificando che i fili scendano sempre verso il basso evitando ristagni d'acqua nella scocca.</li>
+        </ol>
+        <div class="maint-actions-row">
+          <button type="button" class="maint-link-btn" id="maintOpenCalBtn">Apri Calendario per disattivare gli slot →</button>
+        </div>
+      </div>
+
+      <div class="maint-card">
+        <div class="maint-card-head">
+          <div class="maint-card-title">Riavvio Primaverile</div>
+          <span class="maint-pill">Annuale</span>
+        </div>
+        <ol class="maint-steps">
+          <li><strong>A corrente staccata</strong>, apri il coperchio e controlla col cacciavite a taglio il serraggio delle viti su <code>24VIN</code> e sui morsetti valvole <strong>OMRON CH1–CH4 (Vite 2)</strong>.</li>
+          <li>Assicurati che le feritoie laterali e superiori sopra gli SSR siano libere da polvere o insetti.</li>
+          <li>Dai tensione <code>24V AC</code> e prova manualmente <strong>ogni zona per 5 min</strong> verificando l'apertura sul campo.</li>
+        </ol>
+        <div class="maint-actions-row">
+          <button type="button" class="maint-link-btn" data-jump-step="3" data-jump-media="labeled">Rivedi schema morsetti OMRON →</button>
+          <button type="button" class="maint-link-btn" data-jump-step="2" data-jump-media="video">Video morsetto Wago →</button>
+        </div>
+      </div>
+
+      <div class="maint-card">
+        <div class="maint-card-head">
+          <div class="maint-card-title">Cambio Router o Rete Wi-Fi</div>
+          <span class="maint-pill">Self-Config</span>
+        </div>
+        <ol class="maint-steps">
+          <li>Sulla centralina accesa spingi la manopola a <strong>SINISTRA (&lt;)</strong> verso lo schermo OLED per aprire il menu Wi-Fi.</li>
+          <li>Clicca su <strong>Setup AP</strong>, connetti il telefono a <code>Garden-Boss-Setup</code> e apri <code>192.168.4.1</code> per salvare la nuova rete <strong>2.4 GHz</strong>.</li>
+        </ol>
+        <div class="maint-actions-row">
+          <button type="button" class="maint-link-btn" data-jump-step="4" data-jump-media="video">Guarda video configurazione Wi-Fi →</button>
+          <button type="button" class="maint-link-btn" data-jump-zoom="guide/04_selfconfig_wifi_labeled.webp" data-jump-zoom-title="Self-Config Wi-Fi &amp; Joystick">Apri schema OLED →</button>
+        </div>
+      </div>
+
+      <div class="maint-card">
+        <div class="maint-card-head">
+          <div class="maint-card-title">Diagnostica Rapida LED &amp; OLED</div>
+          <span class="maint-pill">Check</span>
+        </div>
+        <ol class="maint-steps">
+          <li><strong>Icona Wi-Fi sbarrata / orario <code>--- 72:72</code>:</strong> la centralina non vede il Wi-Fi 2.4 GHz (ripeti Setup AP).</li>
+          <li><strong>Orologio OK ma manca la lettera <code>M</code>:</strong> Wi-Fi connesso ma broker cloud non raggiungibile (attendi qualche secondo o verifica Internet).</li>
+          <li><strong>LED interno acceso ma valvola ferma:</strong> verifica fusibile trasformatore <code>24V AC</code>, il serraggio delle fasi valvole su <code>Vite 2 OMRON</code> (oltre ai ponti di fabbrica su <code>Vite 1</code>) e il Comune nel Wago 221.</li>
+        </ol>
+        <div class="maint-actions-row">
+          <button type="button" class="maint-link-btn" data-jump-zoom="guide/03c_wiring_overview_labeled.webp" data-jump-zoom-title="Schema completo cablaggio 24V AC">Ingrandisci schema completo →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<!-- Lightbox zoom schemi -->
+<dialog class="guide-lightbox" id="guideLightbox" closedby="any" aria-label="Zoom schema">
+  <div class="guide-lightbox-wrap">
+    <img class="guide-lightbox-img" id="guideLightboxImg" alt="Schema ingrandito">
+    <div class="guide-lightbox-bar">
+      <span id="guideLightboxCaption">Schema</span>
+      <button type="button" class="modal-btn modal-btn-secondary" id="guideLightboxCloseBtn" style="flex:0 0 auto; padding:7px 14px; font-size:12px;">Chiudi</button>
+    </div>
+  </div>
+</dialog>
+
 <!-- =============================================================
      HUB HOME SCREEN
      ============================================================= -->
@@ -3309,7 +3857,28 @@
       </div>
     </div>
 
-    <div class="section-title">Dispositivi</div>
+    <div class="section-title-row">
+      <div class="section-title">Dispositivi</div>
+      <button type="button" class="hub-add-device-btn" id="openAddDeviceBtn" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>Nuovo dispositivo</span>
+      </button>
+    </div>
+
+    <div class="hub-setup-nudge" id="hubSetupNudge" role="button" tabindex="0" hidden>
+      <div class="hub-setup-nudge-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+      </div>
+      <div class="hub-setup-nudge-body">
+        <div class="hub-setup-nudge-title" id="hubSetupNudgeTitle">Prima installazione Garden Boss?</div>
+        <div class="hub-setup-nudge-sub" id="hubSetupNudgeSub">Collega il dispositivo a questo account e scegli se avviare i video guida</div>
+      </div>
+      <svg class="calendar-entry-chevron" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 6 15 12 9 18"/>
+      </svg>
+    </div>
 
     <div class="device-grid">
       <div class="device-card featured stagger" data-device="gardenboss">
@@ -3326,7 +3895,7 @@
               <span class="device-valves-label" id="hubOpenValvesLabel">aperte</span>
             </div>
           </div>
-          <div class="device-name">Garden Boss</div>
+          <div class="device-name" id="hubGbDeviceName">Garden Boss</div>
           <div class="device-status active" id="gbStatus">In attesa…</div>
         </div>
         <div class="device-arrow">
@@ -3387,7 +3956,7 @@
           <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
         </button>
         <div class="greeting">
-          <h2>Garden Boss</h2>
+          <h2 id="gardenTitleHeading">Garden Boss</h2>
           <p>Sistema irrigazione</p>
         </div>
       </div>
@@ -3429,6 +3998,22 @@
       </span>
       <span class="calendar-entry-badge is-empty" id="calendarEntryBadge">24h</span>
       <svg class="calendar-entry-chevron" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 6 15 12 9 18"/>
+      </svg>
+    </button>
+
+    <button type="button" class="guide-entry-btn" id="openGuideBtn" aria-haspopup="dialog">
+      <span class="guide-entry-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+      </span>
+      <span class="guide-entry-text">
+        <span class="guide-entry-title">Guida &amp; Manutenzione</span>
+        <span class="guide-entry-sub" id="guideEntrySub">Montaggio, cablaggio 24V, Wi-Fi e cura</span>
+      </span>
+      <span class="guide-entry-badge" id="guideEntryBadge">Manuale</span>
+      <svg class="guide-entry-chevron" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="9 6 15 12 9 18"/>
       </svg>
     </button>
@@ -5132,14 +5717,18 @@
       toast('Il tuo profilo è ora in sola lettura');
     }
     renderAdminApprovals();
+    if (typeof syncAccountDeviceUI === 'function') syncAccountDeviceUI();
   }
 
-  function activateAccount(acc) {
+  function activateAccount(acc, opts) {
     state.currentAccount = acc;
     if (pinDialog.open) pinDialog.close();
     if (accountsDialog.open) accountsDialog.close();
     applyAccountToSession();
     if (currentScreenKey !== 'hub') transitionToHub();
+    if (opts && opts.isFirstSetup && typeof maybePromptFirstDeviceSetup === 'function') {
+      setTimeout(() => maybePromptFirstDeviceSetup(true), 340);
+    }
   }
 
   function selectAccount(acc) {
@@ -5312,7 +5901,7 @@
         renderAccountScreen();
         if (effectiveMode === 'first-admin') {
           toast(`Amministratore "${name}" creato`);
-          activateAccount(acc);
+          activateAccount(acc, { isFirstSetup: true });
         } else {
           toast(`Account "${name}" creato`);
         }
@@ -7446,6 +8035,596 @@
   Object.values(screens).forEach(setupPullToRefresh);
 
   /* ============================================================
+     ONBOARDING DISPOSITIVO, TIMELINE VIDEO & MANUTENZIONE
+     ============================================================ */
+  const GUIDE_STEPS = [
+    {
+      id: 'components',
+      shortTitle: '1 · Componenti',
+      title: 'Cosa trovi all\'interno',
+      time: '1 min',
+      safety: null,
+      lead: 'La scheda arriva già assemblata e testata: non devi saldare nulla. Ecco dove si trova ogni modulo.',
+      mediaOptions: [
+        { key: 'video', label: 'Animazione 3D', kind: 'video', base: 'guide/01_unboxing_exploded', poster: 'guide/01_unboxing_exploded.webp' },
+        { key: 'labeled', label: 'Mappa Componenti', kind: 'image', src: 'guide/01_unboxing_exploded_labeled.webp', alt: 'Mappa componenti interni Garden Boss V2' }
+      ],
+      bullets: [
+        '<strong>ESP32-WROOM-32</strong> (in alto a sinistra): gestisce Wi-Fi, orologio e comunicazione cloud.',
+        '<strong>Display OLED 1.3" + Joystick ALPS</strong>: per controllare orari, valvole e hotspot Wi-Fi senza telefono.',
+        '<strong>OMRON SSR 4CH</strong> (sotto il plexiglass) + <strong>Step-Down LM2596</strong>: comandano le 4 elettrovalvole e stabilizzano i 5V.',
+        '<strong>Morsetto Wago 221-415</strong> (in basso): ti permette di unire i fili Comuni a leva, senza nastro né saldature.'
+      ],
+      tip: '<strong>Consiglio:</strong> togli semplicemente il coperchio verso l\'alto prima di fissare la base o collegare i cavi.'
+    },
+    {
+      id: 'wall_mount',
+      shortTitle: '2 · Muro',
+      title: 'Fissaggio della base a muro',
+      time: '3 min',
+      safety: 'Esegui montaggio e collegamenti sempre con il trasformatore 24V AC scollegato dalla presa.',
+      lead: 'Fissa prima il guscio grigio inferiore in un punto asciutto vicino ai cavi del pozzetto, usando le due alette esterne.',
+      mediaOptions: [
+        { key: 'video', label: 'Animazione 3D', kind: 'video', base: 'guide/02_wall_mount_screwdriver', poster: 'guide/02_wall_mount_screwdriver.webp' },
+        { key: 'photo', label: 'Vista Dettaglio', kind: 'image', src: 'guide/02_wall_mount_screwdriver.webp', alt: 'Fissaggio scocca V2 a muro con tasselli e viti inox' }
+      ],
+      bullets: [
+        'Tieni sempre il <strong>passacavo inferiore</strong> (lato del logo a casetta) <strong>rivolto verso il basso</strong>, così condensa o pioggia non possono entrare.',
+        'Segna i due fori laterali da 4,6 mm sulle alette rinforzate, inserisci i tasselli e serra con un cacciavite a croce (PH2).'
+      ],
+      tip: '<strong>Importante:</strong> non forare il fondo della scocca; usa solo le due alette laterali esterne.'
+    },
+    {
+      id: 'wago_commons',
+      shortTitle: '3A · Comuni Wago',
+      title: 'Unisci i fili Comuni col Wago 221',
+      time: '3 min',
+      safety: 'Verifica che la 24V AC sia staccata. Spela circa 11 mm di isolante per avere rame pulito.',
+      lead: 'Tutte le elettrovalvole condividono un unico ritorno Comune verso il trasformatore. Il morsetto trasparente Wago 221 li mette in parallelo al sicuro.',
+      mediaOptions: [
+        { key: 'video', label: 'Animazione Wago', kind: 'video', base: 'guide/03a_wago_comuni', poster: 'guide/03a_wago_comuni.webp' },
+        { key: 'labeled', label: 'Schema Wago', kind: 'image', src: 'guide/03a_wago_comuni_labeled.webp', alt: 'Istruzioni numerate Wago 221-415' },
+        { key: 'overview', label: 'Schema Completo', kind: 'image', src: 'guide/03c_wiring_overview_labeled.webp', alt: 'Schema generale cablaggio Garden Boss V2' }
+      ],
+      bullets: [
+        'Fai entrare tutti i cavi dal <strong>passacavo inferiore</strong>.',
+        '<strong>Alza verso l\'alto le leve arancioni</strong> a 90° fino a scatto aperto.',
+        'Inserisci in un foro il filo <span class="wire-chip blue">Blu · Comune 24V AC</span> del trasformatore e nei fori vicini i <span class="wire-chip white">Comuni Valvole</span> dal pozzetto.',
+        'Controlla dalla plastica trasparente che il rame tocchi il fondo, poi <strong>abbassa tutte le leve</strong> fino al clic di chiusura.'
+      ],
+      tip: '<strong>Non sai quale filo è il Comune nel cavo del pozzetto?</strong> Con un tester su <code>200 Ω</code>, il filo che misura <strong>30–50 Ω</strong> rispetto a ciascuno degli altri 4 (mentre tra due valvole leggi <strong>60–100 Ω</strong>) è il Comune.'
+    },
+    {
+      id: 'omron_valves',
+      shortTitle: '3B · Valvole OMRON',
+      title: 'Collega le 4 Fasi Valvole (OMRON)',
+      time: '4 min',
+      safety: 'I ponticelli della Fase 24V su [Vite 1] arrivano già cablati di fabbrica: devi collegare solo la 24VIN e i 4 fili valvola su [Vite 2].',
+      lead: 'Alimenta la scheda su 24VIN, lascia invariati i ponti marroni già montati sui morsetti blu OMRON e collega soltanto la fase di ciascuna elettrovalvola su [Vite 2].',
+      mediaOptions: [
+        { key: 'video', label: 'Animazione OMRON', kind: 'video', base: 'guide/03b_omron_valvole', poster: 'guide/03b_omron_valvole.webp' },
+        { key: 'labeled', label: 'Schema OMRON', kind: 'image', src: 'guide/03b_omron_valvole_labeled.webp', alt: 'Morsetti blu OMRON CH1-CH4 e colori valvole' },
+        { key: 'screw24', label: 'Serraggio 24VIN', kind: 'video', base: 'guide/03_wiring_wago_screwdriver', poster: 'guide/03_wiring_terminals.webp' }
+      ],
+      bullets: [
+        'Collega il <span class="wire-chip brown">24V AC · 24VIN</span> nel morsetto verde a 2 viti in basso a sinistra e serra col cacciavite a taglio.',
+        'I <strong>3 ponticelli marroni</strong> su <strong>[Vite 1] (CH1–CH4)</strong> arrivano <strong>già cablati di fabbrica</strong> per portare la Fase comune a tutti i relè: non devi aggiungerli.',
+        'Inserisci esclusivamente su <strong>[Vite 2]</strong> (la 2ª vite libera) la fase di ogni elettrovalvola: <span class="wire-chip green">V1 · CH1</span> <span class="wire-chip red">V2 · CH2</span> <span class="wire-chip blue">V3 · CH3</span> <span class="wire-chip amber">V4 · CH4</span> e serra saldamente.'
+      ],
+      tip: '<strong>Test meccanico:</strong> tira leggermente ciascun filo subito dopo aver serrato la vite per verificare che non scivoli dal morsetto.'
+    },
+    {
+      id: 'selfconfig_wifi',
+      shortTitle: '4 · Config Wi-Fi',
+      title: 'Self-Configuration Wi-Fi da OLED',
+      time: '2 min',
+      safety: null,
+      lead: 'Chiudi il coperchio superiore, collega l\'alimentatore 24V AC e abbina il tuo Wi-Fi 2.4 GHz direttamente dalla manopola.',
+      mediaOptions: [
+        { key: 'video', label: 'Animazione Joystick', kind: 'video', base: 'guide/04_selfconfig_joystick_oled', poster: 'guide/04_selfconfig_wifi.webp' },
+        { key: 'labeled', label: 'Schema Controlli', kind: 'image', src: 'guide/04_selfconfig_wifi_labeled.webp', alt: 'Istruzioni joystick e rete hotspot Garden-Boss-Setup' }
+      ],
+      bullets: [
+        'Con la Dashboard attiva sull\'OLED, spingi la manopola a <strong>SINISTRA (&lt;)</strong> verso lo schermo per avviare la scansione Wi-Fi.',
+        'Ruota e premi al centro (<strong>Click</strong>) su <strong>Setup AP</strong>: sullo schermo apparirà <code>PORTALE ATTIVO</code>.',
+        'Dal telefono connettiti alla rete Wi-Fi <code>Garden-Boss-Setup</code> e apri <code>192.168.4.1</code> per inserire nome e password della tua Wi-Fi <strong>2.4 GHz</strong>.'
+      ],
+      tip: '<strong>Nota:</strong> al termine della configurazione l\'ESP32 si riavvia automaticamente collegandosi al cloud senza cavi USB.'
+    },
+    {
+      id: 'ready',
+      shortTitle: '5 · Pronto',
+      title: 'Pronto per irrigare!',
+      time: '1 min',
+      safety: null,
+      lead: 'Quando compare l\'icona Wi-Fi con le tacche e la lettera «M» sull\'OLED, la centralina è online sia su display sia dall\'app.',
+      mediaOptions: [
+        { key: 'photo', label: 'Dispositivo Attivo', kind: 'image', src: 'guide/05_ready_active.webp', alt: 'Garden Boss V2 chiuso e operativo' }
+      ],
+      bullets: [
+        'Controlla che dalla finestra trasparente fumé si accendano i <strong>LED verdi</strong> di canale quando avvii una zona dall\'app.',
+        '<strong>Comandi rapidi manopola:</strong> <code>&lt; Sinistra</code> = Wi-Fi · <code>&gt; Destra</code> = Menu Valvole · <code>Ruota</code> = Regola · <code>Pressione 3s</code> = Kill Switch emergenza.',
+        'Torna su <strong>Zone</strong> o <strong>Calendario di attivazione</strong> per personalizzare nomi, colori ed orari settimanali.'
+      ],
+      tip: '<strong>Promemoria:</strong> questa guida e la sezione <strong>Manutenzione</strong> restano sempre accessibili sotto al Calendario.'
+    }
+  ];
+
+  // DOM refs Onboarding & Guide
+  const openAddDeviceBtn      = document.getElementById('openAddDeviceBtn');
+  const hubSetupNudge         = document.getElementById('hubSetupNudge');
+  const hubGbDeviceName       = document.getElementById('hubGbDeviceName');
+  const gardenTitleHeading    = document.getElementById('gardenTitleHeading');
+  const addDeviceDialog       = document.getElementById('addDeviceDialog');
+  const addDeviceCloseBtn     = document.getElementById('addDeviceCloseBtn');
+  const addDeviceAccountText  = document.getElementById('addDeviceAccountText');
+  const addDeviceNameInput    = document.getElementById('addDeviceNameInput');
+  const addDeviceStartGuideBtn = document.getElementById('addDeviceStartGuideBtn');
+  const addDeviceSkipGuideBtn  = document.getElementById('addDeviceSkipGuideBtn');
+
+  const openGuideBtn          = document.getElementById('openGuideBtn');
+  const guideEntrySub         = document.getElementById('guideEntrySub');
+  const guideEntryBadge       = document.getElementById('guideEntryBadge');
+  const guideDialog           = document.getElementById('guideDialog');
+  const guideCloseBtn         = document.getElementById('guideCloseBtn');
+  const guideDialogSub        = document.getElementById('guideDialogSub');
+  const guideTabInstall       = document.getElementById('guideTabInstall');
+  const guideTabMaint         = document.getElementById('guideTabMaint');
+  const guideInstallPane      = document.getElementById('guideInstallPane');
+  const guideMaintPane        = document.getElementById('guideMaintPane');
+  const guideProgressText     = document.getElementById('guideProgressText');
+  const guideCompletedText    = document.getElementById('guideCompletedText');
+  const guideProgressFill     = document.getElementById('guideProgressFill');
+  const guideTimeline         = document.getElementById('guideTimeline');
+  const guideMediaSwitch      = document.getElementById('guideMediaSwitch');
+  const guideZoomBtn          = document.getElementById('guideZoomBtn');
+  const guideViewport         = document.getElementById('guideViewport');
+  const guideCaptionBox       = document.getElementById('guideCaptionBox');
+  const guidePrevBtn          = document.getElementById('guidePrevBtn');
+  const guideMarkDoneBtn      = document.getElementById('guideMarkDoneBtn');
+  const guideNextBtn          = document.getElementById('guideNextBtn');
+  const maintOpenCalBtn       = document.getElementById('maintOpenCalBtn');
+  const guideLightbox         = document.getElementById('guideLightbox');
+  const guideLightboxImg      = document.getElementById('guideLightboxImg');
+  const guideLightboxCaption  = document.getElementById('guideLightboxCaption');
+  const guideLightboxCloseBtn = document.getElementById('guideLightboxCloseBtn');
+
+  const guideState = {
+    activeTab: 'install',   // 'install' | 'maint'
+    stepIdx: 0,
+    mediaMode: 'video',     // key from step.mediaOptions
+    completedIds: [],       // fallback if account is readonly/offline
+    promptedAutoForAcc: new Set()
+  };
+
+  function getAccountDevices(acc) {
+    return (acc && Array.isArray(acc.devices)) ? acc.devices : [];
+  }
+
+  function getPrimaryGardenBoss(acc) {
+    return getAccountDevices(acc).find(d => d && d.type === 'gardenboss') || null;
+  }
+
+  function getActiveCompletedSet() {
+    const acc = state.currentAccount;
+    const dev = getPrimaryGardenBoss(acc);
+    const list = (dev && dev.guideProgress && Array.isArray(dev.guideProgress.completed))
+      ? dev.guideProgress.completed
+      : guideState.completedIds;
+    return new Set(list);
+  }
+
+  function persistGuideProgressToAccount(stepIdx, completedList, guideCompletedFlag) {
+    guideState.completedIds = [...completedList];
+    const acc = state.currentAccount;
+    if (!acc || !canControlDevices(acc)) return;
+    const devices = getAccountDevices(acc).map(d => ({ ...d }));
+    let idx = devices.findIndex(d => d && d.type === 'gardenboss');
+    if (idx === -1) {
+      devices.push({
+        id: 'gb_main',
+        type: 'gardenboss',
+        name: 'Garden Boss',
+        configuredAt: Date.now()
+      });
+      idx = devices.length - 1;
+    }
+    const prevGp = devices[idx].guideProgress || {};
+    const allDone = completedList.length >= GUIDE_STEPS.length;
+    devices[idx] = {
+      ...devices[idx],
+      guideProgress: {
+        currentStep: stepIdx,
+        completed: [...completedList],
+        guideCompleted: guideCompletedFlag !== undefined ? !!guideCompletedFlag : (!!prevGp.guideCompleted || allDone),
+        updatedAt: Date.now()
+      }
+    };
+    const updated = { ...acc, devices };
+    state.currentAccount = updated;
+    state.accountsById[updated.id] = updated;
+    if (state.client && state.connected) {
+      publishRetainedJson(HUB_ACCOUNT_TOPIC(updated.id), updated);
+    }
+  }
+
+  function syncAccountDeviceUI() {
+    const acc = state.currentAccount;
+    const dev = getPrimaryGardenBoss(acc);
+    const displayName = (dev && dev.name) ? dev.name : 'Garden Boss';
+    if (hubGbDeviceName) hubGbDeviceName.textContent = displayName;
+    if (gardenTitleHeading) gardenTitleHeading.textContent = displayName;
+
+    if (hubSetupNudge) {
+      const showNudge = !!(acc && !dev && canControlDevices(acc));
+      hubSetupNudge.hidden = !showNudge;
+    }
+
+    const doneSet = getActiveCompletedSet();
+    const doneCount = doneSet.size;
+    const total = GUIDE_STEPS.length;
+    const started = dev && dev.guideProgress && !dev.guideProgress.guideCompleted && doneCount > 0 && doneCount < total;
+
+    if (guideEntryBadge) {
+      guideEntryBadge.textContent = started ? `${doneCount}/${total}` : 'Manuale';
+      guideEntryBadge.classList.toggle('in-progress', !!started);
+    }
+    if (guideEntrySub) {
+      if (started) {
+        const nextStep = GUIDE_STEPS.find(s => !doneSet.has(s.id)) || GUIDE_STEPS[0];
+        guideEntrySub.textContent = `Riprendi · Prossimo: ${nextStep.shortTitle}`;
+      } else {
+        guideEntrySub.textContent = 'Montaggio, cablaggio 24V, Wi-Fi e cura';
+      }
+    }
+  }
+
+  function maybePromptFirstDeviceSetup(forceOpen) {
+    const acc = state.currentAccount;
+    if (!acc || !canControlDevices(acc)) return;
+    if (getPrimaryGardenBoss(acc)) return;
+    if (!forceOpen && (state.deviceOnline || guideState.promptedAutoForAcc.has(acc.id))) return;
+    guideState.promptedAutoForAcc.add(acc.id);
+    openAddDeviceDialog();
+  }
+
+  function openAddDeviceDialog() {
+    const acc = state.currentAccount;
+    if (!acc) return;
+    const dev = getPrimaryGardenBoss(acc);
+    if (addDeviceAccountText) {
+      addDeviceAccountText.textContent = `Account attivo: ${acc.name} (${ROLE_LABELS[acc.role] || acc.role})`;
+    }
+    if (addDeviceNameInput) {
+      addDeviceNameInput.value = dev && dev.name ? dev.name : 'Garden Boss';
+    }
+    if (!addDeviceDialog.open) addDeviceDialog.showModal();
+  }
+
+  function saveNewDeviceAndProceed(startGuide) {
+    const acc = state.currentAccount;
+    if (!acc) { addDeviceDialog.close(); return; }
+    const rawName = (addDeviceNameInput ? addDeviceNameInput.value : '').trim();
+    const devName = rawName || 'Garden Boss';
+
+    if (canControlDevices(acc)) {
+      const devices = getAccountDevices(acc).map(d => ({ ...d }));
+      const existingIdx = devices.findIndex(d => d && d.type === 'gardenboss');
+      const devRecord = {
+        id: 'gb_main',
+        type: 'gardenboss',
+        name: devName,
+        configuredAt: existingIdx >= 0 ? (devices[existingIdx].configuredAt || Date.now()) : Date.now(),
+        guideProgress: {
+          currentStep: 0,
+          completed: startGuide ? [] : GUIDE_STEPS.map(s => s.id),
+          guideCompleted: !startGuide,
+          updatedAt: Date.now()
+        }
+      };
+      if (existingIdx >= 0) devices[existingIdx] = devRecord;
+      else devices.push(devRecord);
+
+      const updated = { ...acc, devices };
+      state.currentAccount = updated;
+      state.accountsById[updated.id] = updated;
+      if (state.client && state.connected) {
+        publishRetainedJson(HUB_ACCOUNT_TOPIC(updated.id), updated);
+      }
+      guideState.completedIds = [...devRecord.guideProgress.completed];
+    }
+
+    syncAccountDeviceUI();
+    addDeviceDialog.close();
+
+    if (startGuide) {
+      openGuideDialog({ tab: 'install', stepIdx: 0 });
+    } else {
+      toast(`${devName} collegato a ${acc.name}`);
+    }
+  }
+
+  function stopGuideVideos() {
+    if (!guideViewport) return;
+    guideViewport.querySelectorAll('video').forEach(v => {
+      try { v.pause(); v.removeAttribute('src'); v.load(); } catch (e) {}
+    });
+  }
+
+  function openGuideLightbox(src, caption) {
+    if (!guideLightbox || !guideLightboxImg) return;
+    guideLightboxImg.src = src;
+    if (guideLightboxCaption) guideLightboxCaption.textContent = caption || 'Schema Garden Boss V2';
+    if (!guideLightbox.open) guideLightbox.showModal();
+  }
+
+  function renderGuideInstallView() {
+    const step = GUIDE_STEPS[guideState.stepIdx] || GUIDE_STEPS[0];
+    const doneSet = getActiveCompletedSet();
+    const total = GUIDE_STEPS.length;
+    const doneCount = doneSet.size;
+    const pct = Math.round((doneCount / total) * 100);
+
+    if (guideProgressText) guideProgressText.textContent = `Passaggio ${guideState.stepIdx + 1} di ${total} · ${step.title}`;
+    if (guideCompletedText) guideCompletedText.textContent = `${doneCount}/${total} completati (${pct}%)`;
+    if (guideProgressFill) guideProgressFill.style.width = `${Math.max(8, pct)}%`;
+
+    // Timeline nominativa cliccabile
+    if (guideTimeline) {
+      guideTimeline.innerHTML = '';
+      GUIDE_STEPS.forEach((st, idx) => {
+        const isDone = doneSet.has(st.id);
+        const isActive = idx === guideState.stepIdx;
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'guide-step-chip' + (isDone ? ' done' : '') + (isActive ? ' active' : '');
+        chip.setAttribute('role', 'tab');
+        chip.setAttribute('aria-selected', String(isActive));
+
+        const dot = document.createElement('span');
+        dot.className = 'guide-step-chip-dot';
+        dot.textContent = isDone ? '✓' : String(idx + 1);
+        const lbl = document.createElement('span');
+        lbl.textContent = st.shortTitle;
+
+        chip.appendChild(dot);
+        chip.appendChild(lbl);
+        chip.addEventListener('click', () => setGuideStep(idx));
+        guideTimeline.appendChild(chip);
+
+        if (isActive) {
+          requestAnimationFrame(() => {
+            try { chip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch (e) {}
+          });
+        }
+      });
+    }
+
+    // Media selector buttons
+    const options = step.mediaOptions || [];
+    let currentMedia = options.find(o => o.key === guideState.mediaMode) || options[0];
+    if (currentMedia) guideState.mediaMode = currentMedia.key;
+
+    if (guideMediaSwitch) {
+      guideMediaSwitch.innerHTML = '';
+      options.forEach(opt => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'guide-media-btn' + (currentMedia && opt.key === currentMedia.key ? ' active' : '');
+        b.textContent = opt.label;
+        b.addEventListener('click', () => {
+          guideState.mediaMode = opt.key;
+          renderGuideInstallView();
+        });
+        guideMediaSwitch.appendChild(b);
+      });
+    }
+
+    // Media viewport
+    stopGuideVideos();
+    if (guideViewport && currentMedia) {
+      guideViewport.innerHTML = '';
+      if (currentMedia.kind === 'video') {
+        if (guideZoomBtn) guideZoomBtn.hidden = true;
+        const vid = document.createElement('video');
+        vid.autoplay = true;
+        vid.loop = true;
+        vid.muted = true;
+        vid.playsInline = true;
+        vid.controls = true;
+        vid.preload = 'metadata';
+        vid.poster = currentMedia.poster;
+
+        const sWebm = document.createElement('source');
+        sWebm.src = `${currentMedia.base}.webm`;
+        sWebm.type = 'video/webm';
+        const sMp4 = document.createElement('source');
+        sMp4.src = `${currentMedia.base}.mp4`;
+        sMp4.type = 'video/mp4';
+
+        vid.appendChild(sWebm);
+        vid.appendChild(sMp4);
+        guideViewport.appendChild(vid);
+        vid.play().catch(() => {});
+      } else {
+        if (guideZoomBtn) {
+          guideZoomBtn.hidden = false;
+          guideZoomBtn.onclick = () => openGuideLightbox(currentMedia.src, step.title);
+        }
+        const img = document.createElement('img');
+        img.src = currentMedia.src;
+        img.alt = currentMedia.alt || step.title;
+        img.addEventListener('click', () => openGuideLightbox(currentMedia.src, step.title));
+        guideViewport.appendChild(img);
+      }
+    }
+
+    // Didascalia e spiegazione testuale sotto al video
+    if (guideCaptionBox) {
+      const safetyHtml = step.safety
+        ? `<div class="guide-safety-alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>${step.safety}</span></div>`
+        : '';
+      const bulletsHtml = step.bullets.map((txt, i) =>
+        `<li class="guide-bullet-item"><span class="guide-bullet-num">${i + 1}</span><span>${txt}</span></li>`
+      ).join('');
+      const tipHtml = step.tip ? `<div class="guide-tip-box">${step.tip}</div>` : '';
+
+      guideCaptionBox.innerHTML =
+        `<div class="guide-caption-head">` +
+          `<div class="guide-caption-title">${escapeHtml(step.title)}</div>` +
+          `<span class="guide-time-pill">${escapeHtml(step.time)}</span>` +
+        `</div>` +
+        safetyHtml +
+        `<p class="guide-lead">${escapeHtml(step.lead)}</p>` +
+        `<ol class="guide-bullet-list">${bulletsHtml}</ol>` +
+        tipHtml;
+    }
+
+    // Footer buttons
+    const stepDone = doneSet.has(step.id);
+    if (guidePrevBtn) guidePrevBtn.disabled = guideState.stepIdx <= 0;
+    if (guideMarkDoneBtn) {
+      guideMarkDoneBtn.classList.toggle('is-done', stepDone);
+      guideMarkDoneBtn.textContent = stepDone ? 'Completato ✓' : 'Segna fatto ✓';
+    }
+    if (guideNextBtn) {
+      guideNextBtn.textContent = guideState.stepIdx >= total - 1 ? 'Fine ✓' : 'Avanti →';
+    }
+  }
+
+  function setGuideTab(tabName) {
+    guideState.activeTab = tabName === 'maint' ? 'maint' : 'install';
+    const isInstall = guideState.activeTab === 'install';
+    if (guideTabInstall) {
+      guideTabInstall.classList.toggle('active', isInstall);
+      guideTabInstall.setAttribute('aria-selected', String(isInstall));
+    }
+    if (guideTabMaint) {
+      guideTabMaint.classList.toggle('active', !isInstall);
+      guideTabMaint.setAttribute('aria-selected', String(!isInstall));
+    }
+    if (guideInstallPane) guideInstallPane.hidden = !isInstall;
+    if (guideMaintPane) guideMaintPane.hidden = isInstall;
+    if (isInstall) {
+      renderGuideInstallView();
+    } else {
+      stopGuideVideos();
+    }
+  }
+
+  function setGuideStep(idx, mediaMode) {
+    const clamped = Math.max(0, Math.min(GUIDE_STEPS.length - 1, idx));
+    guideState.stepIdx = clamped;
+    const step = GUIDE_STEPS[clamped];
+    if (mediaMode && step.mediaOptions.some(o => o.key === mediaMode)) {
+      guideState.mediaMode = mediaMode;
+    } else {
+      guideState.mediaMode = step.mediaOptions[0] ? step.mediaOptions[0].key : 'video';
+    }
+    if (guideState.activeTab !== 'install') {
+      setGuideTab('install');
+    } else {
+      renderGuideInstallView();
+    }
+  }
+
+  function toggleGuideStepDone(forceDone) {
+    const step = GUIDE_STEPS[guideState.stepIdx];
+    if (!step) return;
+    const doneSet = getActiveCompletedSet();
+    const shouldAdd = forceDone !== undefined ? !!forceDone : !doneSet.has(step.id);
+    if (shouldAdd) doneSet.add(step.id);
+    else doneSet.delete(step.id);
+    persistGuideProgressToAccount(guideState.stepIdx, [...doneSet]);
+    syncAccountDeviceUI();
+    renderGuideInstallView();
+  }
+
+  function openGuideDialog(opts) {
+    const acc = state.currentAccount;
+    const dev = getPrimaryGardenBoss(acc);
+    if (guideDialogSub) {
+      const name = dev && dev.name ? dev.name : 'Garden Boss V2';
+      guideDialogSub.textContent = `${name} · Istruzioni interattive & Manutenzione`;
+    }
+    let startIdx = 0;
+    if (opts && typeof opts.stepIdx === 'number') {
+      startIdx = opts.stepIdx;
+    } else {
+      const doneSet = getActiveCompletedSet();
+      const firstUndone = GUIDE_STEPS.findIndex(s => !doneSet.has(s.id));
+      startIdx = firstUndone >= 0 ? firstUndone : 0;
+    }
+    guideState.stepIdx = Math.max(0, Math.min(GUIDE_STEPS.length - 1, startIdx));
+    const step = GUIDE_STEPS[guideState.stepIdx];
+    guideState.mediaMode = (opts && opts.mediaMode && step.mediaOptions.some(o => o.key === opts.mediaMode))
+      ? opts.mediaMode
+      : (step.mediaOptions[0] ? step.mediaOptions[0].key : 'video');
+    setGuideTab(opts && opts.tab === 'maint' ? 'maint' : 'install');
+    if (!guideDialog.open) guideDialog.showModal();
+  }
+
+  function closeGuideDialog() {
+    stopGuideVideos();
+    if (guideDialog && guideDialog.open) guideDialog.close();
+  }
+
+  // Event bindings
+  if (openAddDeviceBtn) openAddDeviceBtn.addEventListener('click', openAddDeviceDialog);
+  if (hubSetupNudge) {
+    hubSetupNudge.addEventListener('click', openAddDeviceDialog);
+    hubSetupNudge.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openAddDeviceDialog(); } });
+  }
+  if (addDeviceCloseBtn) addDeviceCloseBtn.addEventListener('click', () => addDeviceDialog.close());
+  if (addDeviceStartGuideBtn) addDeviceStartGuideBtn.addEventListener('click', () => saveNewDeviceAndProceed(true));
+  if (addDeviceSkipGuideBtn) addDeviceSkipGuideBtn.addEventListener('click', () => saveNewDeviceAndProceed(false));
+  if (addDeviceDialog) addDeviceDialog.addEventListener('close', () => { addDeviceDialog.returnValue = ''; });
+
+  if (openGuideBtn) openGuideBtn.addEventListener('click', () => openGuideDialog({ tab: 'install' }));
+  if (guideCloseBtn) guideCloseBtn.addEventListener('click', closeGuideDialog);
+  if (guideDialog) guideDialog.addEventListener('close', () => { stopGuideVideos(); guideDialog.returnValue = ''; });
+  if (guideTabInstall) guideTabInstall.addEventListener('click', () => setGuideTab('install'));
+  if (guideTabMaint) guideTabMaint.addEventListener('click', () => setGuideTab('maint'));
+  if (guideMarkDoneBtn) guideMarkDoneBtn.addEventListener('click', () => toggleGuideStepDone());
+  if (guidePrevBtn) guidePrevBtn.addEventListener('click', () => { if (guideState.stepIdx > 0) setGuideStep(guideState.stepIdx - 1); });
+  if (guideNextBtn) {
+    guideNextBtn.addEventListener('click', () => {
+      const doneSet = getActiveCompletedSet();
+      const curStep = GUIDE_STEPS[guideState.stepIdx];
+      if (curStep && !doneSet.has(curStep.id)) {
+        doneSet.add(curStep.id);
+        const isLast = guideState.stepIdx >= GUIDE_STEPS.length - 1;
+        persistGuideProgressToAccount(guideState.stepIdx, [...doneSet], isLast ? true : undefined);
+        syncAccountDeviceUI();
+      }
+      if (guideState.stepIdx < GUIDE_STEPS.length - 1) {
+        setGuideStep(guideState.stepIdx + 1);
+      } else {
+        closeGuideDialog();
+        toast('Guida completata!');
+      }
+    });
+  }
+  if (maintOpenCalBtn) {
+    maintOpenCalBtn.addEventListener('click', () => {
+      closeGuideDialog();
+      openCalendarDialog();
+    });
+  }
+  document.querySelectorAll('[data-jump-step]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.jumpStep, 10) || 0;
+      const mode = btn.dataset.jumpMedia || undefined;
+      setGuideStep(idx, mode);
+    });
+  });
+  document.querySelectorAll('[data-jump-zoom]').forEach(btn => {
+    btn.addEventListener('click', () => openGuideLightbox(btn.dataset.jumpZoom, btn.dataset.jumpZoomTitle));
+  });
+  if (guideLightboxCloseBtn) guideLightboxCloseBtn.addEventListener('click', () => guideLightbox.close());
+  if (guideLightbox) guideLightbox.addEventListener('close', () => { guideLightbox.returnValue = ''; });
+
+  /* ============================================================
      INIT
      ============================================================ */
   // Rimuove eventuali vecchi dati account locali da versioni precedenti:
@@ -7461,6 +8640,7 @@
   renderDeviceStatus(); // finché il LWT non conferma 'online' i controlli restano spenti
   updateGreeting();
   refreshCalendarViews();
+  syncAccountDeviceUI();
 
   // Debug
   window.__hub = {
@@ -7469,6 +8649,8 @@
     resolveColorTheme, openRenameValveModal,
     openCalendarDialog, closeCalendarDialog, refreshCalendarViews,
     analyzeDaySchedules, analyzeWeekSchedules, setCalendarDay, setCalendarZoom,
+    GUIDE_STEPS, openAddDeviceDialog, openGuideDialog, closeGuideDialog,
+    setGuideStep, setGuideTab, toggleGuideStepDone, syncAccountDeviceUI,
     handleMqttMessage, renderDeviceStatus, markDeviceAlive, probeDevice, ensureConnection,
     afterBrokerConnected, transitionToHub, transitionToAccountPicker,
     getSortedAccounts, getSortedRequests, isAdmin, canControlDevices,
